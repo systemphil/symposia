@@ -1,7 +1,8 @@
-import TRPCProvider from '@/app/_lib/trpc/TRPCProvider'
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import TRPCProvider from '@/app/_lib/trpc/TRPCProvider'
+import NextAuthProvider from './_lib/nextAuth/NextAuthProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,11 +18,13 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-        <body className={inter.className}>
-            <TRPCProvider>
-            {children}
-            </TRPCProvider>
-        </body>
+            <body className={inter.className}>
+                <NextAuthProvider>
+                    <TRPCProvider>
+                        {children}
+                    </TRPCProvider>
+                </NextAuthProvider>
+            </body>
         </html>
-    )
+    );
 }
