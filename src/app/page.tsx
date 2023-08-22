@@ -1,6 +1,5 @@
 import TodoList from "@/app/_components/TodoList"
 import { TestProcess } from "./_components/TestProcess"
-import { Suspense } from "react"
 import { apiServerside } from "./_lib/trpc/trpcServerside"
 import TodoListSimple from "./_components/TodoListSimple";
 
@@ -12,9 +11,7 @@ export default async function Home() {
             <p>Index page</p>
             <TodoList initialTodos={todos}/>
             <TodoListSimple />
-            <Suspense>
-                <TestProcess />
-            </Suspense>
+            <TestProcess />
         </main>
     )
 }
