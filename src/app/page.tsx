@@ -1,10 +1,20 @@
 import TodoList from "@/app/_components/TodoList"
+import { TestProcess } from "./_components/TestProcess"
+import { Suspense } from "react"
+import { apiServerside } from "./_lib/trpc/trpcServerside"
+import TodoListSimple from "./_components/TodoListSimple";
 
-export default function Home() {
+export default async function Home() {
+    const todos = await apiServerside.fiction.getTodos();
+
     return (
-        <main className="h-screen flex flex-col justify-front items-center bg-slate-200">
+        <main className="h-screen flex flex-col justify-front items-center gap-4 bg-slate-200">
             <p>Index page</p>
-            <TodoList />
+            <TodoList initialTodos={todos}/>
+            <TodoListSimple />
+            <Suspense>
+                <TestProcess />
+            </Suspense>
         </main>
     )
 }
