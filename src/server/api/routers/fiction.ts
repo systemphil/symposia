@@ -1,5 +1,5 @@
 import { dbGetAllUsers, multiplyFunc, testFunc } from "@/server/controllers/controller";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import { z } from "zod";
 
 export const fictionRouter = createTRPCRouter({
@@ -29,5 +29,11 @@ export const fictionRouter = createTRPCRouter({
         .query(async () => {
             const result = dbGetAllUsers();
             return { result };
-        })
+        }),
+    getSecretMessage: protectedProcedure.query(() => {
+        return "you can now see this secret message!";
+    }),
+    getSuperSecretMessage: protectedAdminProcedure.query(() => {
+        return "you can now see this super secret message!!!";
+    }),
 });

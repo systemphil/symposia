@@ -2,7 +2,7 @@ import TodoList from "@/app/_components/TodoList"
 import { TestProcess } from "./_components/TestProcess"
 import { apiServerside } from "./_lib/trpc/trpcServerside"
 import TodoListSimple from "./_components/TodoListSimple";
-import AuthShowcase from "./_components/AuthShowcase";
+import AuthShowcase from "./_components/Test/AuthShowcase";
 
 export default async function Home() {
     const todos = await apiServerside.fiction.getTodos();

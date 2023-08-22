@@ -2,38 +2,38 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { 
     getServerSession,
     type DefaultSession, 
-    type NextAuthOptions 
+    type NextAuthOptions, 
+    type DefaultUser
 } from "next-auth";
 import { prisma } from "./db";
+import { type Role } from "@prisma/client";
 import { env } from "process";
 import GitHubProvider from "next-auth/providers/github";
 
 declare module "next-auth" {
     interface Session extends DefaultSession {
-      user: {
-        id: string;
-        // ...other properties
-        // role: UserRole;
-      } & DefaultSession["user"];
+        user: {
+            id: string;
+            role: Role;
+        } & DefaultSession["user"];
     }
-  
-    // interface User {
-    //   // ...other properties
-    //   // role: UserRole;
-    // }
+    interface User extends DefaultUser {
+        role: Role;
+    }
 }
 
 export const authOptions: NextAuthOptions = {
+    adapter: PrismaAdapter(prisma),
     callbacks: {
         session: ({ session, user }) => ({
             ...session,
             user: {
-            ...session.user,
-            id: user.id,
+                ...session.user,
+                id: user.id,
+                role: user.role,
             },
         }),
     },
-    adapter: PrismaAdapter(prisma),
     providers: [
         GitHubProvider({
             clientId: env.GITHUB_ID ?? "",
