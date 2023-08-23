@@ -10,6 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User Access and Permissions (necessary for NextAuth)
 model Account {
   id                       String  @id @default(cuid())
   userId                   String
@@ -39,14 +40,15 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  role          Role      @default(BASIC)
-  accounts      Account[]
-  sessions      Session[]
+  id               String               @id @default(cuid())
+  name             String?
+  email            String?              @unique
+  emailVerified    DateTime?
+  image            String?
+  role             Role                 @default(BASIC)
+  accounts         Account[]
+  sessions         Session[]
+  lessonsCompleted UserLessonProgress[]
 }
 
 enum Role {
@@ -60,4 +62,78 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Course, Lessons and Content related data
+model Course {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  slug        String
+  imageUrl    String?
+  parts       Part[]
+  lessons     Lesson[]
+  author      String?
+  published   Boolean  @default(false)
+}
+
+model Part {
+  id       String   @id @default(cuid())
+  name     String
+  slug     String
+  course   Course   @relation(fields: [courseId], references: [id])
+  courseId String
+  lessons  Lesson[]
+}
+
+model Lesson {
+  id             String               @id @default(cuid())
+  name           String
+  description    String
+  slug           String
+  part           Part?                @relation(fields: [partId], references: [id])
+  partId         String?
+  course         Course               @relation(fields: [courseId], references: [id])
+  courseId       String
+  content        LessonContent?
+  transcript     LessonTranscript?
+  video          Video?
+  usersCompleted UserLessonProgress[]
+}
+
+model LessonContent {
+  id        String   @id @default(cuid())
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId  String   @unique
+  content   Bytes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LessonTranscript {
+  id         String   @id @default(cuid())
+  lesson     Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId   String   @unique
+  transcript Bytes
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Video {
+  id        String  @id @default(cuid())
+  lesson    Lesson? @relation(fields: [lessonId], references: [id])
+  lessonId  String? @unique
+  fileName  String
+  duration  Float?
+  posterUrl String?
+}
+
+model UserLessonProgress {
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId    String
+  completedAt DateTime @default(now())
+
+  @@id([userId, lessonId])
 }

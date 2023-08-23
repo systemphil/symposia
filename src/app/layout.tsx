@@ -19,6 +19,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={inter.className}>
+                <p className="w-full bg-orange-200 flex flex-col justify-center items-center">Navbar Placeholder</p>
                 <NextAuthProvider>
                     <TRPCProvider>
                         {children}
