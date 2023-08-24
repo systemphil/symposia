@@ -67,3 +67,41 @@ export const dbGetCourseAndLessonsBySlug = async (slug: string) => {
         throw new Error("An error occurred while fetching the course.");
     }
 }
+
+/**
+ * Updates or creates course details by slug as identifier.
+ * @access "ADMIN""
+ */
+export const dbUpsertCourseBySlug = async ({
+    name, description, slug
+}: {
+    slug: string, name: string, description: string
+}) => {
+    try {
+        const validName = z.string().parse(name);
+        const validDescription = z.string().parse(description);
+        const validSlug = z.string().parse(slug);
+        
+        await requireAdminAuth();
+        return await prisma.course.upsert({
+            where: {
+                slug: validSlug
+            },
+            update: {
+                name: validName,
+                description: validDescription,
+            },
+            create: {
+                name: validName,
+                description: validDescription,
+                slug: validSlug,
+            }
+            
+        });
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while fetching the course.");
+    }
+}
