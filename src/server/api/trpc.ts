@@ -21,7 +21,7 @@ type CreateContextOptions = {
     res: NextResponse;
 };
 
-const createInnerTRPCContext = (opts: CreateContextOptions) => {
+export const createInnerTRPCContext = (opts: CreateContextOptions) => {
     return {
         ...opts,
         prisma,

@@ -1,8 +1,10 @@
 import { getServerAuthSession } from "@/server/auth";
 import { redirect } from "next/navigation";
 
-
-export default async function DashboardLayout({
+/**
+ * AdminLayout controls the access and UI for /admin/** 
+ */
+export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode
@@ -16,7 +18,9 @@ export default async function DashboardLayout({
     return (
         <section>
             <p className="w-full bg-red-200 flex flex-col justify-center items-center">ADMIN Navbar Placeholder</p>
-            {children}
+            <div className="container">
+                {children}
+            </div>
         </section>
     )
 }

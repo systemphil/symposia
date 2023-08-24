@@ -1,3 +1,4 @@
+import { coursesRouter } from "./routers/coursesRouter";
 import { fictionRouter } from "./routers/fiction";
 import { createTRPCRouter } from "./trpc";
 
@@ -8,6 +9,7 @@ import { createTRPCRouter } from "./trpc";
  */
 export const appRouter = createTRPCRouter({
     fiction: fictionRouter,
+    courses: coursesRouter,
 });
 
 export type AppRouter = typeof appRouter;

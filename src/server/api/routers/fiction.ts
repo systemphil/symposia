@@ -2,6 +2,8 @@ import { dbGetAllUsers, multiplyFunc, testFunc } from "@/server/controllers/cont
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import { z } from "zod";
 
+// TODO delete this example router when no longer useful
+
 export const fictionRouter = createTRPCRouter({
     getTodos: publicProcedure.query(async () => {
         const result = testFunc()

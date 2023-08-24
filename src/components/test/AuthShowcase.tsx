@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signIn, signOut } from "next-auth/react";
-import { apiClientside } from "../../_lib/trpc/trpcClientside";
+import { apiClientside } from "../../lib/trpc/trpcClientside";
 
 export default function AuthShowcase() {
     const { data: session } = useSession();
