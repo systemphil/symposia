@@ -16,7 +16,7 @@ const CourseCard = ({ course, isAdmin }: CourseCardProps) => {
     return (
         <>
             <Link href={href}>
-                <div className='w-full border rounded-lg transition shadow-sm hover:shadow-md cursor-pointer'>
+                <div className='w-full border rounded-lg bg-blue-300 transition shadow-sm hover:shadow-md cursor-pointer'>
                     {course.imageUrl && (
                         <img
                             className="w-full rounded-t-lg"

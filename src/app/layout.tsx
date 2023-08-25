@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import TRPCProvider from '@/lib/trpc/TRPCProvider'
 import NextAuthProvider from '../lib/nextAuth/NextAuthProvider'
+import RootNavbar from '@/components/RootNavbar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,10 +20,12 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={inter.className}>
-                <p className="w-full bg-orange-200 flex flex-col justify-center items-center">Navbar Placeholder</p>
                 <NextAuthProvider>
                     <TRPCProvider>
+
+                        <RootNavbar />
                         {children}
+
                     </TRPCProvider>
                 </NextAuthProvider>
             </body>

@@ -8,7 +8,11 @@ const config: Config = {
   ],
   theme: {
     container: {
-      center: true
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
     },
     extend: {
       backgroundImage: {
@@ -18,6 +22,23 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require("daisyui"),
+  ],
+  daisyui: {
+    logs: false,
+    themes: [
+      "light",
+      // {
+      //   exampleRokni: {
+      //     "primary": "#febe6b",
+      //     "secondary": "#ffc9a7",
+      //     "accent": "#f68961",
+      //     "neutral": "#efefe9",
+      //     "base-100": "#ffffff",
+      //   }
+      // }
+    ],
+  },
 }
 export default config

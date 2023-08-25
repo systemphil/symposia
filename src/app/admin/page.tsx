@@ -22,7 +22,7 @@ export default async function Admin() {
             )}
 
             <Link href="/admin/courses/new">
-                <button>Create a course</button>
+                <button className="btn btn-primary">Create a course</button>
             </Link>
         </main>
     )
