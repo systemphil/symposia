@@ -5,9 +5,9 @@ import Heading from '@/components/Heading';
 import AdminCourseFormContainer from '@/components/AdminCourseFormContainer'
 
 
-export default async function AdminCourseEdit ({ params }: { params: { id: string }}) {
-    const id = params.id;
-    if (typeof id !== "string") { throw new Error('missing id') };
+export default async function AdminCourseEdit ({ params }: { params: { courseId: string }}) {
+    const id = params.courseId;
+    if (typeof id !== "string") { throw new Error('missing course id') };
 
     const course = await dbGetCourseAndLessonsById(id);
 

@@ -1,1 +1,0 @@
-- add regex to slug parser
