@@ -11,8 +11,8 @@ export type UpsertCourseInputs = {
     slug: string;
     name: string;
     description: string;
-    imageUrl?: string | null;
-    author?: string | null;
+    imageUrl?: string | null | undefined;
+    author?: string | null | undefined;
     published: boolean
 };
 

@@ -75,12 +75,18 @@ export const dbGetCourseAndLessonsById = async (id: string) => {
 export const dbUpsertCourseById = async ({
     id, name, description, slug, imageUrl, published, author
 }: {
-    id: string, slug: string, name: string, description: string, imageUrl?: string, published?: boolean, author?: string
+    id?: string, 
+    slug: string, 
+    name: string, 
+    description: string, 
+    imageUrl?: string | null, 
+    published?: boolean | null, 
+    author?: string | null,
 }) => {
     try {
         await requireAdminAuth();
 
-        const validId = z.string().parse(id);
+        const validId = id ? z.string().parse(id) : "x"; // Prisma needs id of some value
         const validName = z.string().parse(name);
         const validDescription = z.string().parse(description);
         const validSlug = z.string().toLowerCase().parse(slug);

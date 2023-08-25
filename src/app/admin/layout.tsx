@@ -1,6 +1,9 @@
 import { getServerAuthSession } from "@/server/auth";
 import { redirect } from "next/navigation";
 
+
+export const dynamic = 'force-dynamic'; // Nextjs flag that disables all caching of fetch requests and always invalidates routes on /admin/* 
+
 /**
  * AdminLayout controls the access and UI for /admin/** 
  */

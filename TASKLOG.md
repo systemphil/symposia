@@ -1,1 +1,1 @@
-- test with superjson on trpc
+- add regex to slug parser

@@ -19,20 +19,26 @@ export const coursesRouter = createTRPCRouter({
         .input(
             z
                 .object({
-                    id: z.string()
+                    id: z.string().optional(),
                 })
         )
         .query(async (opts) => {
-            return await dbGetCourseAndLessonsById(opts.input.id);
+            if (opts.input.id) {
+                return await dbGetCourseAndLessonsById(opts.input.id);
+            } else {
+                return null;
+            }
         }),
     upsertCourse: protectedAdminProcedure
         .input(
             z
                 .object({
-                    id: z.string(),
+                    id: z.string().optional(),
                     name: z.string(),
                     slug: z.string().toLowerCase(),
                     description: z.string(),
+                    imageUrl: z.string().url().optional().nullish(),
+                    author: z.string().optional().nullish(),
                 })
         )
         .mutation(async (opts) => {
