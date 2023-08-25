@@ -69,7 +69,7 @@ model Course {
   id          String   @id @default(cuid())
   name        String
   description String
-  slug        String   @unique
+  slug        String
   imageUrl    String?
   parts       Part[]
   lessons     Lesson[]

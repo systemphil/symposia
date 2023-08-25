@@ -48,13 +48,13 @@ export const dbGetAllCourses = async () => {
  * Calls the database to retrieve specific course and lessons by slug identifier.
  * @access "ADMIN""
  */
-export const dbGetCourseAndLessonsBySlug = async (slug: string) => {
+export const dbGetCourseAndLessonsById = async (id: string) => {
     try {
-        const validSlug = z.string().parse(slug);
+        const validId = z.string().parse(id);
         await requireAdminAuth();
         return await prisma.course.findFirst({
             where: {
-                slug: validSlug,
+                id: validId,
             },
             include: {
                 lessons: true
@@ -72,31 +72,42 @@ export const dbGetCourseAndLessonsBySlug = async (slug: string) => {
  * Updates or creates course details by slug as identifier.
  * @access "ADMIN""
  */
-export const dbUpsertCourseBySlug = async ({
-    name, description, slug
+export const dbUpsertCourseById = async ({
+    id, name, description, slug, imageUrl, published, author
 }: {
-    slug: string, name: string, description: string
+    id: string, slug: string, name: string, description: string, imageUrl?: string, published?: boolean, author?: string
 }) => {
     try {
+        await requireAdminAuth();
+
+        const validId = z.string().parse(id);
         const validName = z.string().parse(name);
         const validDescription = z.string().parse(description);
-        const validSlug = z.string().parse(slug);
+        const validSlug = z.string().toLowerCase().parse(slug);
+        const validImageUrl = imageUrl ? z.string().url().parse(imageUrl) : undefined;
+        const validAuthor = author ? z.string().parse(author) : undefined;
+        const validPublished = published ? z.boolean().parse(published) : undefined;
         
-        await requireAdminAuth();
         return await prisma.course.upsert({
             where: {
-                slug: validSlug
+                id: validId
             },
             update: {
                 name: validName,
+                slug: validSlug,
                 description: validDescription,
+                imageUrl: validImageUrl,
+                author: validAuthor,
+                published: validPublished
             },
             create: {
                 name: validName,
                 description: validDescription,
                 slug: validSlug,
+                imageUrl: validImageUrl,
+                author: validAuthor,
+                published: validPublished,
             }
-            
         });
     } catch (error) {
         if (error instanceof AuthenticationError) {

@@ -1,18 +1,18 @@
 import Link from 'next/link'
-import { dbGetCourseAndLessonsBySlug } from '@/server/controllers/courses';
+import { dbGetCourseAndLessonsById } from '@/server/controllers/courses';
 import { redirect } from "next/navigation";
 import Heading from '@/components/Heading';
 import AdminCourseFormContainer from '@/components/AdminCourseFormContainer'
 
 
-export default async function AdminCourseEdit ({ params }: { params: { slug: string }}) {
-    const slug = params.slug;
-    if (typeof slug !== "string") { throw new Error('missing id') };
+export default async function AdminCourseEdit ({ params }: { params: { id: string }}) {
+    const id = params.id;
+    if (typeof id !== "string") { throw new Error('missing id') };
 
-    const course = await dbGetCourseAndLessonsBySlug(slug);
+    const course = await dbGetCourseAndLessonsById(id);
 
     if (!course) {
-        console.log("No course found at this");
+        console.log("No course found");
         redirect("/");
     }
 
@@ -20,7 +20,7 @@ export default async function AdminCourseEdit ({ params }: { params: { slug: str
         <div className='grid md:grid-cols-2'>
             <div>
                 <Heading as='h2'>{course.name}</Heading>
-                <AdminCourseFormContainer initialCourse={course} slug={slug}/>
+                <AdminCourseFormContainer initialCourse={course} id={id}/>
             </div>
 
             <div>

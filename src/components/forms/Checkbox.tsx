@@ -14,7 +14,7 @@ const Checkbox = ({ name, label, options = {} }: Props) => {
     return (
         <Field>
             <div className="flex items-center gap-2">
-                <input type="checkbox" className="border-gray-200 cursor-not-allowed mb-1 block" disabled {...register(name, options)} />
+                <input type="checkbox" className="border-gray-200 mb-1 block" {...register(name, options)} />
                 <Label htmlFor={name}>{label}</Label>
             </div>
         </Field>

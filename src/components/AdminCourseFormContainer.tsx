@@ -1,20 +1,19 @@
 "use client";
 
-import type { Course, Lesson } from "@prisma/client";
-import CourseForm, { UpdateCourseInputs } from "./forms/CourseForm";
+import CourseForm, { UpsertCourseInputs } from "./forms/CourseForm";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
-import { type dbGetCourseAndLessonsBySlug } from "@/server/controllers/courses";
+import { type dbGetCourseAndLessonsById } from "@/server/controllers/courses";
 import { type SubmitHandler } from "react-hook-form";
 
 
 const AdminCourseFormContainer = ({
     initialCourse, 
-    slug 
+    id 
 }: {
-    slug: string;
-    initialCourse: Awaited<ReturnType<(typeof dbGetCourseAndLessonsBySlug)>>
+    id: string;
+    initialCourse: Awaited<ReturnType<(typeof dbGetCourseAndLessonsById)>>
 }) => {
-    const {data: course} = apiClientside.courses.getCourseAndLessonsBySlug.useQuery({slug: slug}, {
+    const {data: course} = apiClientside.courses.getCourseAndLessonsById.useQuery({id: id}, {
         initialData: initialCourse,
         refetchOnMount: false,
         refetchOnReconnect: false,
@@ -30,7 +29,7 @@ const AdminCourseFormContainer = ({
         }
     })
 
-    const onSubmit: SubmitHandler<UpdateCourseInputs> = async data => {
+    const onSubmit: SubmitHandler<UpsertCourseInputs> = async data => {
         updateCourseMutation.mutate(data);
     };
 

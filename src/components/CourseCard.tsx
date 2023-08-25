@@ -7,8 +7,12 @@ type CourseCardProps = {
     course: Course;
 }
 
+/**
+ * Displays a Course to the UI. 
+ * * NOTICE It generates distinct routes based on admin status.
+ */
 const CourseCard = ({ course, isAdmin }: CourseCardProps) => {
-    const href = isAdmin ? `/admin/courses/${course.slug}` : `/courses/${course.slug}`
+    const href = isAdmin ? `/admin/courses/${course.id}` : `/courses/${course.slug}`
     return (
         <>
             <Link href={href}>
