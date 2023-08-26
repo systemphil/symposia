@@ -3,7 +3,7 @@
 import { apiClientside } from "@/lib/trpc/trpcClientside";
 import { useParams, useRouter } from "next/navigation";
 
-import { type dbGetLessonById } from "@/server/controllers/courses";
+import { type dbGetLessonAndContentsById } from "@/server/controllers/courses";
 import { useForm, type SubmitHandler, FormProvider } from "react-hook-form";
 import type { Course, Lesson } from "@prisma/client";
 import TextInput from "./TextInput";
@@ -23,7 +23,7 @@ const LessonForm = ({
 }: {
     courseId: Course["id"];
     lessonId?: Lesson["id"];
-    initialLesson?: Awaited<ReturnType<(typeof dbGetLessonById)>>
+    initialLesson?: Awaited<ReturnType<(typeof dbGetLessonAndContentsById)>>
 }) => {
     const router = useRouter();
     const params = useParams();
@@ -74,7 +74,7 @@ const LessonForm = ({
                 <TextInput label='Slug*' name='slug' options={{ required: true }} />
                 <TextAreaInput label='Description*' name='description' options={{ required: true }} />
                 {/* // TODO Add selection for partId here */}
-                <SubmitInput value={`${lesson ? 'Update' : 'Create'} course`} isLoading={upsertLessonMutation.isLoading} />
+                <SubmitInput value={`${lesson ? 'Update' : 'Create'} lesson`} isLoading={upsertLessonMutation.isLoading} />
             </form>
         </FormProvider>
     )

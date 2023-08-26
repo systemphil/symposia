@@ -72,7 +72,7 @@ export const dbGetCourseAndLessonsById = async (id: string) => {
  * Calls the database to retrieve specific lesson and its contents by id identifier.
  * @access "ADMIN""
  */
-export const dbGetLessonById = async (id: string) => {
+export const dbGetLessonAndContentsById = async (id: string) => {
     try {
         await requireAdminAuth();
         const validId = z.string().parse(id);

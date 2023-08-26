@@ -1,4 +1,4 @@
-import { dbGetAllCourses, dbGetCourseAndLessonsById, dbGetLessonById, dbUpsertCourseById, dbUpsertLessonById } from "@/server/controllers/courses";
+import { dbGetAllCourses, dbGetCourseAndLessonsById, dbGetLessonAndContentsById, dbUpsertCourseById, dbUpsertLessonById } from "@/server/controllers/courses";
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import * as z from "zod";
 
@@ -38,7 +38,7 @@ export const coursesRouter = createTRPCRouter({
         )
         .query(async (opts) => {
             if (opts.input.id) {
-                return await dbGetLessonById(opts.input.id);
+                return await dbGetLessonAndContentsById(opts.input.id);
             } else {
                 return null;
             }
