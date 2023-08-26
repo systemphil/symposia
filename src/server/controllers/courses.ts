@@ -45,7 +45,7 @@ export const dbGetAllCourses = async () => {
 }
 
 /**
- * Calls the database to retrieve specific course and lessons by slug identifier.
+ * Calls the database to retrieve specific course and lessons by id identifier.
  * @access "ADMIN""
  */
 export const dbGetCourseAndLessonsById = async (id: string) => {
@@ -69,7 +69,34 @@ export const dbGetCourseAndLessonsById = async (id: string) => {
 }
 
 /**
- * Updates or creates course details by slug as identifier.
+ * Calls the database to retrieve specific lesson and its contents by id identifier.
+ * @access "ADMIN""
+ */
+export const dbGetLessonById = async (id: string) => {
+    try {
+        await requireAdminAuth();
+        const validId = z.string().parse(id);
+        return await prisma.lesson.findFirst({
+            where: {
+                id: validId,
+            },
+            include: {
+                part: true,
+                content: true,
+                transcript: true,
+                video: true,
+            }
+        });
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while fetching the course.");
+    }
+}
+
+/**
+ * Updates an existing course details by id as identifier or creates a new one if id is not provided.
  * @access "ADMIN""
  */
 export const dbUpsertCourseById = async ({
@@ -113,6 +140,56 @@ export const dbUpsertCourseById = async ({
                 imageUrl: validImageUrl,
                 author: validAuthor,
                 published: validPublished,
+            }
+        });
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while fetching the course.");
+    }
+}
+
+/**
+ * Updates an existing lesson details by id as identifier or creates a new one if id is not provided.
+ * @access "ADMIN""
+ */
+export const dbUpsertLessonById = async ({
+    id, name, description, slug, partId, courseId
+}: {
+    id?: string, 
+    slug: string, 
+    name: string, 
+    description: string, 
+    partId?: string | null, 
+    courseId: string | null,
+}) => {
+    try {
+        await requireAdminAuth();
+
+        const validId = id ? z.string().parse(id) : "x"; // Prisma needs id of some value
+        const validName = z.string().parse(name);
+        const validDescription = z.string().parse(description);
+        const validSlug = z.string().toLowerCase().parse(slug);
+        const validPartId = partId ? z.string().parse(partId) : undefined;
+        const validCourseId = z.string().parse(courseId);
+        
+        return await prisma.lesson.upsert({
+            where: {
+                id: validId
+            },
+            update: {
+                name: validName,
+                slug: validSlug,
+                description: validDescription,
+                partId: validPartId,
+            },
+            create: {
+                name: validName,
+                description: validDescription,
+                slug: validSlug,
+                courseId: validCourseId,
+                partId: validPartId,
             }
         });
     } catch (error) {
