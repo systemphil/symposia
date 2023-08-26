@@ -35,13 +35,13 @@ const LessonForm = ({
         enabled: lessonId ? true : false,
     });
 
-    const upsertLessonMutation = apiClientside.courses.upsertCourse.useMutation({
-        onSuccess: (newData) => {
+    const upsertLessonMutation = apiClientside.courses.upsertLesson.useMutation({
+        onSuccess: (newLesson) => {
         // toast.success('Course updated successfully')
             // If course is new, it should not match existing path and push user to new path. Otherwise, refresh data.
-            if (params.id !== newData.id) {
+            if (params.lessonId !== newLesson.id) {
                 console.log("pushing to new route")
-                router.push(`/admin/courses/${courseId}/lessons/${newData.id}`)
+                router.push(`/admin/courses/${courseId}/lessons/${newLesson.id}`)
             } else {
                 void utils.courses.invalidate();
             }

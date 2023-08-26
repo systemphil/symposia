@@ -45,7 +45,7 @@ export default async function AdminCourseEdit ({ params }: { params: { courseId:
                     </div>
                 )}
                 <Link href={`/admin/courses/${course.id}/lessons/new`}>
-                    <button>Add a lesson</button>
+                    <button className="btn btn-primary">Add a lesson</button>
                 </Link>
             </div>
         </div>
