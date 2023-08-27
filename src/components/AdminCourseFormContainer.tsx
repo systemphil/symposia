@@ -26,7 +26,7 @@ const AdminCourseFormContainer = ({
 
     const updateCourseMutation = apiClientside.courses.upsertCourse.useMutation({
         onSuccess: (newData) => {
-        // toast.success('Course updated successfully')
+            // toast.success('Course updated successfully')
             // If course is new, it should not match existing path and push user to new path. Otherwise, refresh data.
             if (params.id !== newData.id) {
                 console.log("pushing to new route")
@@ -36,8 +36,8 @@ const AdminCourseFormContainer = ({
             }
         },
         onError: (error) => {
-        console.error(error)
-        // toast.error('Something went wrong')
+            console.error(error)
+            // toast.error('Something went wrong')
         }
     })
 

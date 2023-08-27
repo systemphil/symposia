@@ -3,7 +3,7 @@
 import { apiClientside } from "@/lib/trpc/trpcClientside";
 import { useParams, useRouter } from "next/navigation";
 
-import { type dbGetLessonAndContentsById } from "@/server/controllers/courses";
+import { type dbGetLessonAndRelationsById } from "@/server/controllers/courses";
 import { useForm, type SubmitHandler, FormProvider } from "react-hook-form";
 import type { Course, Lesson } from "@prisma/client";
 import TextInput from "./TextInput";
@@ -23,7 +23,7 @@ const LessonForm = ({
 }: {
     courseId: Course["id"];
     lessonId?: Lesson["id"];
-    initialLesson?: Awaited<ReturnType<(typeof dbGetLessonAndContentsById)>>
+    initialLesson?: Awaited<ReturnType<(typeof dbGetLessonAndRelationsById)>>
 }) => {
     const router = useRouter();
     const params = useParams();
@@ -37,7 +37,7 @@ const LessonForm = ({
 
     const upsertLessonMutation = apiClientside.courses.upsertLesson.useMutation({
         onSuccess: (newLesson) => {
-        // toast.success('Course updated successfully')
+            // toast.success('Course updated successfully')
             // If course is new, it should not match existing path and push user to new path. Otherwise, refresh data.
             if (params.lessonId !== newLesson.id) {
                 console.log("pushing to new route")
@@ -47,8 +47,8 @@ const LessonForm = ({
             }
         },
         onError: (error) => {
-        console.error(error)
-        // toast.error('Something went wrong')
+            console.error(error)
+            // toast.error('Something went wrong')
         }
     })
 

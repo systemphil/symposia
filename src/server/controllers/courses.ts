@@ -1,6 +1,7 @@
 import { prisma } from "../db";
 import { getServerAuthSession } from "../auth";
 import * as z from "zod";
+import { LessonContent } from "@prisma/client";
 
 class AuthenticationError extends Error {
     constructor() {
@@ -27,6 +28,26 @@ const requireAdminAuth = async (): Promise<void> => {
         throw new AuthenticationError();
     }
 };
+
+/**
+ * Exception handler with admin check.
+ * TODO consider scrapping or using
+ * ? validation needs to be part of the error handling but these can be quite varied,
+ * ? and would have to be accounted for here, which increases complexity and defeats the purpose of the function
+ * @param retrieveFunc 
+ * @returns 
+ */
+const adminDatabaseErrorHandling = async <T>(retrieveFunc: () => Promise<T>): Promise<T> => {
+    try {
+        await requireAdminAuth();
+        return await retrieveFunc();
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow error as-is
+        }
+        throw new Error("An error occured while fetching the data.");
+    }
+}
 
 /**
  * Calls the database to retrieve all courses.
@@ -72,7 +93,7 @@ export const dbGetCourseAndLessonsById = async (id: string) => {
  * Calls the database to retrieve specific lesson and its contents by id identifier.
  * @access "ADMIN""
  */
-export const dbGetLessonAndContentsById = async (id: string) => {
+export const dbGetLessonAndRelationsById = async (id: string) => {
     try {
         await requireAdminAuth();
         const validId = z.string().parse(id);
@@ -86,6 +107,27 @@ export const dbGetLessonAndContentsById = async (id: string) => {
                 transcript: true,
                 video: true,
             }
+        });
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while fetching the course.");
+    }
+}
+
+/**
+ * Calls the database to retrieve specific lessonContent data by id identifier.
+ * @access "ADMIN""
+ */
+export const dbGetLessonContentById = async (id: string) => {
+    try {
+        await requireAdminAuth();
+        const validId = z.string().parse(id);
+        return await prisma.lessonContent.findFirst({
+            where: {
+                id: validId,
+            },
         });
     } catch (error) {
         if (error instanceof AuthenticationError) {
@@ -190,6 +232,43 @@ export const dbUpsertLessonById = async ({
                 slug: validSlug,
                 courseId: validCourseId,
                 partId: validPartId,
+            }
+        });
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while fetching the course.");
+    }
+}
+
+/**
+ * Updates an existing lessonContent details by id as identifier or creates a new one if id is not provided.
+ * @access "ADMIN""
+ */
+export const dbUpsertLessonContentById = async ({
+    id, lessonId, content
+}: {
+    id?: LessonContent["id"], 
+    lessonId: LessonContent["lessonId"], 
+    content: LessonContent["content"],
+}) => {
+    try {
+        await requireAdminAuth();
+
+        const validId = id ? z.string().parse(id) : "x"; // Prisma needs id of some value
+        const validLessonId = z.string().parse(lessonId);
+        
+        return await prisma.lessonContent.upsert({
+            where: {
+                id: validId
+            },
+            update: {
+                content: content,
+            },
+            create: {
+                lessonId: validLessonId,
+                content: content
             }
         });
     } catch (error) {

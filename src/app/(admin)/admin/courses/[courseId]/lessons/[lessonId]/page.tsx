@@ -1,6 +1,5 @@
 import Link from 'next/link'
-import { dbGetLessonAndContentsById } from '@/server/controllers/courses';
-import { redirect } from "next/navigation";
+import { dbGetLessonAndRelationsById } from '@/server/controllers/courses';
 import Heading from '@/components/Heading';
 import LessonForm from '@/components/forms/LessonForm';
 
@@ -8,13 +7,14 @@ import LessonForm from '@/components/forms/LessonForm';
 export default async function AdminLessonEdit ({ params }: { params: { courseId: string, lessonId: string }}) {
     const lessonId = params.lessonId;
     const courseId = params.courseId;
-    if (typeof lessonId !== "string") { throw new Error('missing course id') };
+    if (typeof lessonId !== "string" || typeof courseId !== "string") { throw new Error("missing course or lesson id") };
 
-    const lesson = await dbGetLessonAndContentsById(lessonId);
+    const lesson = await dbGetLessonAndRelationsById(lessonId);
 
     if (!lesson) {
-        console.log("No lesson found");
-        redirect("/");
+        return(
+            <Heading as="h2">No lesson found</Heading>
+        )
     }
 
     return (
@@ -35,7 +35,7 @@ export default async function AdminLessonEdit ({ params }: { params: { courseId:
                     {(
                         lesson.content
                     ) ? (
-                        <Link key={lesson.content.id} href={`/admin/courses/${lesson.id}/lessons/${lesson.id}/lesson-content/${lesson.content.id}`}>
+                        <Link key={lesson.content.id} href={`/admin/courses/${courseId}/lessons/${lessonId}/lesson-content/${lesson.content.id}`}>
                                 <div className='flex gap-4 border border-gray-200 rounded-lg mb-6 cursor-pointer'>
                                     <div className='py-2'>
                                         <Heading as='h5'>{lesson.name} Content</Heading>
@@ -47,7 +47,7 @@ export default async function AdminLessonEdit ({ params }: { params: { courseId:
                             <Heading as='h2'>No content.</Heading>
                         </div>
                     )}
-                    <Link href={`/admin/courses/${lesson.id}/lessons/${lesson.id}/lesson-content/new`}>
+                    <Link href={`/admin/courses/${courseId}/lessons/${lessonId}/lesson-content/new`}>
                         <button className="btn btn-primary">Add content</button>
                     </Link>
                 </div>

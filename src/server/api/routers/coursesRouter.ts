@@ -1,18 +1,20 @@
-import { dbGetAllCourses, dbGetCourseAndLessonsById, dbGetLessonAndContentsById, dbUpsertCourseById, dbUpsertLessonById } from "@/server/controllers/courses";
+import { 
+    dbGetAllCourses, 
+    dbGetCourseAndLessonsById, 
+    dbGetLessonAndRelationsById, 
+    dbGetLessonContentById, 
+    dbUpsertCourseById, 
+    dbUpsertLessonById, 
+    dbUpsertLessonContentById 
+} from "@/server/controllers/courses";
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import * as z from "zod";
+import { Buffer } from "node:buffer";
 
 
 export const coursesRouter = createTRPCRouter({
     getAllCourses: publicProcedure
-        // .output(
-        //     z
-        //         .object({
-        //             result: z.number(),
-        //         })
-        // )
         .query(async () => {
-            
             return await dbGetAllCourses();
         }),
     getCourseAndLessonsById: protectedAdminProcedure
@@ -38,7 +40,21 @@ export const coursesRouter = createTRPCRouter({
         )
         .query(async (opts) => {
             if (opts.input.id) {
-                return await dbGetLessonAndContentsById(opts.input.id);
+                return await dbGetLessonAndRelationsById(opts.input.id);
+            } else {
+                return null;
+            }
+        }),
+    getLessonContentById: protectedAdminProcedure
+        .input(
+            z
+                .object({
+                    id: z.string().optional(),
+                })
+        )
+        .query(async (opts) => {
+            if (opts.input.id) {
+                return await dbGetLessonContentById(opts.input.id);
             } else {
                 return null;
             }
@@ -72,5 +88,17 @@ export const coursesRouter = createTRPCRouter({
         )
         .mutation(async (opts) => {
             return await dbUpsertLessonById(opts.input);
+        }),
+    upsertLessonContent: protectedAdminProcedure
+        .input(
+            z
+                .object({
+                    id: z.string().optional(),
+                    lessonId: z.string(),
+                    content: z.instanceof(Buffer),
+                })
+        )
+        .mutation(async (opts) => {
+            return await dbUpsertLessonContentById(opts.input);
         }),
 })
