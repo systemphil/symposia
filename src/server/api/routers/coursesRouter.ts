@@ -95,7 +95,7 @@ export const coursesRouter = createTRPCRouter({
                 .object({
                     id: z.string().optional(),
                     lessonId: z.string(),
-                    content: z.instanceof(Buffer),
+                    content: z.string(),
                 })
         )
         .mutation(async (opts) => {

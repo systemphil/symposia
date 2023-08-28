@@ -45,6 +45,7 @@ import {
     tablePlugin,
     useCodeBlockEditorContext,
 } from "@mdxeditor/editor";
+import { apiClientside } from "@/lib/trpc/trpcClientside";
 
 // const DynamicMDXEditor = dynamic(
 //     () => import('@mdxeditor/editor').then((mod) => mod.MDXEditor), 
@@ -55,42 +56,74 @@ import {
 //     return <DynamicMDXEditor ref={editorRef} {...props} />;
 // });
 
+// const PlainTextCodeEditorDescriptor: CodeBlockEditorDescriptor = {
+//         // always use the editor, no matter the language or the meta of the code block
+//         match: (language, meta) => true,
+//         // You can have multiple editors with different priorities, so that there's a "catch-all" editor (with the lowest priority)
+//         priority: 0,
+//         // The Editor is a React component
+//         Editor: (props) => {
+//             const cb = useCodeBlockEditorContext()
+//             // stops the proppagation so that the parent lexical editor does not handle certain events.
+//             return (
+//                 <div onKeyDown={(e) => e.nativeEvent.stopImmediatePropagation()}>
+//                     <textarea rows={10} cols={100} defaultValue={props.code} onChange={(e) => cb.setCode(e.target.value)} />
+//                 </div>
+//             )
+//         }
+//     }
+
 export default function Editor() {
     const editorRef = React.useRef<MDXEditorMethods>(null)
-    const markdownEdit = `time
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-    time`
+    const utils = apiClientside.useContext();
+    const upsertLessonContentMutation = apiClientside.courses.upsertLessonContent.useMutation({
+        onSuccess: () => {
+            // toast.success('Course updated successfully')
+            console.log("success! lesson content updated/created")
+            utils.courses.getLessonContentById.invalidate();
+        },
+        onError: (error) => {
+            console.error(error)
+            // toast.error('Something went wrong')
+        }
+    })
+    const {data: incomingLessonContent} = apiClientside.courses.getLessonContentById.useQuery({
+        id: "cllv8cfcy0001u22swg51l885",
+    })
     
-    const test = `hello world
-    
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-    
-    > Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-    `
-    const PlainTextCodeEditorDescriptor: CodeBlockEditorDescriptor = {
-        // always use the editor, no matter the language or the meta of the code block
-        match: (language, meta) => true,
-        // You can have multiple editors with different priorities, so that there's a "catch-all" editor (with the lowest priority)
-        priority: 0,
-        // The Editor is a React component
-        Editor: (props) => {
-            const cb = useCodeBlockEditorContext()
-            // stops the proppagation so that the parent lexical editor does not handle certain events.
-            return (
-                <div onKeyDown={(e) => e.nativeEvent.stopImmediatePropagation()}>
-                <textarea rows={3} cols={20} defaultValue={props.code} onChange={(e) => cb.setCode(e.target.value)} />
-                </div>
-            )
+    const handleSave = async () => {
+        const markdownValue = editorRef.current?.getMarkdown();
+        if (!markdownValue) {
+            console.log("no markdown value", markdownValue)
+            return;    
+        }
+        
+        upsertLessonContentMutation.mutate({
+            id: "cllv8cfcy0001u22swg51l885",
+            lessonId: "cllrxst0m0002u28key43ydf9",
+            content: markdownValue
+        })
+    };
+
+    const handleFetchMarkdown = async () => {
+        if (!incomingLessonContent) {
+            console.log("Attempting invalidate...");
+            utils.courses.getLessonContentById.invalidate();
+        }
+        if (incomingLessonContent) {
+            editorRef.current?.setMarkdown(incomingLessonContent.content);
         }
     }
-    
+
     return (
         <>
-            <button className="btn btn-primary" onClick={() => editorRef.current?.setMarkdown('new markdown')}>Set new markdown</button>
+            <button className="btn btn-primary" onClick={() => editorRef.current?.setMarkdown("# Test \n Here we go \n - dope \n - cool")}>Set new markdown</button>
             <button className="btn btn-primary" onClick={() => console.log(editorRef.current?.getMarkdown())}>Get markdown</button>
+            <button className="btn btn-primary" onClick={() => handleSave()}>Save markdown to db</button>
+            <button className="btn btn-primary" onClick={() => handleFetchMarkdown()}>Get markdown from db</button>
             <MDXEditor 
                 ref={editorRef}
-                markdown={markdownEdit}
+                markdown="Hello **world**!"
                 contentEditableClassName="prose max-w-none"
                 plugins={[
                     listsPlugin(),

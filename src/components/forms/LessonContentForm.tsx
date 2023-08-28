@@ -44,27 +44,29 @@ const LessonContentForm = ({
         }
     })
 
-    const onSubmit: SubmitHandler<LessonContent> = async data => {
-        upsertLessonContentMutation.mutate(data);
-    };
+    // TODO fix types!!
+    // const onSubmit: SubmitHandler<Awaited<ReturnType<(typeof dbGetLessonContentById)>>> = async data => {
+    //     // TODO fix
+    //     // upsertLessonContentMutation.mutate(data);
+    // };
 
-    const methods = useForm<LessonContent>({ 
-        defaultValues: {
-            id: lessonContent?.id,
-            lessonId: lessonId,
-            content: lessonContent?.content, 
-        }
-    });
+    // const methods = useForm<Awaited<ReturnType<(typeof dbGetLessonContentById)>>>({ 
+    //     defaultValues: {
+    //         id: lessonContent?.id,
+    //         lessonId: lessonId,
+    //         content: lessonContent?.content, 
+    //     }
+    // });
 
-    return (
-        <FormProvider {...methods}>
-            <form className='flex flex-col max-w-lg' onSubmit={methods.handleSubmit(onSubmit)}>
-                <TextAreaInput label='Description*' name='description' options={{ required: true }} />
-                {/* // TODO Add selection for partId here */}
-                <SubmitInput value={`${lessonContent ? 'Update' : 'Create'} content`} isLoading={upsertLessonContentMutation.isLoading} />
-            </form>
-        </FormProvider>
-    )
+    // return (
+    //     <FormProvider {...methods}>
+    //         <form className='flex flex-col max-w-lg' onSubmit={methods.handleSubmit(onSubmit)}>
+    //             <TextAreaInput label='Description*' name='description' options={{ required: true }} />
+    //             {/* // TODO Add selection for partId here */}
+    //             <SubmitInput value={`${lessonContent ? 'Update' : 'Create'} content`} isLoading={upsertLessonContentMutation.isLoading} />
+    //         </form>
+    //     </FormProvider>
+    // )
 }
 
 export default LessonContentForm;

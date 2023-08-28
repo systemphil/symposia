@@ -124,11 +124,19 @@ export const dbGetLessonContentById = async (id: string) => {
     try {
         await requireAdminAuth();
         const validId = z.string().parse(id);
-        return await prisma.lessonContent.findFirst({
+        const result = await prisma.lessonContent.findFirst({
             where: {
                 id: validId,
             },
         });
+        if (!result) return;
+        // tRPC cannot handle binary transfer, so the buffer must be converted to string here.
+        const contentAsString = result?.content.toString("utf-8");
+        const newResult = {
+            ...result,
+            content: contentAsString
+        }
+        return newResult;
     } catch (error) {
         if (error instanceof AuthenticationError) {
             throw error; // Rethrow custom error as-is
@@ -251,26 +259,29 @@ export const dbUpsertLessonContentById = async ({
 }: {
     id?: LessonContent["id"], 
     lessonId: LessonContent["lessonId"], 
-    content: LessonContent["content"],
+    content: string,
 }) => {
     try {
         await requireAdminAuth();
 
         const validId = id ? z.string().parse(id) : "x"; // Prisma needs id of some value
         const validLessonId = z.string().parse(lessonId);
+
+        const contentAsBuffer = Buffer.from(content, 'utf-8');
         
-        return await prisma.lessonContent.upsert({
+        await prisma.lessonContent.upsert({
             where: {
                 id: validId
             },
             update: {
-                content: content,
+                content: contentAsBuffer,
             },
             create: {
                 lessonId: validLessonId,
-                content: content
+                content: contentAsBuffer
             }
         });
+        return;
     } catch (error) {
         if (error instanceof AuthenticationError) {
             throw error; // Rethrow custom error as-is
