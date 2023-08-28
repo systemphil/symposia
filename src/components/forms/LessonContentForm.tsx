@@ -36,7 +36,7 @@ const LessonContentForm = ({
     const upsertLessonContentMutation = apiClientside.courses.upsertLessonContent.useMutation({
         onSuccess: () => {
             // toast.success('Course updated successfully')
-            void utils.courses.invalidate();
+            void utils.courses.getLessonContentById.invalidate();
         },
         onError: (error) => {
             console.error(error)

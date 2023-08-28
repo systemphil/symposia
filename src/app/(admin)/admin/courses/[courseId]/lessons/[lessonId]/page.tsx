@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { dbGetLessonAndRelationsById } from '@/server/controllers/courses';
 import Heading from '@/components/Heading';
 import LessonForm from '@/components/forms/LessonForm';
+import Editor from '@/components/Editor';
 
 
 export default async function AdminLessonEdit ({ params }: { params: { courseId: string, lessonId: string }}) {
@@ -29,7 +30,13 @@ export default async function AdminLessonEdit ({ params }: { params: { courseId:
                 // TODO seems to me that we don't really need to nest deeper as the lesson id is the necessary element
                 // TODO for all the attachment of lesson
              */}
+
+            
+
             <div className="flex flex-col gap-24">
+
+                <Editor />
+
                 <div>
                     <Heading as='h4'>Lesson Content</Heading>
                     {(
