@@ -118,6 +118,7 @@ export const dbGetLessonAndRelationsById = async (id: string) => {
 
 /**
  * Calls the database to retrieve specific lessonContent data by id identifier.
+ * Converts binary content to string so that it can pass the tRPC network boundary. 
  * @access "ADMIN""
  */
 export const dbGetLessonContentById = async (id: string) => {
@@ -130,8 +131,9 @@ export const dbGetLessonContentById = async (id: string) => {
             },
         });
         if (!result) return;
-        // tRPC cannot handle binary transfer, so the buffer must be converted to string here.
+        // tRPC cannot handle binary transmission, so the buffer must be converted to string here.
         const contentAsString = result?.content.toString("utf-8");
+        // New object is made from shallow copy of the result with the updated content field.
         const newResult = {
             ...result,
             content: contentAsString

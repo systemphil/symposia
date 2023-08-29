@@ -15,7 +15,6 @@ import {
     BlockTypeSelect,
     ChangeAdmonitionType,
     ChangeCodeMirrorLanguage,
-    CodeBlockEditorDescriptor,
     CodeToggle,
     ConditionalContents,
     CreateLink,
@@ -28,7 +27,6 @@ import {
     InsertTable,
     InsertThematicBreak,
     ListsToggle,
-    MDXEditor,
     MDXEditorMethods, 
     MDXEditorProps, 
     Separator, 
@@ -43,36 +41,23 @@ import {
     linkPlugin,
     markdownShortcutPlugin,
     tablePlugin,
-    useCodeBlockEditorContext,
 } from "@mdxeditor/editor";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
 
-// const DynamicMDXEditor = dynamic(
-//     () => import('@mdxeditor/editor').then((mod) => mod.MDXEditor), 
-//     { ssr: false }
-// )
+const DynamicMDXEditor = dynamic(
+    () => import('./WrappedEditor'), 
+    { ssr: false }
+)
 
-// const MDXEditor = React.forwardRef<MDXEditorMethods, MDXEditorProps>((props, editorRef) => {
-//     return <DynamicMDXEditor ref={editorRef} {...props} />;
-// });
+const ForwardedRefMDXEditor = forwardRef<MDXEditorMethods, MDXEditorProps>((props, ref) => (
+    <DynamicMDXEditor {...props} editorRef={ref} />
+))
 
-// const PlainTextCodeEditorDescriptor: CodeBlockEditorDescriptor = {
-//         // always use the editor, no matter the language or the meta of the code block
-//         match: (language, meta) => true,
-//         // You can have multiple editors with different priorities, so that there's a "catch-all" editor (with the lowest priority)
-//         priority: 0,
-//         // The Editor is a React component
-//         Editor: (props) => {
-//             const cb = useCodeBlockEditorContext()
-//             // stops the proppagation so that the parent lexical editor does not handle certain events.
-//             return (
-//                 <div onKeyDown={(e) => e.nativeEvent.stopImmediatePropagation()}>
-//                     <textarea rows={10} cols={100} defaultValue={props.code} onChange={(e) => cb.setCode(e.target.value)} />
-//                 </div>
-//             )
-//         }
-//     }
-
+/**
+ * MDX Editor that allows live, rich text editing of markdown files on the client. 
+ * Renders only on Clientside through Next's dynamic import and a forwardRef wrapping so
+ * that useRef hook properly is passed down to the function.
+ */
 export default function Editor() {
     const editorRef = React.useRef<MDXEditorMethods>(null)
     const utils = apiClientside.useContext();
@@ -102,8 +87,8 @@ export default function Editor() {
             id: "cllv8cfcy0001u22swg51l885",
             lessonId: "cllrxst0m0002u28key43ydf9",
             content: markdownValue
-        })
-    };
+        });
+    }
 
     const handleFetchMarkdown = async () => {
         if (!incomingLessonContent) {
@@ -121,7 +106,7 @@ export default function Editor() {
             <button className="btn btn-primary" onClick={() => console.log(editorRef.current?.getMarkdown())}>Get markdown</button>
             <button className="btn btn-primary" onClick={() => handleSave()}>Save markdown to db</button>
             <button className="btn btn-primary" onClick={() => handleFetchMarkdown()}>Get markdown from db</button>
-            <MDXEditor 
+            <ForwardedRefMDXEditor 
                 ref={editorRef}
                 markdown="Hello **world**!"
                 contentEditableClassName="prose max-w-none"
