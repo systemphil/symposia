@@ -1,6 +1,6 @@
 import { prisma } from "../db";
 
-
+// TODO examples to test with, CLEANUP once done
 export const testFunc = () => {
     return [10, 20, 30, 40, 50]
 }

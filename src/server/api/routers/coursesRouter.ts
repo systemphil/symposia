@@ -49,15 +49,11 @@ export const coursesRouter = createTRPCRouter({
         .input(
             z
                 .object({
-                    id: z.string().optional(),
+                    id: z.string(),
                 })
         )
         .query(async (opts) => {
-            if (opts.input.id) {
-                return await dbGetLessonContentById(opts.input.id);
-            } else {
-                return null;
-            }
+            return await dbGetLessonContentById(opts.input.id);
         }),
     upsertCourse: protectedAdminProcedure
         .input(

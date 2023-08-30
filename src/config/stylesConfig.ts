@@ -1,6 +1,6 @@
 export const stylesConfig = {
     nav: {
-        bgColor: "bg-green-300",
+        bgColor: "bg-blue-300",
         textColor: "text-slate-700"
     },
     page: {

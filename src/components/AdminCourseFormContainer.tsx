@@ -6,7 +6,9 @@ import { type dbGetCourseAndLessonsById } from "@/server/controllers/courses";
 import { useParams, useRouter } from "next/navigation";
 import { type SubmitHandler } from "react-hook-form";
 
-
+/**
+ * TODO REFACTOR this with CourseForm to create a single component
+ */
 const AdminCourseFormContainer = ({
     initialCourse, 
     id 
@@ -28,7 +30,7 @@ const AdminCourseFormContainer = ({
         onSuccess: (newData) => {
             // toast.success('Course updated successfully')
             // If course is new, it should not match existing path and push user to new path. Otherwise, refresh data.
-            if (params.id !== newData.id) {
+            if (params.courseId !== newData.id) {
                 console.log("pushing to new route")
                 router.push(`/admin/courses/${newData.id}`)
             } else {

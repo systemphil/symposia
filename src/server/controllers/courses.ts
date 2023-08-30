@@ -90,7 +90,7 @@ export const dbGetCourseAndLessonsById = async (id: string) => {
 }
 
 /**
- * Calls the database to retrieve specific lesson and its contents by id identifier.
+ * Calls the database to retrieve specific lesson and relations by id identifier. Does not include fields with byte objects, only plain objects.
  * @access "ADMIN""
  */
 export const dbGetLessonAndRelationsById = async (id: string) => {
@@ -103,8 +103,18 @@ export const dbGetLessonAndRelationsById = async (id: string) => {
             },
             include: {
                 part: true,
-                content: true,
-                transcript: true,
+                content: {
+                    select: {
+                        id: true,
+                        lessonId: true,
+                    }
+                },
+                transcript: {
+                    select: {
+                        id: true,
+                        lessonId: true
+                    }
+                },
                 video: true,
             }
         });
@@ -118,7 +128,8 @@ export const dbGetLessonAndRelationsById = async (id: string) => {
 
 /**
  * Calls the database to retrieve specific lessonContent data by id identifier.
- * Converts binary content to string so that it can pass the tRPC network boundary. 
+ * Converts binary content to string so that it can pass the tRPC network boundary
+ * and/or be passed down to Client Components from Server Components. 
  * @access "ADMIN""
  */
 export const dbGetLessonContentById = async (id: string) => {
@@ -253,6 +264,21 @@ export const dbUpsertLessonById = async ({
 }
 
 /**
+ * Utility function to remove properties from an object by field
+ * @param obj Object to modify
+ * @param keys[] An array of properties to omit by key
+ * @returns New object with the omitted properties
+ */
+function exclude<Obj, Key extends keyof Obj>(
+    obj: Obj,
+    keys: Key[]
+): Omit<Obj, Key> {
+    const newObj = { ...obj };
+    keys.forEach((key) => delete newObj[key]);
+    return newObj;
+}
+
+/**
  * Updates an existing lessonContent details by id as identifier or creates a new one if id is not provided.
  * @access "ADMIN""
  */
@@ -271,7 +297,7 @@ export const dbUpsertLessonContentById = async ({
 
         const contentAsBuffer = Buffer.from(content, 'utf-8');
         
-        await prisma.lessonContent.upsert({
+        const result = await prisma.lessonContent.upsert({
             where: {
                 id: validId
             },
@@ -283,7 +309,9 @@ export const dbUpsertLessonContentById = async ({
                 content: contentAsBuffer
             }
         });
-        return;
+
+        const resultWithoutContent = exclude(result, ["content"])
+        return resultWithoutContent;
     } catch (error) {
         if (error instanceof AuthenticationError) {
             throw error; // Rethrow custom error as-is

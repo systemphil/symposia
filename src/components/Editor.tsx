@@ -13,6 +13,7 @@ import {
     AdmonitionDirectiveDescriptor,
     AdmonitionKind,
     BlockTypeSelect,
+    Button,
     ChangeAdmonitionType,
     ChangeCodeMirrorLanguage,
     CodeToggle,
@@ -31,6 +32,7 @@ import {
     MDXEditorProps, 
     Separator, 
     ShowSandpackInfo, 
+    TooltipWrap, 
     codeBlockPlugin, 
     codeMirrorPlugin, 
     diffSourcePlugin, 
@@ -43,22 +45,31 @@ import {
     tablePlugin,
 } from "@mdxeditor/editor";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
+import { type dbGetLessonContentById } from "@/server/controllers/courses";
+import Heading from "./Heading";
+import { Lesson } from "@prisma/client";
+
 
 const DynamicMDXEditor = dynamic(
     () => import('./WrappedEditor'), 
     { ssr: false }
 )
-
 const ForwardedRefMDXEditor = forwardRef<MDXEditorMethods, MDXEditorProps>((props, ref) => (
     <DynamicMDXEditor {...props} editorRef={ref} />
 ))
+
+type EditorProps = {
+    initialLessonContent: Awaited<ReturnType<(typeof dbGetLessonContentById)>>;
+    lessonName: Lesson["name"];
+}
 
 /**
  * MDX Editor that allows live, rich text editing of markdown files on the client. 
  * Renders only on Clientside through Next's dynamic import and a forwardRef wrapping so
  * that useRef hook properly is passed down to the function.
+ * @param lessonContent Must receive LessonContent entry
  */
-export default function Editor() {
+export default function Editor({ initialLessonContent, lessonName }: EditorProps) {
     const editorRef = React.useRef<MDXEditorMethods>(null)
     const utils = apiClientside.useContext();
     const upsertLessonContentMutation = apiClientside.courses.upsertLessonContent.useMutation({
@@ -72,10 +83,17 @@ export default function Editor() {
             // toast.error('Something went wrong')
         }
     })
-    const {data: incomingLessonContent} = apiClientside.courses.getLessonContentById.useQuery({
-        id: "cllv8cfcy0001u22swg51l885",
+
+    if (!initialLessonContent) throw new Error("Lesson Content Data missing / could not be retrieved from server")
+
+    const {data: lessonContent} = apiClientside.courses.getLessonContentById.useQuery({ id: initialLessonContent.id}, {
+        initialData: initialLessonContent,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
     })
     
+    if (!lessonContent) throw new Error("Lesson Content Data missing / could not be retrieved from client query")
+
     const handleSave = async () => {
         const markdownValue = editorRef.current?.getMarkdown();
         if (!markdownValue) {
@@ -84,31 +102,31 @@ export default function Editor() {
         }
         
         upsertLessonContentMutation.mutate({
-            id: "cllv8cfcy0001u22swg51l885",
-            lessonId: "cllrxst0m0002u28key43ydf9",
+            id: lessonContent.id,
+            lessonId: lessonContent.lessonId,
             content: markdownValue
         });
     }
 
     const handleFetchMarkdown = async () => {
-        if (!incomingLessonContent) {
+        if (!lessonContent) {
             console.log("Attempting invalidate...");
             utils.courses.getLessonContentById.invalidate();
         }
-        if (incomingLessonContent) {
-            editorRef.current?.setMarkdown(incomingLessonContent.content);
+        if (lessonContent) {
+            editorRef.current?.setMarkdown(lessonContent.content);
         }
     }
 
     return (
         <>
-            <button className="btn btn-primary" onClick={() => editorRef.current?.setMarkdown("# Test \n Here we go \n - dope \n - cool")}>Set new markdown</button>
-            <button className="btn btn-primary" onClick={() => console.log(editorRef.current?.getMarkdown())}>Get markdown</button>
+            <Heading as="h1">Editing contents of "<span className="italic">{lessonName}</span>&nbsp;"</Heading>
+            {/* <button className="btn btn-primary" onClick={() => console.log(editorRef.current?.getMarkdown())}>Get markdown</button>
             <button className="btn btn-primary" onClick={() => handleSave()}>Save markdown to db</button>
-            <button className="btn btn-primary" onClick={() => handleFetchMarkdown()}>Get markdown from db</button>
+            <button className="btn btn-primary" onClick={() => handleFetchMarkdown()}>Get markdown from db</button> */}
             <ForwardedRefMDXEditor 
                 ref={editorRef}
-                markdown="Hello **world**!"
+                markdown={lessonContent.content}
                 contentEditableClassName="prose max-w-none"
                 plugins={[
                     listsPlugin(),
@@ -128,17 +146,25 @@ export default function Editor() {
                     markdownShortcutPlugin(),
                     toolbarPlugin({
                         toolbarContents: () => (
-                            <DefaultToolbar />
+                            <DefaultToolbar handleSave={handleSave}/>
                         )
                     })
                 ]}
             />
-            <div className="border-neutral-border border-dashed border-t-[1px]"></div>
+            <div className="border-neutral-border border-dashed border-t-[1px] mb-16"></div>
         </>
     )
 }
 
-const DefaultToolbar: React.FC = () => {
+type DefaultToolbarProps = {
+    handleSave: () => void;
+}
+const DefaultToolbar: React.FC<DefaultToolbarProps> = ({ handleSave }) => {
+
+    const handleSaveButton = () => {
+        handleSave();
+    }
+
     return (
         <DiffSourceToggleWrapper>
             <ConditionalContents
@@ -146,7 +172,10 @@ const DefaultToolbar: React.FC = () => {
                     { when: (editor) => editor?.editorType === 'codeblock', contents: () => <ChangeCodeMirrorLanguage /> },
                     { when: (editor) => editor?.editorType === 'sandpack', contents: () => <ShowSandpackInfo /> },
                     { fallback: () => (
-                        <>
+                        <>  
+                            <TooltipWrap title="Save to database">
+                                <Button onClick={() => handleSaveButton()}>💾</Button>
+                            </TooltipWrap>
                             <UndoRedo />
                             <Separator />
                             <BoldItalicUnderlineToggles />
