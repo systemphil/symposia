@@ -2,6 +2,7 @@ import { prisma } from "../db";
 import { getServerAuthSession } from "../auth";
 import * as z from "zod";
 import { LessonContent } from "@prisma/client";
+import { exclude } from "@/utils/utils";
 
 class AuthenticationError extends Error {
     constructor() {
@@ -261,21 +262,6 @@ export const dbUpsertLessonById = async ({
         }
         throw new Error("An error occurred while fetching the course.");
     }
-}
-
-/**
- * Utility function to remove properties from an object by field
- * @param obj Object to modify
- * @param keys[] An array of properties to omit by key
- * @returns New object with the omitted properties
- */
-function exclude<Obj, Key extends keyof Obj>(
-    obj: Obj,
-    keys: Key[]
-): Omit<Obj, Key> {
-    const newObj = { ...obj };
-    keys.forEach((key) => delete newObj[key]);
-    return newObj;
 }
 
 /**
