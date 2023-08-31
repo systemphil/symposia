@@ -45,7 +45,7 @@ import {
     tablePlugin,
 } from "@mdxeditor/editor";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
-import { type dbGetLessonContentById } from "@/server/controllers/courses";
+import { type dbGetLessonContentById } from "@/server/controllers/coursesController";
 import Heading from "./Heading";
 import { Lesson } from "@prisma/client";
 
@@ -67,12 +67,12 @@ type EditorProps = {
  * MDX Editor that allows live, rich text editing of markdown files on the client. 
  * Renders only on Clientside through Next's dynamic import and a forwardRef wrapping so
  * that useRef hook properly is passed down to the function.
- * @param lessonContent Must receive LessonContent entry
+ * @param props includes LessonContent object and lessonName string
  */
 export default function Editor({ initialLessonContent, lessonName }: EditorProps) {
     const editorRef = React.useRef<MDXEditorMethods>(null)
     const utils = apiClientside.useContext();
-    const upsertLessonContentMutation = apiClientside.courses.upsertLessonContent.useMutation({
+    const updateLessonContentMutation = apiClientside.courses.updateLessonContentOrLessonTranscript.useMutation({
         onSuccess: () => {
             // toast.success('Course updated successfully')
             console.log("success! lesson content updated/created")
@@ -97,13 +97,12 @@ export default function Editor({ initialLessonContent, lessonName }: EditorProps
     const handleSave = async () => {
         const markdownValue = editorRef.current?.getMarkdown();
         if (!markdownValue) {
-            console.log("no markdown value", markdownValue)
+            console.error("No markdown value in handleSave", markdownValue)
             return;    
         }
         
-        upsertLessonContentMutation.mutate({
+        updateLessonContentMutation.mutate({
             id: lessonContent.id,
-            lessonId: lessonContent.lessonId,
             content: markdownValue
         });
     }

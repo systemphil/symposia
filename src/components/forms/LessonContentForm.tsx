@@ -3,7 +3,7 @@
 import { apiClientside } from "@/lib/trpc/trpcClientside";
 import { useParams, useRouter } from "next/navigation";
 
-import type { dbGetLessonContentById } from "@/server/controllers/courses";
+import type { dbGetLessonContentById } from "@/server/controllers/coursesController";
 import { useForm, type SubmitHandler, FormProvider } from "react-hook-form";
 import type { Lesson, LessonContent } from "@prisma/client";
 import TextInput from "./TextInput";

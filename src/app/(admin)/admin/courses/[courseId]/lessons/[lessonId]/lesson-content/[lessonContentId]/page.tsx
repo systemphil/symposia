@@ -1,5 +1,5 @@
 import Editor from "@/components/Editor";
-import { dbGetLessonAndRelationsById, dbGetLessonContentById } from "@/server/controllers/courses";
+import { dbGetLessonAndRelationsById, dbGetLessonContentById } from "@/server/controllers/coursesController";
 
 
 export default async function AdminLessonContentEdit ({ params }: { params: { courseId: string, lessonId: string, lessonContentId: string }}) {

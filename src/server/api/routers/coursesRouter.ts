@@ -3,10 +3,11 @@ import {
     dbGetCourseAndLessonsById, 
     dbGetLessonAndRelationsById, 
     dbGetLessonContentById, 
+    dbUpdateLessonContentOrLessonTranscriptById, 
     dbUpsertCourseById, 
     dbUpsertLessonById, 
     dbUpsertLessonContentById 
-} from "@/server/controllers/courses";
+} from "@/server/controllers/coursesController";
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import * as z from "zod";
 import { Buffer } from "node:buffer";
@@ -85,7 +86,7 @@ export const coursesRouter = createTRPCRouter({
         .mutation(async (opts) => {
             return await dbUpsertLessonById(opts.input);
         }),
-    upsertLessonContent: protectedAdminProcedure
+    upsertLessonContent: protectedAdminProcedure //TODO schedule for deletion and CLEANUP
         .input(
             z
                 .object({
@@ -97,4 +98,15 @@ export const coursesRouter = createTRPCRouter({
         .mutation(async (opts) => {
             return await dbUpsertLessonContentById(opts.input);
         }),
+    updateLessonContentOrLessonTranscript: protectedAdminProcedure
+        .input(
+            z
+                .object({
+                    id: z.string(),
+                    content: z.string(),
+                })
+        )
+        .mutation(async (opts) => {
+            return await dbUpdateLessonContentOrLessonTranscriptById(opts.input);
+        })
 })

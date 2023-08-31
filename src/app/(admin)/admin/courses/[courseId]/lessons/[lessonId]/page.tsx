@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { dbGetLessonAndRelationsById } from '@/server/controllers/courses';
+import { dbGetLessonAndRelationsById } from '@/server/controllers/coursesController';
 import Heading from '@/components/Heading';
 import LessonForm from '@/components/forms/LessonForm';
 

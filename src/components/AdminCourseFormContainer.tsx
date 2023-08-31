@@ -2,7 +2,7 @@
 
 import CourseForm, { UpsertCourseInputs } from "./forms/CourseForm";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
-import { type dbGetCourseAndLessonsById } from "@/server/controllers/courses";
+import { type dbGetCourseAndLessonsById } from "@/server/controllers/coursesController";
 import { useParams, useRouter } from "next/navigation";
 import { type SubmitHandler } from "react-hook-form";
 

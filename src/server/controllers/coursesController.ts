@@ -1,7 +1,7 @@
 import { prisma } from "../db";
 import { getServerAuthSession } from "../auth";
 import * as z from "zod";
-import { LessonContent } from "@prisma/client";
+import { LessonContent, LessonTranscript } from "@prisma/client";
 import { exclude } from "@/utils/utils";
 
 class AuthenticationError extends Error {
@@ -302,6 +302,76 @@ export const dbUpsertLessonContentById = async ({
         if (error instanceof AuthenticationError) {
             throw error; // Rethrow custom error as-is
         }
+        throw new Error("An error occurred while fetching the course.");
+    }
+}
+
+/**
+ * Updates an existing lessonContent or lessonTranscript by id as identifier.
+ * @description If lessonContent, updates the content field.
+ * @description If lessonTranscript, updates the transcript field.
+ * @access "ADMIN""
+ */
+export const dbUpdateLessonContentOrLessonTranscriptById = async ({
+    id, content
+}: {
+    id: LessonContent["id"] | LessonTranscript["id"], 
+    content: string,
+}) => {
+    try {
+        await requireAdminAuth();
+        const validId = z.string().parse(id);
+        const validContent = z.string().parse(content);
+
+        // Should we parse string
+        const contentAsBuffer = Buffer.from(validContent, 'utf-8');
+
+        // Prisma does not allow us to traverse two tables at once, so we have to 
+        // construct a complex SQL query using $executeRaw. First we try to update
+        // one table where there is an id match, and, then, we check how many rows were affected.
+        // If 0, then that means the first update did not find an id match, and so we try with the second
+        // table, which should work. The overall result should be exactly 1 number of records updated.
+        let result = await prisma.$executeRaw`UPDATE "LessonContent" SET content = ${contentAsBuffer} WHERE id = ${validId};`
+
+        if (result === 0) {
+            result = await prisma.$executeRaw`UPDATE "LessonTranscript" SET transcript = ${contentAsBuffer} WHERE id = ${validId};`
+        }
+
+        console.log("=== UPDATE FUNC in CONTROLLER", result);
+
+        if (result === 1) {
+            return;
+        } else {
+            throw new Error("Database update should have returned exactly 1 updated record.")
+        }
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while fetching the course.");
+    }
+}
+
+const _dbUpdateLessonContentOrLessonTranscript = async ({
+    id, content
+}: {
+    id: LessonContent["id"] | LessonTranscript["id"], 
+    content: Buffer,
+}) => {
+    try {
+        const result = await prisma.lessonContent.update({
+            where: {
+                id: id,
+            },
+            data: {
+                content: content,
+            },
+        });
+        return result;
+    } catch(error) {
+        // if (error instanceof RecordNotFound) {
+        //     throw error; // Rethrow custom error as-is
+        // }
         throw new Error("An error occurred while fetching the course.");
     }
 }

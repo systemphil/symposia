@@ -1,7 +1,7 @@
 import CourseGrid from "@/components/CourseGrid";
 import Heading from "@/components/Heading";
 import { stylesConfig } from "@/config/stylesConfig";
-import { dbGetAllCourses } from "@/server/controllers/courses";
+import { dbGetAllCourses } from "@/server/controllers/coursesController";
 import Link from "next/link";
 
 export default async function Admin() {

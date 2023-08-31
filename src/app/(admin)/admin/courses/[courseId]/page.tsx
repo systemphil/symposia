@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { dbGetCourseAndLessonsById } from '@/server/controllers/courses';
+import { dbGetCourseAndLessonsById } from '@/server/controllers/coursesController';
 import { redirect } from "next/navigation";
 import Heading from '@/components/Heading';
 import AdminCourseFormContainer from '@/components/AdminCourseFormContainer'

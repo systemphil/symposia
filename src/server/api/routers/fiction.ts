@@ -33,9 +33,9 @@ export const fictionRouter = createTRPCRouter({
             return { result };
         }),
     getSecretMessage: protectedProcedure.query(() => {
-        return "you can now see this secret message!";
+        return "you can now see this secret message! | means you are logged in";
     }),
     getSuperSecretMessage: protectedAdminProcedure.query(() => {
-        return "you can now see this super secret message!!!";
+        return "you can now see this super secret message!!! | means you are an admin - you're special :)";
     }),
 });

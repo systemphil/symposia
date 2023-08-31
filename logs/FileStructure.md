@@ -27,13 +27,13 @@
 |   |
 |   ├───server
 |   |   ├───api
-|   |   |   └───routers
-|   |   |   routersRoot.ts
-|   |   |   trpc.ts
+|   |   |   ├───routers
+|   |   |   |   routersRoot.ts
+|   |   |   |   trpc.ts
 |   |   |
 |   |   └───controllers
-|   |   auth.ts
-|   |   db.ts
+|   |   |   auth.ts
+|   |   |   db.ts
 |   |
 |   └───utils
 |
