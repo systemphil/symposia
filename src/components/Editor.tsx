@@ -121,9 +121,7 @@ export default function Editor({ initialLessonContent, lessonName }: EditorProps
     return (
         <>
             <Heading as="h1">Editing contents of "<span className="italic">{lessonName}</span>&nbsp;"</Heading>
-            {/* <button className="btn btn-primary" onClick={() => console.log(editorRef.current?.getMarkdown())}>Get markdown</button>
-            <button className="btn btn-primary" onClick={() => handleSave()}>Save markdown to db</button>
-            <button className="btn btn-primary" onClick={() => handleFetchMarkdown()}>Get markdown from db</button> */}
+            <button className="btn btn-primary" onClick={() => console.log(editorRef.current?.getMarkdown())}>Get markdown</button>
             <ForwardedRefMDXEditor 
                 ref={editorRef}
                 markdown={lessonContent.content}
