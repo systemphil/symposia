@@ -28,7 +28,7 @@ const LessonForm = ({
     const router = useRouter();
     const params = useParams();
     const utils = apiClientside.useContext();
-    const {data: lesson} = apiClientside.courses.getLessonAndContentsById.useQuery({id: lessonId}, {
+    const {data: lesson} = apiClientside.courses.getLessonAndRelationsById.useQuery({id: lessonId}, {
         initialData: initialLesson,
         refetchOnMount: false,
         refetchOnReconnect: false,

@@ -1,5 +1,5 @@
 import Editor from "@/components/Editor";
-import { dbGetLessonAndRelationsById, dbGetLessonContentById } from "@/server/controllers/coursesController";
+import { dbGetLessonAndRelationsById, dbGetLessonContentOrLessonTranscriptById } from "@/server/controllers/coursesController";
 
 
 export default async function AdminLessonContentEdit ({ params }: { params: { courseId: string, lessonId: string, lessonContentId: string }}) {
@@ -7,7 +7,7 @@ export default async function AdminLessonContentEdit ({ params }: { params: { co
     const lessonContentId = params.lessonContentId;
     if (typeof lessonContentId !== "string") { throw new Error("missing lessonContent id") };
 
-    const lessonContent = await dbGetLessonContentById(lessonContentId);
+    const lessonContent = await dbGetLessonContentOrLessonTranscriptById(lessonContentId);
     const lesson = await dbGetLessonAndRelationsById(lessonId)
 
     if (!lessonContent) {
@@ -18,6 +18,6 @@ export default async function AdminLessonContentEdit ({ params }: { params: { co
     }
 
     return(
-        <Editor initialLessonContent={lessonContent} lessonName={lesson.name}/>
+        <Editor initialLessonMaterial={lessonContent} lessonName={lesson.name}/>
     )
 }

@@ -3,7 +3,7 @@
 import { apiClientside } from "@/lib/trpc/trpcClientside";
 import { useParams, useRouter } from "next/navigation";
 
-import type { dbGetLessonContentById } from "@/server/controllers/coursesController";
+import type { dbGetLessonContentOrLessonTranscriptById } from "@/server/controllers/coursesController";
 import { useForm, type SubmitHandler, FormProvider } from "react-hook-form";
 import type { Lesson, LessonContent } from "@prisma/client";
 import TextInput from "./TextInput";
@@ -21,12 +21,12 @@ const LessonContentForm = ({
     initialLessonContent,
 }: {
     lessonId?: Lesson["id"];
-    initialLessonContent?: Awaited<ReturnType<(typeof dbGetLessonContentById)>>
+    initialLessonContent?: Awaited<ReturnType<(typeof dbGetLessonContentOrLessonTranscriptById)>>
 }) => {
     const router = useRouter();
     const params = useParams();
     const utils = apiClientside.useContext();
-    const {data: lessonContent} = apiClientside.courses.getLessonContentById.useQuery({id: initialLessonContent?.id}, {
+    const {data: lessonContent} = apiClientside.courses.getLessonContentOrLessonTranscriptById.useQuery({id: initialLessonContent?.id}, {
         initialData: initialLessonContent,
         refetchOnMount: false,
         refetchOnReconnect: false,
@@ -36,7 +36,7 @@ const LessonContentForm = ({
     const upsertLessonContentMutation = apiClientside.courses.upsertLessonContent.useMutation({
         onSuccess: () => {
             // toast.success('Course updated successfully')
-            void utils.courses.getLessonContentById.invalidate();
+            void utils.courses.getLessonContentOrLessonTranscriptById.invalidate();
         },
         onError: (error) => {
             console.error(error)

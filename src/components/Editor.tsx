@@ -45,7 +45,7 @@ import {
     tablePlugin,
 } from "@mdxeditor/editor";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
-import { type dbGetLessonContentById } from "@/server/controllers/coursesController";
+import { type dbGetLessonContentOrLessonTranscriptById } from "@/server/controllers/coursesController";
 import Heading from "./Heading";
 import { Lesson } from "@prisma/client";
 
@@ -59,7 +59,7 @@ const ForwardedRefMDXEditor = forwardRef<MDXEditorMethods, MDXEditorProps>((prop
 ))
 
 type EditorProps = {
-    initialLessonContent: Awaited<ReturnType<(typeof dbGetLessonContentById)>>;
+    initialLessonMaterial: Awaited<ReturnType<(typeof dbGetLessonContentOrLessonTranscriptById)>>;
     lessonName: Lesson["name"];
 }
 
@@ -69,14 +69,14 @@ type EditorProps = {
  * that useRef hook properly is passed down to the function.
  * @param props includes LessonContent object and lessonName string
  */
-export default function Editor({ initialLessonContent, lessonName }: EditorProps) {
+export default function Editor({ initialLessonMaterial, lessonName }: EditorProps) {
     const editorRef = React.useRef<MDXEditorMethods>(null)
     const utils = apiClientside.useContext();
-    const updateLessonContentMutation = apiClientside.courses.updateLessonContentOrLessonTranscript.useMutation({
+    const updateLessonMaterialMutation = apiClientside.courses.updateLessonContentOrLessonTranscript.useMutation({
         onSuccess: () => {
             // toast.success('Course updated successfully')
             console.log("success! lesson content updated/created")
-            utils.courses.getLessonContentById.invalidate();
+            utils.courses.getLessonContentOrLessonTranscriptById.invalidate();
         },
         onError: (error) => {
             console.error(error)
@@ -84,15 +84,15 @@ export default function Editor({ initialLessonContent, lessonName }: EditorProps
         }
     })
 
-    if (!initialLessonContent) throw new Error("Lesson Content Data missing / could not be retrieved from server")
+    if (!initialLessonMaterial) throw new Error("lessonMaterial Data missing / could not be retrieved from server")
 
-    const {data: lessonContent} = apiClientside.courses.getLessonContentById.useQuery({ id: initialLessonContent.id}, {
-        initialData: initialLessonContent,
+    const {data: lessonMaterial} = apiClientside.courses.getLessonContentOrLessonTranscriptById.useQuery({ id: initialLessonMaterial.id}, {
+        initialData: initialLessonMaterial,
         refetchOnMount: false,
         refetchOnReconnect: false,
     })
     
-    if (!lessonContent) throw new Error("Lesson Content Data missing / could not be retrieved from client query")
+    if (!lessonMaterial) throw new Error("lessonMaterial Data missing / could not be retrieved from client query")
 
     const handleSave = async () => {
         const markdownValue = editorRef.current?.getMarkdown();
@@ -101,29 +101,39 @@ export default function Editor({ initialLessonContent, lessonName }: EditorProps
             return;    
         }
         
-        updateLessonContentMutation.mutate({
-            id: lessonContent.id,
+        updateLessonMaterialMutation.mutate({
+            id: lessonMaterial.id,
             content: markdownValue
         });
     }
 
-    const handleFetchMarkdown = async () => {
-        if (!lessonContent) {
-            console.log("Attempting invalidate...");
-            utils.courses.getLessonContentById.invalidate();
-        }
-        if (lessonContent) {
-            editorRef.current?.setMarkdown(lessonContent.content);
-        }
+    // const handleFetchMarkdown = async () => {
+    //     if (!lessonMaterial) {
+    //         console.log("Attempting invalidate...");
+    //         utils.courses.getLessonContentOrLessonTranscriptById.invalidate();
+    //     }
+    //     if (lessonMaterial) {
+    //         editorRef.current?.setMarkdown(lessonMaterial.content);
+    //     }
+    // }
+
+    let incomingMarkdown: string;
+    if ("transcript" in lessonMaterial) {
+        incomingMarkdown = lessonMaterial.transcript;
+    } else if ("content" in lessonMaterial) {
+        incomingMarkdown = lessonMaterial.content;
+    } else {
+        incomingMarkdown = "No content available.";
     }
 
     return (
         <>
             <Heading as="h1">Editing contents of "<span className="italic">{lessonName}</span>&nbsp;"</Heading>
+            {/* //TODO BTN below only for testing, CLEANUP when done */}
             <button className="btn btn-primary" onClick={() => console.log(editorRef.current?.getMarkdown())}>Get markdown</button>
             <ForwardedRefMDXEditor 
                 ref={editorRef}
-                markdown={lessonContent.content}
+                markdown={incomingMarkdown}
                 contentEditableClassName="prose max-w-none"
                 plugins={[
                     listsPlugin(),
@@ -206,10 +216,10 @@ const DefaultToolbar: React.FC<DefaultToolbarProps> = ({ handleSave }) => {
                                     {
                                         when: (editorInFocus) => !whenInAdmonition(editorInFocus),
                                         contents: () => (
-                                        <>
-                                            <Separator />
-                                            <InsertAdmonition />
-                                        </>
+                                            <>
+                                                <Separator />
+                                                <InsertAdmonition />
+                                            </>
                                         )
                                     }
                                 ]}

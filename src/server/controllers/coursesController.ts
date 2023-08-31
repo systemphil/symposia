@@ -1,7 +1,7 @@
 import { prisma } from "../db";
 import { getServerAuthSession } from "../auth";
 import * as z from "zod";
-import { LessonContent, LessonTranscript } from "@prisma/client";
+import { Course, LessonContent, LessonTranscript } from "@prisma/client";
 import { exclude } from "@/utils/utils";
 
 class AuthenticationError extends Error {
@@ -128,27 +128,40 @@ export const dbGetLessonAndRelationsById = async (id: string) => {
 }
 
 /**
- * Calls the database to retrieve specific lessonContent data by id identifier.
- * Converts binary content to string so that it can pass the tRPC network boundary
+ * Calls the database to retrieve specific lessonContent or lessonTranscript by id identifier.
+ * Converts binary content of found record to string so that it can pass the tRPC network boundary
  * and/or be passed down to Client Components from Server Components. 
  * @access "ADMIN""
  */
-export const dbGetLessonContentById = async (id: string) => {
+export const dbGetLessonContentOrLessonTranscriptById = async (id: string) => {
     try {
         await requireAdminAuth();
         const validId = z.string().parse(id);
-        const result = await prisma.lessonContent.findFirst({
+        const lessonContent = await prisma.lessonContent.findUnique({
             where: {
                 id: validId,
             },
         });
-        if (!result) return;
+        if (!lessonContent) {
+            const lessonTranscript = await prisma.lessonTranscript.findUnique({
+                where: {
+                    id: validId,
+                }
+            })
+            if (!lessonTranscript) throw new Error("No lessonTranscript or lessonContent found at db call")
+            const transcriptAsString = lessonTranscript.transcript.toString("utf-8");
+            const newResult = {
+                ...lessonTranscript,
+                transcript: transcriptAsString,
+            }
+            return newResult;
+        };
         // tRPC cannot handle binary transmission, so the buffer must be converted to string here.
-        const contentAsString = result?.content.toString("utf-8");
+        const contentAsString = lessonContent.content.toString("utf-8");
         // New object is made from shallow copy of the result with the updated content field.
         const newResult = {
-            ...result,
-            content: contentAsString
+            ...lessonContent,
+            content: contentAsString,
         }
         return newResult;
     } catch (error) {
@@ -159,13 +172,7 @@ export const dbGetLessonContentById = async (id: string) => {
     }
 }
 
-/**
- * Updates an existing course details by id as identifier or creates a new one if id is not provided.
- * @access "ADMIN""
- */
-export const dbUpsertCourseById = async ({
-    id, name, description, slug, imageUrl, published, author
-}: {
+type DbUpsertCourseByIdProps = {
     id?: string, 
     slug: string, 
     name: string, 
@@ -173,7 +180,15 @@ export const dbUpsertCourseById = async ({
     imageUrl?: string | null, 
     published?: boolean | null, 
     author?: string | null,
-}) => {
+}
+
+/**
+ * Updates an existing course details by id as identifier or creates a new one if id is not provided.
+ * @access "ADMIN""
+ */
+export const dbUpsertCourseById = async ({
+    id, name, description, slug, imageUrl, published, author
+}: DbUpsertCourseByIdProps) => {
     try {
         await requireAdminAuth();
 
@@ -326,11 +341,15 @@ export const dbUpdateLessonContentOrLessonTranscriptById = async ({
         // Should we parse string
         const contentAsBuffer = Buffer.from(validContent, 'utf-8');
 
-        // Prisma does not allow us to traverse two tables at once, so we have to 
-        // construct a complex SQL query using $executeRaw. First we try to update
-        // one table where there is an id match, and, then, we check how many rows were affected.
-        // If 0, then that means the first update did not find an id match, and so we try with the second
-        // table, which should work. The overall result should be exactly 1 number of records updated.
+        /**
+         * Prisma does not allow us to traverse two tables at once, so we made SQL executions directly with $executeRaw where
+         * prisma returns the number of rows affected by the query instead of an error in the usual prisma.update(). 
+         * First we try to update one table where there is an id match, and, then, we check how many rows were affected.
+         * If 0, then that means the first update did not find an id match, and so we try with the second
+         * table, which should work. The overall result should be exactly 1 number of records updated.
+         * @see {@link https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#executeraw PrismaExecuteRaw}
+         * @see {@link https://www.cockroachlabs.com/docs/stable/sql-statements SQL@CockroachDB}
+         */
         let result = await prisma.$executeRaw`UPDATE "LessonContent" SET content = ${contentAsBuffer} WHERE id = ${validId};`
 
         if (result === 0) {

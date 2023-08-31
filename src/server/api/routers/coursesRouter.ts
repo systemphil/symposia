@@ -2,7 +2,7 @@ import {
     dbGetAllCourses, 
     dbGetCourseAndLessonsById, 
     dbGetLessonAndRelationsById, 
-    dbGetLessonContentById, 
+    dbGetLessonContentOrLessonTranscriptById, 
     dbUpdateLessonContentOrLessonTranscriptById, 
     dbUpsertCourseById, 
     dbUpsertLessonById, 
@@ -32,7 +32,7 @@ export const coursesRouter = createTRPCRouter({
                 return null;
             }
         }),
-    getLessonAndContentsById: protectedAdminProcedure
+    getLessonAndRelationsById: protectedAdminProcedure
         .input(
             z
                 .object({
@@ -46,7 +46,7 @@ export const coursesRouter = createTRPCRouter({
                 return null;
             }
         }),
-    getLessonContentById: protectedAdminProcedure
+    getLessonContentOrLessonTranscriptById: protectedAdminProcedure
         .input(
             z
                 .object({
@@ -54,7 +54,7 @@ export const coursesRouter = createTRPCRouter({
                 })
         )
         .query(async (opts) => {
-            return await dbGetLessonContentById(opts.input.id);
+            return await dbGetLessonContentOrLessonTranscriptById(opts.input.id);
         }),
     upsertCourse: protectedAdminProcedure
         .input(
@@ -66,6 +66,7 @@ export const coursesRouter = createTRPCRouter({
                     description: z.string(),
                     imageUrl: z.string().url().optional().nullish(),
                     author: z.string().optional().nullish(),
+                    published: z.boolean().optional().nullish(),
                 })
         )
         .mutation(async (opts) => {
