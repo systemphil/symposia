@@ -107,30 +107,24 @@ export default function Editor({ initialLessonMaterial, lessonName }: EditorProp
         });
     }
 
-    // const handleFetchMarkdown = async () => {
-    //     if (!lessonMaterial) {
-    //         console.log("Attempting invalidate...");
-    //         utils.courses.getLessonContentOrLessonTranscriptById.invalidate();
-    //     }
-    //     if (lessonMaterial) {
-    //         editorRef.current?.setMarkdown(lessonMaterial.content);
-    //     }
-    // }
-
     let incomingMarkdown: string;
+    let incomingType: string;
     if ("transcript" in lessonMaterial) {
         incomingMarkdown = lessonMaterial.transcript;
+        incomingType = "transcript";
     } else if ("content" in lessonMaterial) {
         incomingMarkdown = lessonMaterial.content;
+        incomingType = "content";
     } else {
+        incomingType = "nothing";
         incomingMarkdown = "No content available.";
     }
 
     return (
         <>
-            <Heading as="h1">Editing contents of "<span className="italic">{lessonName}</span>&nbsp;"</Heading>
+            <Heading as="h1">Editing {incomingType} of "<span className="italic">{lessonName}</span>&nbsp;"</Heading>
             {/* //TODO BTN below only for testing, CLEANUP when done */}
-            <button className="btn btn-primary" onClick={() => console.log(editorRef.current?.getMarkdown())}>Get markdown</button>
+            <button className="btn btn-accent" onClick={() => console.log(editorRef.current?.getMarkdown())}>DEBUG:Print markdown to console</button>
             <ForwardedRefMDXEditor 
                 ref={editorRef}
                 markdown={incomingMarkdown}

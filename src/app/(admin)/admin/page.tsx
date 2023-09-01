@@ -8,7 +8,7 @@ export default async function Admin() {
     const courses = await dbGetAllCourses();
 
     return (
-        <main className={`h-screen flex flex-col justify-front items-center gap-4 ${stylesConfig.page.bgColor}`}>
+        <main className={`h-screen flex flex-col justify-front items-center gap-4 ${stylesConfig.adminPage.bgColor}`}>
             <Heading>Admin</Heading>
             <Heading as='h2'>Your courses</Heading>
 

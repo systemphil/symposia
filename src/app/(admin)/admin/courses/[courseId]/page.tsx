@@ -3,6 +3,7 @@ import { dbGetCourseAndLessonsById } from '@/server/controllers/coursesControlle
 import { redirect } from "next/navigation";
 import Heading from '@/components/Heading';
 import AdminCourseFormContainer from '@/components/AdminCourseFormContainer'
+import CourseMaterialCard from '@/components/CourseMaterialCard';
 
 
 export default async function AdminCourseEdit ({ params }: { params: { courseId: string }}) {
@@ -30,13 +31,11 @@ export default async function AdminCourseEdit ({ params }: { params: { courseId:
                 ) ? (
                     <>
                         {course.lessons.map(lesson => (
-                            <Link key={lesson.id} href={`/admin/courses/${course.id}/lessons/${lesson.id}`}>
-                                    <div className='flex gap-4 border border-gray-200 rounded-lg mb-6 cursor-pointer'>
-                                        <div className='py-2'>
-                                            <Heading as='h5'>{lesson.name}</Heading>
-                                        </div>
-                                    </div>
-                            </Link>
+                            <CourseMaterialCard 
+                                key={lesson.id} 
+                                href={`/admin/courses/${course.id}/lessons/${lesson.id}`} 
+                                heading={lesson.name} 
+                            />
                         ))}
                     </>
                 ) : (

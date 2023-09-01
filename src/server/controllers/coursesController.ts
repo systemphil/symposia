@@ -322,6 +322,49 @@ export const dbUpsertLessonContentById = async ({
 }
 
 /**
+ * Updates an existing LessonTranscript model by id as identifier or creates a new one if id is not provided.
+ * Must have the id of the Lesson this LessonTranscript relates to.
+ * @access "ADMIN""
+ */
+export const dbUpsertLessonTranscriptById = async ({
+    id, lessonId, transcript
+}: {
+    id?: LessonTranscript["id"], 
+    lessonId: LessonContent["lessonId"], 
+    transcript: string,
+}) => {
+    try {
+        await requireAdminAuth();
+
+        const validId = id ? z.string().parse(id) : "x"; // Prisma needs id of some value
+        const validLessonId = z.string().parse(lessonId);
+
+        const contentAsBuffer = Buffer.from(transcript, 'utf-8');
+        
+        const result = await prisma.lessonTranscript.upsert({
+            where: {
+                id: validId
+            },
+            update: {
+                transcript: contentAsBuffer,
+            },
+            create: {
+                lessonId: validLessonId,
+                transcript: contentAsBuffer
+            }
+        });
+
+        const resultWithoutTranscript = exclude(result, ["transcript"])
+        return resultWithoutTranscript;
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while fetching the course.");
+    }
+}
+
+/**
  * Updates an existing lessonContent or lessonTranscript by id as identifier.
  * @description If lessonContent, updates the content field.
  * @description If lessonTranscript, updates the transcript field.
@@ -367,30 +410,6 @@ export const dbUpdateLessonContentOrLessonTranscriptById = async ({
         if (error instanceof AuthenticationError) {
             throw error; // Rethrow custom error as-is
         }
-        throw new Error("An error occurred while fetching the course.");
-    }
-}
-
-const _dbUpdateLessonContentOrLessonTranscript = async ({
-    id, content
-}: {
-    id: LessonContent["id"] | LessonTranscript["id"], 
-    content: Buffer,
-}) => {
-    try {
-        const result = await prisma.lessonContent.update({
-            where: {
-                id: id,
-            },
-            data: {
-                content: content,
-            },
-        });
-        return result;
-    } catch(error) {
-        // if (error instanceof RecordNotFound) {
-        //     throw error; // Rethrow custom error as-is
-        // }
         throw new Error("An error occurred while fetching the course.");
     }
 }
