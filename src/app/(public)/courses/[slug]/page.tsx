@@ -1,4 +1,3 @@
-import CourseGrid from "@/components/CourseGrid";
 import Heading from "@/components/Heading";
 import { stylesConfig } from "@/config/stylesConfig";
 import { dbGetCourseBySlug } from "@/server/controllers/coursesController";
