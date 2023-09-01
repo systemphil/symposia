@@ -67,6 +67,30 @@ export const dbGetAllCourses = async () => {
 }
 
 /**
+ * Calls the database to retrieve all published courses.
+ * @access PUBLIC
+ */
+export const dbGetAllPublishedCourses = async () => {
+    return await prisma.course.findMany({
+        where: {
+            published: true,
+        }
+    })
+}
+
+/**
+ * Calls the database to retrieve specific course by slug identifier
+ * @access PUBLIC
+ */
+export const dbGetCourseBySlug = async (slug: string) => {
+    return await prisma.course.findUnique({
+        where: {
+            slug: slug,
+        }
+    })
+}
+
+/**
  * Calls the database to retrieve specific course and lessons by id identifier.
  * @access "ADMIN""
  */
