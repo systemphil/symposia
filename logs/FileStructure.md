@@ -27,13 +27,13 @@
 |   |
 |   ├───server
 |   |   ├───api
-|   |   |   └───routers
-|   |   |   routersRoot.ts
-|   |   |   trpc.ts
+|   |   |   ├───routers
+|   |   |   |   routersRoot.ts
+|   |   |   |   trpc.ts
 |   |   |
-|   |   └───controllers
-|   |   auth.ts
-|   |   db.ts
+|   |   ├───controllers
+|   |   |   auth.ts
+|   |   |   db.ts
 |   |
 |   └───utils
 |
@@ -75,4 +75,4 @@
 - `utils` Application-wide utility functions directory.
 - `.env` **DO NOT COMMIT TO GIT** Environenmental variables. If the requisite variables are not populated, parts of the app won't work.
 - `.env.example` Example file of `.env` but without sensitive values.
-- `package.json` Top-level dependencies of the app.
+- `package.json` Top-level dependencies and configurations of the project.
