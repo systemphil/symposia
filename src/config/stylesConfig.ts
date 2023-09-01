@@ -6,6 +6,9 @@ export const stylesConfig = {
     adminPage: {
         bgColor: "bg-slate-200"
     },
+    coursesPage: {
+        bgColor: "big-slate-200",
+    },
     nav: {
         bgColor: "bg-blue-300",
         textColor: "text-slate-700"

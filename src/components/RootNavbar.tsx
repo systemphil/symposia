@@ -38,6 +38,9 @@ const RootNavbar = () => {
                         <Link href="/admin">
                             <p>Admin</p>
                         </Link>
+                        <Link href="/courses">
+                            <p>Courses</p>
+                        </Link>
                     </div>
 
                     <nav className="flex gap-6 items-center">
