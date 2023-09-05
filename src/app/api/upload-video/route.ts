@@ -1,4 +1,4 @@
-import { gcUploadVideo } from '@/server/controllers/storageController';
+import { gcUploadVideo } from '@/server/controllers/gcController';
 import { NextRequest, NextResponse } from 'next/server';
  
 export async function GET(req: NextRequest, res: NextResponse) {

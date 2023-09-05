@@ -1,10 +1,12 @@
+import { type GenerateSignedPostPolicyV4Options } from "@google-cloud/storage";
 import { bucket } from "../bucket";
 
 
 export const gcUploadVideo = async (fileName: string) => {
     try {
-        const file = bucket.file(fileName);
-        const options = {
+		const filePath = `video/${fileName}`
+        const file = bucket.file(filePath);
+        const options: GenerateSignedPostPolicyV4Options = {
             expires: Date.now() + 1 * 60 * 1000, //  1 minute,
             fields: { 'x-goog-meta-test': 'data' },
         };
@@ -41,20 +43,20 @@ function test(
     const storage = new Storage();
   
     async function uploadFile() {
-      const options = {
-        destination: destFileName,
-        // Optional:
-        // Set a generation-match precondition to avoid potential race conditions
-        // and data corruptions. The request to upload is aborted if the object's
-        // generation number does not match your precondition. For a destination
-        // object that does not yet exist, set the ifGenerationMatch precondition to 0
-        // If the destination object already exists in your bucket, set instead a
-        // generation-match precondition using its generation number.
-        preconditionOpts: {ifGenerationMatch: generationMatchPrecondition},
-      };
-  
-      await storage.bucket(bucketName).upload(filePath, options);
-      console.log(`${filePath} uploaded to ${bucketName}`);
+		const options = {
+			destination: destFileName,
+			// Optional:
+			// Set a generation-match precondition to avoid potential race conditions
+			// and data corruptions. The request to upload is aborted if the object's
+			// generation number does not match your precondition. For a destination
+			// object that does not yet exist, set the ifGenerationMatch precondition to 0
+			// If the destination object already exists in your bucket, set instead a
+			// generation-match precondition using its generation number.
+			preconditionOpts: {ifGenerationMatch: generationMatchPrecondition},
+		};
+	
+		await storage.bucket(bucketName).upload(filePath, options);
+		console.log(`${filePath} uploaded to ${bucketName}`);
     }
   
     uploadFile().catch(console.error);

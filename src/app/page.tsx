@@ -2,6 +2,7 @@ import { apiServerside } from "../lib/trpc/trpcServerside"
 import AuthShowcase from "../components/test/AuthShowcase";
 import TodoList from "../components/test/TodoList";
 import VideoUpload from "@/components/forms/VideoUpload";
+import ToastTest from "@/components/test/ToastTest";
 
 export default async function Home() {
     const todos = await apiServerside.fiction.getTodos();
@@ -12,6 +13,7 @@ export default async function Home() {
             <VideoUpload />
             <AuthShowcase />
             <TodoList initialTodos={todos}/>
+            <ToastTest />
         </main>
     )
 }

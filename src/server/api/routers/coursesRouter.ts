@@ -10,7 +10,6 @@ import {
 } from "@/server/controllers/coursesController";
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import * as z from "zod";
-import { Buffer } from "node:buffer";
 
 
 export const coursesRouter = createTRPCRouter({

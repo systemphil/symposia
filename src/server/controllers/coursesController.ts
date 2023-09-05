@@ -405,9 +405,7 @@ export const dbUpdateLessonContentOrLessonTranscriptById = async ({
         const validId = z.string().parse(id);
         const validContent = z.string().parse(content);
 
-        // Should we parse string
         const contentAsBuffer = Buffer.from(validContent, 'utf-8');
-
         /**
          * Prisma does not allow us to traverse two tables at once, so we made SQL executions directly with $executeRaw where
          * prisma returns the number of rows affected by the query instead of an error in the usual prisma.update(). 
@@ -422,8 +420,6 @@ export const dbUpdateLessonContentOrLessonTranscriptById = async ({
         if (result === 0) {
             result = await prisma.$executeRaw`UPDATE "LessonTranscript" SET transcript = ${contentAsBuffer} WHERE id = ${validId};`
         }
-
-        console.log("=== UPDATE FUNC in CONTROLLER", result);
 
         if (result === 1) {
             return;
