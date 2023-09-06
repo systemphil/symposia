@@ -3,15 +3,19 @@ import {
     dbGetCourseAndLessonsById, 
     dbGetLessonAndRelationsById, 
     dbGetLessonContentOrLessonTranscriptById, 
+    dbGetVideoByLessonId, 
     dbUpdateLessonContentOrLessonTranscriptById, 
     dbUpsertCourseById, 
     dbUpsertLessonById, 
-    dbUpsertLessonContentById 
+    dbUpsertLessonContentById, 
+    dbUpsertVideoById
 } from "@/server/controllers/coursesController";
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import * as z from "zod";
 
-
+/**
+ * TypeScript Remote Procedure Call router for all matters related to the Course data model and its relations.
+ */
 export const coursesRouter = createTRPCRouter({
     getAllCourses: publicProcedure
         .query(async () => {
@@ -55,6 +59,16 @@ export const coursesRouter = createTRPCRouter({
         .query(async (opts) => {
             return await dbGetLessonContentOrLessonTranscriptById(opts.input.id);
         }),
+    getVideoByLessonId: protectedAdminProcedure
+        .input(
+            z
+                .object({
+                    id: z.string(),
+                })
+        )
+        .query(async (opts) => {
+            return await dbGetVideoByLessonId(opts.input.id);
+        }),
     upsertCourse: protectedAdminProcedure
         .input(
             z
@@ -86,6 +100,19 @@ export const coursesRouter = createTRPCRouter({
         .mutation(async (opts) => {
             return await dbUpsertLessonById(opts.input);
         }),
+    // TODO CLEANUP
+    // upsertVideo: protectedAdminProcedure
+    //     .input(
+    //         z   
+    //             .object({
+    //                 id: z.string().optional(),
+    //                 lessonId: z.string(),
+    //                 fileName: z.string().optional(),
+    //             })
+    //     )
+    //     .mutation(async (opts) => {
+    //         return await dbUpsertVideoById(opts.input);
+    //     }),
     upsertLessonContent: protectedAdminProcedure //TODO schedule for deletion and CLEANUP
         .input(
             z

@@ -3,6 +3,7 @@ import { dbGetLessonAndRelationsById } from '@/server/controllers/coursesControl
 import Heading from '@/components/Heading';
 import LessonForm from '@/components/forms/LessonForm';
 import CourseMaterialCard from '@/components/CourseMaterialCard';
+import VideoForm from '@/components/forms/VideoForm';
 
 
 export default async function AdminLessonEdit ({ params }: { params: { courseId: string, lessonId: string }}) {
@@ -47,7 +48,8 @@ export default async function AdminLessonEdit ({ params }: { params: { courseId:
                     
                 <div>
                     <Heading as='h4'>Lesson Video</Heading>
-                    {(
+                    <VideoForm />
+                    {/* {(
                         lesson.video
                     ) ? (
                         <CourseMaterialCard //TODO need video form with upload, not a coursematerialcard
@@ -61,7 +63,7 @@ export default async function AdminLessonEdit ({ params }: { params: { courseId:
                                 <button className="btn btn-primary">Add video</button>
                             </Link>
                         </div>
-                    )}
+                    )} */}
                 </div>
 
                 <div>

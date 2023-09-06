@@ -196,6 +196,38 @@ export const dbGetLessonContentOrLessonTranscriptById = async (id: string) => {
     }
 }
 
+/**
+ * Calls the database to retrieve specific Video entry based on the ID of the Lesson it is related to. 
+ * Returns null when either Lesson or its related Video is not found.
+ * @access "ADMIN"
+ */
+export const dbGetVideoByLessonId = async (id: string) => {
+    try {
+        const validId = z.string().parse(id);
+        await requireAdminAuth();
+        const lessonWithVideo = await prisma.lesson.findUnique({
+            where: {
+                id: validId,
+            },
+            include: {
+                video: true
+            }
+        });
+        if (lessonWithVideo) {
+            if (lessonWithVideo.video) {
+                return lessonWithVideo.video;
+            }
+            return null;
+        }
+        return null;
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while retrieving the video from database.");
+    }
+}
+
 type DbUpsertCourseByIdProps = {
     id?: string, 
     slug: string, 
@@ -426,6 +458,45 @@ export const dbUpdateLessonContentOrLessonTranscriptById = async ({
         } else {
             throw new Error("Database update should have returned exactly 1 updated record.")
         }
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while fetching the course.");
+    }
+}
+
+/**
+ * Updates Video details by id as identifier or creates a new one if id is not provided, in which case 
+ * the id of the lesson this video is related to must be provided.
+ * @access "ADMIN""
+ */
+export const dbUpsertVideoById = async ({
+    id, lessonId, fileName
+}: {
+    id?: string, 
+    lessonId: string,
+    fileName?: string,
+}) => {
+    try {
+        await requireAdminAuth();
+
+        const validId = id ? z.string().parse(id) : "x"; // Prisma needs id of some value in order to query
+        const validLessonId = z.string().parse(lessonId);
+        const validFileName = fileName ? z.string().parse(fileName) : "";
+        
+        return await prisma.video.upsert({
+            where: {
+                id: validId,
+            },
+            update: {
+                fileName: validFileName,
+            },
+            create: {
+                lessonId: validLessonId,
+                fileName: validFileName,
+            }
+        });
     } catch (error) {
         if (error instanceof AuthenticationError) {
             throw error; // Rethrow custom error as-is
