@@ -1,7 +1,7 @@
 import { type GenerateSignedPostPolicyV4Options } from "@google-cloud/storage";
 import { bucket } from "../bucket";
 
-// TODO FILE TO BE DELETED
+// TODO - FILE TO BE DELETED
 
 // export const gcGenerateSignedPostUploadURL = async (fileName: string) => {
 //     try {

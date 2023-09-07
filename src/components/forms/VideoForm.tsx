@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import VideoFileInput from "./VideoFileInput";
 import { Video } from "@prisma/client";
@@ -8,52 +8,49 @@ import SubmitInput from "./SubmitInput";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
+import VideoViewer from "../VideoViewer";
 
 
+type VideoFormValues = Video & {
+    fileInput: FileList;
+};
+/**
+ * Video upload client component that that uses lessonId parameter to retrieve Video entry from database (if it exists).
+ * When user hits submit on an upload, it will request a signed upload link from the server and let the client upload to the bucket.
+ * The server will handle create/update of Video entry. Given an existing record, the submit handler will check whether a new upload's
+ * filename is different from the old one, at which point a signal will be sent to storage to delete the old file. A new upload of 
+ * the same filename will automatically replace the old file on the storage.
+ * @route Intended for the /admin route where the lessonId parameter is exposed. 
+ */
 const VideoForm = () => {
     const [selectedFile, setSelectedFile] = useState<File>();
     const [handlerLoading, setHandlerLoading] = useState<boolean>(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const params = useParams();
     const utils = apiClientside.useContext();
     const lessonId = typeof params.lessonId === "string" ? params.lessonId : "";
-
-    const { data: videoEntry } = apiClientside.courses.getVideoByLessonId.useQuery({ id: lessonId})
-
+    const { data: videoEntry } = apiClientside.courses.getVideoByLessonId.useQuery({ id: lessonId});
     const createSignedPostUrlMutation = apiClientside.gc.createSignedPostUrl.useMutation({
-        onSuccess: () => {
-            // toast.success('Course updated successfully')
-            // If course is new, it should not match existing path and push user to new path. Otherwise, refresh data.
-            // if (params.lessonId !== newLesson.id) {
-            //     console.log("pushing to new route")
-            //     router.push(`/admin/courses/${courseId}/lessons/${newLesson.id}`)
-            // } else {
-            //     void utils.courses.invalidate();
-            // }
-        },
         onError: (error) => {
             console.error(error)
             toast.error('Oops! Something went wrong')
         }
+    });
+    const deleteVideoMutation = apiClientside.gc.deleteVideoFile.useMutation({
+        onError: (error) => {
+            console.error(error)
+            toast.error('Oops! Could not delete the old file!')
+        }
+    });
+    const createSignedReadUrlMutation = apiClientside.gc.createSignedReadUrl.useMutation({
+        onError: (error) => { console.error(error)}
     })
-
-    // const upsertVideoMutation = apiClientside.courses.upsertVideo.useMutation({
-    //     onError: (error) => {
-    //         console.error(error)
-    //         toast.error('Oops! Something went wrong')
-    //     }
-    // })
-
     const handleSelectedFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target && e.target.files && e.target.files[0];
         if (file) {
             setSelectedFile(file);
         }
-    }
-
-    type VideoFormValues = Video & {
-        fileInput: FileList;
     };
-
     const methods = useForm<VideoFormValues>({ 
         defaultValues: {
             id: videoEntry?.id || "",
@@ -62,40 +59,38 @@ const VideoForm = () => {
             fileInput: undefined,
         }
     });
-
     const onSubmit: SubmitHandler<VideoFormValues> = async (data) => {
         try {
+            //
+            // 0. Preliminary setup and check that there is a file.
+            //
             setHandlerLoading(true);
-            console.log(data)
-
             if (!data.fileInput || data.fileInput.length === 0) {
-                toast.error('No files selected!')
+                toast.error('No files selected!');
                 setSelectedFile(undefined);
-                methods.reset()
+                methods.reset();
                 setHandlerLoading(false);
                 return;
             }
+            //
+            // 1. Retrieving file details, requesting signed post url for storage and performing checks.
+            //
             const file = data.fileInput[0];
-            // 1 encode
             const filename = encodeURIComponent(file.name);
-            // 2 get signedPostUrl to gc -- use tRPC here
             const response = await createSignedPostUrlMutation.mutateAsync({
                 id: videoEntry?.id || undefined,
                 lessonId: lessonId,
                 fileName: filename,
             })
             if (!response.url) {
-                setHandlerLoading(false);
-                setSelectedFile(undefined);
-                methods.reset()
-                toast.error('Oops! Something went wrong')
                 console.error(response);
                 throw new Error("No URL in the response from gc.");
             }
+            //
+            // 2. Preparing post for upload, sending request and checking response for OK.
+            //
             const { url, fields } = response;
-
             const formData = new FormData();
-        
             Object.entries({ ...fields, file }).forEach(([key, value]) => {
                 if (typeof value === "string") {
                     formData.append(key, value);
@@ -103,8 +98,6 @@ const VideoForm = () => {
                     formData.append(key, value, file.name);
                 }
             });
-            
-            // 4 External post to gc
             const upload = await fetch(url, {
                 method: 'POST',
                 body: formData,
@@ -114,42 +107,50 @@ const VideoForm = () => {
                     /**
                      * If there is an existing entry and the incoming upload filename is different,
                      * the bucket will not overwrite the old file, in which case we must manually
-                     * send a signal to the bucket to delete the old file. 
+                     * send a signal to the bucket to delete the old file. At this stage, videoEntry data is
+                     * not yet updated (this invalidation takes place at the end of this function), so we can use its data.
                      */
-                    // TODO
-                    console.log(`New file name detected! \nNew: ${filename} \nOld: ${videoEntry.fileName} \nInitiating signal to delete old file`)
+                    await deleteVideoMutation.mutateAsync({ id: videoEntry.id, fileName: videoEntry.fileName });
                 }
-                toast.success("Success! Video uploaded / updated.")
-                console.log('Uploaded successfully!');
+                toast.success("Success! Video uploaded / updated.");
             } else {
-                toast.error('Oops! Something went wrong')
-                setSelectedFile(undefined);
-                methods.reset()
-                setHandlerLoading(false);
-                console.error('Upload failed.');
                 throw new Error("Post to GC did not return OK");
             }
-
+            //
+            // 3. Upload complete. Cleanup of form and resetting queries and states.
+            //
             void utils.courses.getVideoByLessonId.invalidate();
             setSelectedFile(undefined);
-            methods.reset()
+            methods.reset();
             setHandlerLoading(false);
         } catch(error) {
             setSelectedFile(undefined);
-            methods.reset()
+            methods.reset();
             setHandlerLoading(false);
-            toast.error('Oops! Something went wrong')
+            toast.error('Oops! Something went wrong');
             throw error;
         }
-    }
-
+    };
+    useEffect(() => {
+        if (videoEntry) {
+            createSignedReadUrlMutation
+                .mutateAsync({ id: videoEntry.id, fileName: videoEntry.fileName})
+                .then((url) => {
+                    setPreviewUrl(url);
+                })
+                .catch((error) => {
+                    toast.error("Oops! Unable to get video preview");
+                    console.error("Error retrieving preview URL: ", error);
+                });
+        }
+    }, [videoEntry]);
     return(
         <FormProvider {...methods}>
             <form 
                 className='flex flex-col max-w-lg border-dotted border-2 border-slate-500 p-4 rounded-md' 
                 onSubmit={methods.handleSubmit(onSubmit)}
             >
-                { videoEntry && <p>Existing video: {videoEntry.fileName}</p>}
+                { previewUrl && <VideoViewer videoUrl={previewUrl} />}
                 <VideoFileInput 
                     label='File*' 
                     name='fileInput'
@@ -163,11 +164,9 @@ const VideoForm = () => {
                         <p>Selected File: {selectedFile.name}</p>
                     </div>
                 )}
-
                 <SubmitInput value={`${(videoEntry && videoEntry.id) ? 'Update' : 'Upload'} video`} isLoading={handlerLoading} />
             </form>
         </FormProvider>
     )
 }
-
 export default VideoForm;

@@ -1,34 +1,9 @@
 import { prisma } from "../db";
-import { getServerAuthSession } from "../auth";
 import * as z from "zod";
-import { Course, LessonContent, LessonTranscript } from "@prisma/client";
+import { LessonContent, LessonTranscript } from "@prisma/client";
 import { exclude } from "@/utils/utils";
+import { AuthenticationError, requireAdminAuth } from "@/server/auth";
 
-class AuthenticationError extends Error {
-    constructor() {
-        super("Access denied. Insufficient Authentication.");
-        this.name = "AuthenticationError";
-    }
-}
-
-/**
- * Checks the user's authentication session for admin access.
- *
- * This function verifies whether the user's authentication session is valid and
- * has the role of "ADMIN". If the user is not authenticated or doesn't have the
- * required role, an AuthenticationError is thrown.
- *
- * @throws {AuthenticationError} If the user is not authenticated or lacks admin access.
- * @returns {Promise<void>} A Promise that resolves if the user has admin access.
- * @async
- */
-const requireAdminAuth = async (): Promise<void> => {
-    const session = await getServerAuthSession();
-
-    if (!session || session.user.role !== "ADMIN") {
-        throw new AuthenticationError();
-    }
-};
 
 /**
  * Exception handler with admin check.
