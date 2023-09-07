@@ -18,7 +18,10 @@ const SubmitInput = ({ value, isLoading }: Props) => {
 
     return (
         <div>
-            <input className={classes} type="submit" value={label} disabled={isLoading} />
+            <button className={classes} type="submit" value={label} disabled={isLoading}>
+                {isLoading && <span className="loading loading-bars loading-md"></span>}
+                {label}
+            </button>
         </div>
     )
 }

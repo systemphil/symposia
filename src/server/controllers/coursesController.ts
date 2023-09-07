@@ -1,34 +1,9 @@
 import { prisma } from "../db";
-import { getServerAuthSession } from "../auth";
 import * as z from "zod";
-import { Course, LessonContent, LessonTranscript } from "@prisma/client";
+import { LessonContent, LessonTranscript } from "@prisma/client";
 import { exclude } from "@/utils/utils";
+import { AuthenticationError, requireAdminAuth } from "@/server/auth";
 
-class AuthenticationError extends Error {
-    constructor() {
-        super("Access denied. Insufficient Authentication.");
-        this.name = "AuthenticationError";
-    }
-}
-
-/**
- * Checks the user's authentication session for admin access.
- *
- * This function verifies whether the user's authentication session is valid and
- * has the role of "ADMIN". If the user is not authenticated or doesn't have the
- * required role, an AuthenticationError is thrown.
- *
- * @throws {AuthenticationError} If the user is not authenticated or lacks admin access.
- * @returns {Promise<void>} A Promise that resolves if the user has admin access.
- * @async
- */
-const requireAdminAuth = async (): Promise<void> => {
-    const session = await getServerAuthSession();
-
-    if (!session || session.user.role !== "ADMIN") {
-        throw new AuthenticationError();
-    }
-};
 
 /**
  * Exception handler with admin check.
@@ -193,6 +168,38 @@ export const dbGetLessonContentOrLessonTranscriptById = async (id: string) => {
             throw error; // Rethrow custom error as-is
         }
         throw new Error("An error occurred while fetching the course.");
+    }
+}
+
+/**
+ * Calls the database to retrieve specific Video entry based on the ID of the Lesson it is related to. 
+ * Returns null when either Lesson or its related Video is not found.
+ * @access "ADMIN"
+ */
+export const dbGetVideoByLessonId = async (id: string) => {
+    try {
+        const validId = z.string().parse(id);
+        await requireAdminAuth();
+        const lessonWithVideo = await prisma.lesson.findUnique({
+            where: {
+                id: validId,
+            },
+            include: {
+                video: true
+            }
+        });
+        if (lessonWithVideo) {
+            if (lessonWithVideo.video) {
+                return lessonWithVideo.video;
+            }
+            return null;
+        }
+        return null;
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while retrieving the video from database.");
     }
 }
 
@@ -405,9 +412,7 @@ export const dbUpdateLessonContentOrLessonTranscriptById = async ({
         const validId = z.string().parse(id);
         const validContent = z.string().parse(content);
 
-        // Should we parse string
         const contentAsBuffer = Buffer.from(validContent, 'utf-8');
-
         /**
          * Prisma does not allow us to traverse two tables at once, so we made SQL executions directly with $executeRaw where
          * prisma returns the number of rows affected by the query instead of an error in the usual prisma.update(). 
@@ -423,13 +428,50 @@ export const dbUpdateLessonContentOrLessonTranscriptById = async ({
             result = await prisma.$executeRaw`UPDATE "LessonTranscript" SET transcript = ${contentAsBuffer} WHERE id = ${validId};`
         }
 
-        console.log("=== UPDATE FUNC in CONTROLLER", result);
-
         if (result === 1) {
             return;
         } else {
             throw new Error("Database update should have returned exactly 1 updated record.")
         }
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while fetching the course.");
+    }
+}
+
+/**
+ * Updates Video details by id as identifier or creates a new one if id is not provided, in which case 
+ * the id of the lesson this video is related to must be provided.
+ * @access "ADMIN""
+ */
+export const dbUpsertVideoById = async ({
+    id, lessonId, fileName
+}: {
+    id?: string, 
+    lessonId: string,
+    fileName?: string,
+}) => {
+    try {
+        await requireAdminAuth();
+
+        const validId = id ? z.string().parse(id) : "x"; // Prisma needs id of some value in order to query
+        const validLessonId = z.string().parse(lessonId);
+        const validFileName = fileName ? z.string().parse(fileName) : "";
+        
+        return await prisma.video.upsert({
+            where: {
+                id: validId,
+            },
+            update: {
+                fileName: validFileName,
+            },
+            create: {
+                lessonId: validLessonId,
+                fileName: validFileName,
+            }
+        });
     } catch (error) {
         if (error instanceof AuthenticationError) {
             throw error; // Rethrow custom error as-is
