@@ -9,6 +9,7 @@ import { apiClientside } from "@/lib/trpc/trpcClientside";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import VideoViewer from "../VideoViewer";
+import Heading from "../Heading";
 
 
 type VideoFormValues = Video & {
