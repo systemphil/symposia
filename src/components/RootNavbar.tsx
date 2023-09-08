@@ -38,8 +38,8 @@ const RootNavbar = () => {
                         <Link href="/admin">
                             <p>Admin</p>
                         </Link>
-                        <Link href="/editor">
-                            <p>Editor</p>
+                        <Link href="/courses">
+                            <p>Courses</p>
                         </Link>
                     </div>
 

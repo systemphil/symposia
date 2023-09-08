@@ -2,16 +2,20 @@ import {
     dbGetAllCourses, 
     dbGetCourseAndLessonsById, 
     dbGetLessonAndRelationsById, 
-    dbGetLessonContentById, 
+    dbGetLessonContentOrLessonTranscriptById, 
+    dbGetVideoByLessonId, 
+    dbUpdateLessonContentOrLessonTranscriptById, 
     dbUpsertCourseById, 
     dbUpsertLessonById, 
-    dbUpsertLessonContentById 
-} from "@/server/controllers/courses";
+    dbUpsertLessonContentById, 
+    dbUpsertVideoById
+} from "@/server/controllers/coursesController";
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import * as z from "zod";
-import { Buffer } from "node:buffer";
 
-
+/**
+ * TypeScript Remote Procedure Call router for all matters related to the Course data model and its relations.
+ */
 export const coursesRouter = createTRPCRouter({
     getAllCourses: publicProcedure
         .query(async () => {
@@ -31,7 +35,7 @@ export const coursesRouter = createTRPCRouter({
                 return null;
             }
         }),
-    getLessonAndContentsById: protectedAdminProcedure
+    getLessonAndRelationsById: protectedAdminProcedure
         .input(
             z
                 .object({
@@ -45,7 +49,7 @@ export const coursesRouter = createTRPCRouter({
                 return null;
             }
         }),
-    getLessonContentById: protectedAdminProcedure
+    getLessonContentOrLessonTranscriptById: protectedAdminProcedure
         .input(
             z
                 .object({
@@ -53,7 +57,17 @@ export const coursesRouter = createTRPCRouter({
                 })
         )
         .query(async (opts) => {
-            return await dbGetLessonContentById(opts.input.id);
+            return await dbGetLessonContentOrLessonTranscriptById(opts.input.id);
+        }),
+    getVideoByLessonId: protectedAdminProcedure
+        .input(
+            z
+                .object({
+                    id: z.string(),
+                })
+        )
+        .query(async (opts) => {
+            return await dbGetVideoByLessonId(opts.input.id);
         }),
     upsertCourse: protectedAdminProcedure
         .input(
@@ -65,6 +79,7 @@ export const coursesRouter = createTRPCRouter({
                     description: z.string(),
                     imageUrl: z.string().url().optional().nullish(),
                     author: z.string().optional().nullish(),
+                    published: z.boolean().optional().nullish(),
                 })
         )
         .mutation(async (opts) => {
@@ -85,7 +100,20 @@ export const coursesRouter = createTRPCRouter({
         .mutation(async (opts) => {
             return await dbUpsertLessonById(opts.input);
         }),
-    upsertLessonContent: protectedAdminProcedure
+    // TODO CLEANUP
+    // upsertVideo: protectedAdminProcedure
+    //     .input(
+    //         z   
+    //             .object({
+    //                 id: z.string().optional(),
+    //                 lessonId: z.string(),
+    //                 fileName: z.string().optional(),
+    //             })
+    //     )
+    //     .mutation(async (opts) => {
+    //         return await dbUpsertVideoById(opts.input);
+    //     }),
+    upsertLessonContent: protectedAdminProcedure //TODO schedule for deletion and CLEANUP
         .input(
             z
                 .object({
@@ -97,4 +125,15 @@ export const coursesRouter = createTRPCRouter({
         .mutation(async (opts) => {
             return await dbUpsertLessonContentById(opts.input);
         }),
+    updateLessonContentOrLessonTranscript: protectedAdminProcedure
+        .input(
+            z
+                .object({
+                    id: z.string(),
+                    content: z.string(),
+                })
+        )
+        .mutation(async (opts) => {
+            return await dbUpdateLessonContentOrLessonTranscriptById(opts.input);
+        })
 })

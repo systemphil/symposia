@@ -4,7 +4,7 @@ import TextAreaInput from './TextAreaInput';
 import SubmitInput from './SubmitInput';
 import Checkbox from "./Checkbox";
 import { Lesson, Course } from "@prisma/client";
-import { type dbGetCourseAndLessonsById } from "@/server/controllers/courses";
+import { type dbGetCourseAndLessonsById } from "@/server/controllers/coursesController";
 
 export type UpsertCourseInputs = {
     id: string;

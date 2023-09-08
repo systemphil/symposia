@@ -1,4 +1,4 @@
-import { dbGetLessonAndRelationsById, dbUpsertLessonContentById } from "@/server/controllers/courses";
+import { dbGetLessonAndRelationsById, dbUpsertLessonContentById } from "@/server/controllers/coursesController";
 import { redirect } from "next/navigation";
 
 /**
@@ -16,18 +16,18 @@ export default async function AdminLessonContentNew ({ params }: { params: { cou
     if (lesson && lesson.content && lesson.content.id) {
         // If lessonContent already exists, push to that.
         console.log("=== LESSONCONTENT exists")
-        redirect(`/admin/courses/${courseId}/lessons/${lessonId}/lesson-content/${lesson.content.id}`);
+        redirect(`/admin/courses/${courseId}/lessons/${lessonId}/lesson-material/${lesson.content.id}`);
     }
     const newLessonDetails = {
         lessonId: lessonId,
-        content: "Hello **world**"
+        content: "Hello **world**! New content."
     }
 
     const newLessonContent = await dbUpsertLessonContentById(newLessonDetails);
     if (newLessonContent && newLessonContent.id) {
         // If new LessonContent entry was created successfully, push user to route.
         console.log("=== LESSONCONTENT created and redirecting")
-        redirect(`/admin/courses/${courseId}/lessons/${lessonId}/lesson-content/${newLessonContent.id}`);
+        redirect(`/admin/courses/${courseId}/lessons/${lessonId}/lesson-material/${newLessonContent.id}`);
     }
 
     return(
