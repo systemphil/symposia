@@ -1,5 +1,7 @@
 # 🚧 This is a work in progress
 
+If you'd like to be part of the development of this app, kindly follow the instructions below. If you have any further questions or would like to get involved, [get in touch with Firgrep here](https://www.filipniklas.com/#/contact).
+
 ## Setting up your local environment and branch
 
 0.0. Once you have access to the repo on github, fork and/or clone it into a folder where you keep your projects.
@@ -30,6 +32,12 @@
 
 - Whenever you make any edits to the source files while the server is running, the server will pick up those changes and output them immediately. This is extremely handy during development, as you can input code and hit `ctrl` + `k` then `s` (save-all) and view directly your latest changes.
 - To terminate the server, hit `ctrl` + `c` on your keyboard whilst in the terminal where the server runs, input `y` when prompted to terminate batch job.
+
+## NextJS Client-Server Model
+
+A high-level abstraction of the relationship between Client- and Server Components and how they interact with the backend. (Subject to change.)
+
+<img src="https://firebasestorage.googleapis.com/v0/b/portfolio-d0330.appspot.com/o/symposia-static%2Fnextjs-server-client-pattern.png?alt=media&token=23699e9b-c995-4a9e-8ec0-a6f0356a4cba" alt="nextjs-client-server-model"/>
 
 ## File Structure
 
