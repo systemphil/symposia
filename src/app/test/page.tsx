@@ -1,6 +1,7 @@
+import LoadingBars from "@/components/LoadingBars";
 import MDXRenderer from "@/components/MDXRenderer";
 import { dbGetLessonContentOrLessonTranscriptById } from "@/server/controllers/coursesController"
-import { mdxCompile } from "@/server/mdxCompiler";
+import { mdxCompiler } from "@/server/mdxCompiler";
 import { Suspense } from "react";
 
 
@@ -21,16 +22,18 @@ export default async function TestPage() {
         incomingMarkdown = "No content available.";
     }
 
-    const compiledMdx = await mdxCompile(incomingMarkdown);
+    const compiledMdx = await mdxCompiler(incomingMarkdown);
 
     return (
         <main className="h-screen flex flex-col justify-front items-center gap-4 bg-slate-200">
             <p>Test page with hardcoded retrieval from db</p>
+            <div className="container">
             {dataString && 
-                <Suspense fallback={<span className="loading loading-bars loading-md"></span>}>
+                <Suspense fallback={<LoadingBars />}>
                     <MDXRenderer data={compiledMdx} />
                 </Suspense>
             }
+            </div>
             
             
         </main>
