@@ -35,6 +35,9 @@ const RootNavbar = () => {
                         <Link href="/">
                             <p>Home</p>
                         </Link>
+                        <Link href="/test"> {/* // TODO REMOVE WHEN FINISHED */}
+                            <p className="text-red-500">Test</p>
+                        </Link>
                         <Link href="/admin">
                             <p>Admin</p>
                         </Link>
