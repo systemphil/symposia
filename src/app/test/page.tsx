@@ -7,8 +7,11 @@ import { Suspense } from "react";
 
 
 export default async function TestPage() {
+
+    // TODO all these serverside things can be put into a single controller function.
     const dataString = await dbGetLessonContentOrLessonTranscriptById("cllv8cfcy0001u22swg51l885");
 
+    // TODO refactor this to its own function
     let incomingMarkdown: string;
     let incomingType: string;
     if ("transcript" in dataString) {
@@ -28,11 +31,9 @@ export default async function TestPage() {
         <main className="h-screen flex flex-col justify-front items-center gap-4 bg-slate-200">
             <p>Test page with hardcoded retrieval from db</p>
             <div className="container">
-            {dataString && 
                 <Suspense fallback={<LoadingBars />}>
                     <MDXRenderer data={compiledMdx} />
                 </Suspense>
-            }
             </div>
             
             
