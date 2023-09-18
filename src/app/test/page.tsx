@@ -1,6 +1,6 @@
 import LoadingBars from "@/components/LoadingBars";
 import MDXRenderer from "@/components/MDXRenderer";
-import { dbGetLessonContentOrLessonTranscriptById } from "@/server/controllers/coursesController"
+import { dbGetMdxContentByModelId } from "@/server/controllers/coursesController"
 import { mdxCompiler } from "@/server/mdxCompiler";
 import { Suspense } from "react";
 
@@ -9,7 +9,7 @@ import { Suspense } from "react";
 export default async function TestPage() {
 
     // TODO all these serverside things can be put into a single controller function.
-    const dataString = await dbGetLessonContentOrLessonTranscriptById("cllv8cfcy0001u22swg51l885");
+    const dataString = await dbGetMdxContentByModelId("cllv8cfcy0001u22swg51l885");
 
     // TODO refactor this to its own function
     let incomingMarkdown: string;

@@ -1,10 +1,10 @@
 import { 
     dbGetAllCourses, 
-    dbGetCourseAndLessonsById, 
+    dbGetCourseAndDetailsAndLessonsById, 
     dbGetLessonAndRelationsById, 
-    dbGetLessonContentOrLessonTranscriptById, 
+    dbGetMdxContentByModelId, 
     dbGetVideoByLessonId, 
-    dbUpdateLessonContentOrLessonTranscriptById, 
+    dbUpdateMdxContentByModelId, 
     dbUpsertCourseById, 
     dbUpsertLessonById, 
     dbUpsertLessonContentById, 
@@ -30,7 +30,7 @@ export const coursesRouter = createTRPCRouter({
         )
         .query(async (opts) => {
             if (opts.input.id) {
-                return await dbGetCourseAndLessonsById(opts.input.id);
+                return await dbGetCourseAndDetailsAndLessonsById(opts.input.id);
             } else {
                 return null;
             }
@@ -49,7 +49,7 @@ export const coursesRouter = createTRPCRouter({
                 return null;
             }
         }),
-    getLessonContentOrLessonTranscriptById: protectedAdminProcedure
+    getMdxContentByModelId: protectedAdminProcedure
         .input(
             z
                 .object({
@@ -57,7 +57,7 @@ export const coursesRouter = createTRPCRouter({
                 })
         )
         .query(async (opts) => {
-            return await dbGetLessonContentOrLessonTranscriptById(opts.input.id);
+            return await dbGetMdxContentByModelId(opts.input.id);
         }),
     getVideoByLessonId: protectedAdminProcedure
         .input(
@@ -125,7 +125,7 @@ export const coursesRouter = createTRPCRouter({
         .mutation(async (opts) => {
             return await dbUpsertLessonContentById(opts.input);
         }),
-    updateLessonContentOrLessonTranscript: protectedAdminProcedure
+    updateMdxContentByModelId: protectedAdminProcedure
         .input(
             z
                 .object({
@@ -134,6 +134,6 @@ export const coursesRouter = createTRPCRouter({
                 })
         )
         .mutation(async (opts) => {
-            return await dbUpdateLessonContentOrLessonTranscriptById(opts.input);
+            return await dbUpdateMdxContentByModelId(opts.input);
         })
 })

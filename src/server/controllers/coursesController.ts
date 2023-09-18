@@ -1,6 +1,6 @@
 import { prisma } from "../db";
 import * as z from "zod";
-import { LessonContent, LessonTranscript } from "@prisma/client";
+import { Course, CourseDetails, LessonContent, LessonTranscript } from "@prisma/client";
 import { exclude } from "@/utils/utils";
 import { AuthenticationError, requireAdminAuth } from "@/server/auth";
 
@@ -66,10 +66,10 @@ export const dbGetCourseBySlug = async (slug: string) => {
 }
 
 /**
- * Calls the database to retrieve specific course and lessons by id identifier.
+ * Calls the database to retrieve specific course, its course details and lessons by id identifier.
  * @access "ADMIN""
  */
-export const dbGetCourseAndLessonsById = async (id: string) => {
+export const dbGetCourseAndDetailsAndLessonsById = async (id: string) => {
     try {
         const validId = z.string().parse(id);
         await requireAdminAuth();
@@ -78,7 +78,12 @@ export const dbGetCourseAndLessonsById = async (id: string) => {
                 id: validId,
             },
             include: {
-                lessons: true
+                lessons: true,
+                details: {
+                    select: {
+                        id: true
+                    }
+                }
             }
         });
     } catch (error) {
@@ -127,27 +132,62 @@ export const dbGetLessonAndRelationsById = async (id: string) => {
 }
 
 /**
- * Calls the database to retrieve specific lessonContent or lessonTranscript by id identifier.
+ * Calls the database to retrieve mdx content by id of the model as identifier.
  * Converts binary content of found record to string so that it can pass the tRPC network boundary
- * and/or be passed down to Client Components from Server Components. 
+ * and/or be passed down to Client Components from Server Components.
+ * @supports LessonContent | LessonTranscript | CourseDetails
  * @access "ADMIN""
  */
-export const dbGetLessonContentOrLessonTranscriptById = async (id: string) => {
+export const dbGetMdxContentByModelId = async (id: string) => {
     try {
         await requireAdminAuth();
         const validId = z.string().parse(id);
+        /**
+         * tRPC cannot handle binary transmission, so the buffer from each below must be converted to string.
+         * And then new object is made from shallow copy of the result with the updated content field.
+         * 
+         * First we look for a match in the LessonContent Model
+         */
         const lessonContent = await prisma.lessonContent.findUnique({
             where: {
                 id: validId,
             },
         });
         if (!lessonContent) {
+            /**
+             * If no matching id found, proceed to query LessonTranscript.
+             */
             const lessonTranscript = await prisma.lessonTranscript.findUnique({
                 where: {
                     id: validId,
                 }
             })
-            if (!lessonTranscript) throw new Error("No lessonTranscript or lessonContent found at db call")
+            if (!lessonTranscript) {
+                /**
+                 * If no matching id found, proceed to query CourseDetails.
+                 */
+                const courseDetails = await prisma.courseDetails.findUnique({
+                    where: {
+                        id: validId,
+                    }
+                })
+                /**
+                 * All three query attempts failed, throw error.
+                 */
+                if (!courseDetails) throw new Error("No lessonTranscript, lessonContent or courseDetails found at db call")
+                /**
+                 * Resolve third attempt if query successful.
+                 */
+                const courseDetailsContentAsString = courseDetails.content.toString("utf-8");
+                const newResult = {
+                    ...courseDetails,
+                    content: courseDetailsContentAsString,
+                }
+                return newResult;
+            }
+            /**
+             * Resolve second attempt if query successful.
+             */
             const transcriptAsString = lessonTranscript.transcript.toString("utf-8");
             const newResult = {
                 ...lessonTranscript,
@@ -155,9 +195,10 @@ export const dbGetLessonContentOrLessonTranscriptById = async (id: string) => {
             }
             return newResult;
         };
-        // tRPC cannot handle binary transmission, so the buffer must be converted to string here.
+        /**
+         * Resolve first attempt if query successful.
+         */
         const contentAsString = lessonContent.content.toString("utf-8");
-        // New object is made from shallow copy of the result with the updated content field.
         const newResult = {
             ...lessonContent,
             content: contentAsString,
@@ -396,15 +437,58 @@ export const dbUpsertLessonTranscriptById = async ({
 }
 
 /**
+ * Updates an existing CourseDetails  model by id as identifier or creates a new one if id is not provided.
+ * Must have the id of the Course this CourseDetails relates to.
+ * @access "ADMIN""
+ */
+export const dbUpsertCourseDetailsById = async ({
+    id, courseId, content
+}: {
+    id?: CourseDetails["id"], 
+    courseId: Course["id"], 
+    content: string,
+}) => {
+    try {
+        await requireAdminAuth();
+
+        const validId = id ? z.string().parse(id) : "x"; // Prisma needs id of some value
+        const validCourseId = z.string().parse(courseId);
+
+        const contentAsBuffer = Buffer.from(content, 'utf-8');
+        
+        const result = await prisma.courseDetails.upsert({
+            where: {
+                id: validId
+            },
+            update: {
+                content: contentAsBuffer,
+            },
+            create: {
+                courseId: validCourseId,
+                content: contentAsBuffer
+            }
+        });
+
+        const resultWithoutContent = exclude(result, ["content"])
+        return resultWithoutContent;
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occurred while upserting CourseDetails.");
+    }
+}
+
+/**
  * Updates an existing lessonContent or lessonTranscript by id as identifier.
  * @description If lessonContent, updates the content field.
  * @description If lessonTranscript, updates the transcript field.
  * @access "ADMIN""
  */
-export const dbUpdateLessonContentOrLessonTranscriptById = async ({
+export const dbUpdateMdxContentByModelId = async ({
     id, content
 }: {
-    id: LessonContent["id"] | LessonTranscript["id"], 
+    id: LessonContent["id"] | LessonTranscript["id"] | CourseDetails["id"], 
     content: string,
 }) => {
     try {
@@ -423,11 +507,12 @@ export const dbUpdateLessonContentOrLessonTranscriptById = async ({
          * @see {@link https://www.cockroachlabs.com/docs/stable/sql-statements SQL@CockroachDB}
          */
         let result = await prisma.$executeRaw`UPDATE "LessonContent" SET content = ${contentAsBuffer} WHERE id = ${validId};`
-
         if (result === 0) {
             result = await prisma.$executeRaw`UPDATE "LessonTranscript" SET transcript = ${contentAsBuffer} WHERE id = ${validId};`
         }
-
+        if (result === 0) {
+            result = await prisma.$executeRaw`UPDATE "CourseDetails" SET content = ${contentAsBuffer} WHERE id = ${validId};`
+        }
         if (result === 1) {
             return;
         } else {

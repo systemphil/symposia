@@ -45,9 +45,8 @@ import {
     tablePlugin,
 } from "@mdxeditor/editor";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
-import { type dbGetLessonContentOrLessonTranscriptById } from "@/server/controllers/coursesController";
+import { type dbGetMdxContentByModelId } from "@/server/controllers/coursesController";
 import Heading from "./Heading";
-import { Lesson } from "@prisma/client";
 
 /**
  * NextJS dynamic import so that client-side only is enforced. Must import wrapped editor to satisfy requirements of forwardRef.
@@ -68,39 +67,39 @@ const ForwardedRefMDXEditor = forwardRef<MDXEditorMethods, MDXEditorProps>((prop
 ForwardedRefMDXEditor.displayName = "ForwardedRefMDXEditor";
 
 type EditorProps = {
-    initialLessonMaterial: Awaited<ReturnType<(typeof dbGetLessonContentOrLessonTranscriptById)>>;
-    lessonName: Lesson["name"];
+    initialMaterial: Awaited<ReturnType<(typeof dbGetMdxContentByModelId)>>;
+    title: string;
 }
 /**
  * MDX Editor that allows live, rich text editing of markdown files on the client. 
  * Renders only on Clientside through Next's dynamic import and a forwardRef wrapping so
  * that useRef hook properly is passed down to the function.
- * @param props includes LessonContent object and lessonName string
+ * @param props includes MDX string and title string
  */
-export default function Editor({ initialLessonMaterial, lessonName }: EditorProps) {
-    const editorRef = React.useRef<MDXEditorMethods>(null)
+export default function Editor({ initialMaterial, title }: EditorProps) {
+    const editorRef = React.useRef<MDXEditorMethods>(null);
     const utils = apiClientside.useContext();
-    const updateLessonMaterialMutation = apiClientside.courses.updateLessonContentOrLessonTranscript.useMutation({
+    const updateLessonMaterialMutation = apiClientside.courses.updateMdxContentByModelId.useMutation({
         onSuccess: () => {
             // toast.success('Course updated successfully')
             console.log("success! lesson content updated/created")
-            utils.courses.getLessonContentOrLessonTranscriptById.invalidate();
+            utils.courses.getMdxContentByModelId.invalidate();
         },
         onError: (error) => {
             console.error(error)
             // toast.error('Something went wrong')
         }
-    })
+    });
 
-    if (!initialLessonMaterial) throw new Error("lessonMaterial Data missing / could not be retrieved from server")
+    if (!initialMaterial) throw new Error("lessonMaterial Data missing / could not be retrieved from server");
 
-    const {data: lessonMaterial} = apiClientside.courses.getLessonContentOrLessonTranscriptById.useQuery({ id: initialLessonMaterial.id}, {
-        initialData: initialLessonMaterial,
+    const {data: material} = apiClientside.courses.getMdxContentByModelId.useQuery({ id: initialMaterial.id}, {
+        initialData: initialMaterial,
         refetchOnMount: false,
         refetchOnReconnect: false,
-    })
+    });
     
-    if (!lessonMaterial) throw new Error("lessonMaterial Data missing / could not be retrieved from client query")
+    if (!material) throw new Error("lessonMaterial Data missing / could not be retrieved from client query");
 
     const handleSave = async () => {
         const markdownValue = editorRef.current?.getMarkdown();
@@ -110,18 +109,18 @@ export default function Editor({ initialLessonMaterial, lessonName }: EditorProp
         }
         
         updateLessonMaterialMutation.mutate({
-            id: lessonMaterial.id,
+            id: material.id,
             content: markdownValue
         });
-    }
+    };
 
     let incomingMarkdown: string;
     let incomingType: string;
-    if ("transcript" in lessonMaterial) {
-        incomingMarkdown = lessonMaterial.transcript;
+    if ("transcript" in material) {
+        incomingMarkdown = material.transcript;
         incomingType = "transcript";
-    } else if ("content" in lessonMaterial) {
-        incomingMarkdown = lessonMaterial.content;
+    } else if ("content" in material) {
+        incomingMarkdown = material.content;
         incomingType = "content";
     } else {
         incomingType = "nothing";
@@ -130,7 +129,7 @@ export default function Editor({ initialLessonMaterial, lessonName }: EditorProp
 
     return (
         <>
-            <Heading as="h1">Editing {incomingType} of &quot;<span className="italic">{lessonName}</span>&nbsp;&quot;</Heading>
+            <Heading as="h1">Editing {incomingType} of &quot;<span className="italic">{title}</span>&nbsp;&quot;</Heading>
             {/* //TODO BTN below only for testing, CLEANUP when done */}
             <button className="btn btn-accent" onClick={() => console.log(editorRef.current?.getMarkdown())}>DEBUG:Print markdown to console</button>
             <ForwardedRefMDXEditor 
