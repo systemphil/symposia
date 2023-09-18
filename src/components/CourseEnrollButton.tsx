@@ -1,10 +1,6 @@
 "use client";
 
-import { signIn, useSession } from "next-auth/react";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { CSSProperties } from "react";
-import Button from "./ui/FunctionButton";
+import { useSession } from "next-auth/react";
 import LinkButton from "./ui/LinkButton";
 import { ButtonVariantEnum } from "@/config/buttonConfig";
 

@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { ButtonVariantEnum } from "@/config/buttonConfig";
 import FunctionButton from "./ui/FunctionButton";
 
-const UserAuthForm = () => {
+const UserAuthForm = ({ isSignUp } : { isSignUp: boolean }) => {
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
     const loginWithGoogle = async () => {
@@ -24,7 +24,9 @@ const UserAuthForm = () => {
     return (
         <div className='container flex flex-col justify-front items-center gap-4'>
             <div className='flex flex-col space-y-2 text-center'>
-                <h1 style={{color: 'black'}}>Welcome back</h1>
+                <h1 style={{color: 'black'}}>{
+                    isSignUp ? 'Get started' : 'Welcome back'
+                }</h1>
             </div>
             <FunctionButton variant={ButtonVariantEnum.roundedBlue} props={{
                 text: 'Google',
