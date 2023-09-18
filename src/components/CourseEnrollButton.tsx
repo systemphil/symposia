@@ -32,15 +32,3 @@ const CourseEnrollButton = ({ slug } : CourseEnrollButtonProps) => {
 }
 
 export default CourseEnrollButton;
-
-// (sessionData) ? (
-//     <Link href={`/enroll/${slug}`}>
-//         <text>Enroll</text>
-//     </Link>
-// ) : (
-//     <Link href={{ pathname: '/sign-in', query: {
-//         enroll: slug
-//     }}}>
-//         <text>Sign In to Enroll</text>
-//     </Link>
-// )
