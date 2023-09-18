@@ -49,20 +49,28 @@ import { type dbGetLessonContentOrLessonTranscriptById } from "@/server/controll
 import Heading from "./Heading";
 import { Lesson } from "@prisma/client";
 
-
+/**
+ * NextJS dynamic import so that client-side only is enforced. Must import wrapped editor to satisfy requirements of forwardRef.
+ */
 const DynamicMDXEditor = dynamic(
     () => import('./WrappedEditor'), 
     { ssr: false }
 )
+/**
+ * React's forwardRef to allow reference state to be passed to components as props.
+ */
 const ForwardedRefMDXEditor = forwardRef<MDXEditorMethods, MDXEditorProps>((props, ref) => (
     <DynamicMDXEditor {...props} editorRef={ref} />
 ))
+/**
+ * Display name added to satisfy ESLint requirement for easier debugging.
+ */
+ForwardedRefMDXEditor.displayName = "ForwardedRefMDXEditor";
 
 type EditorProps = {
     initialLessonMaterial: Awaited<ReturnType<(typeof dbGetLessonContentOrLessonTranscriptById)>>;
     lessonName: Lesson["name"];
 }
-
 /**
  * MDX Editor that allows live, rich text editing of markdown files on the client. 
  * Renders only on Clientside through Next's dynamic import and a forwardRef wrapping so
@@ -122,7 +130,7 @@ export default function Editor({ initialLessonMaterial, lessonName }: EditorProp
 
     return (
         <>
-            <Heading as="h1">Editing {incomingType} of "<span className="italic">{lessonName}</span>&nbsp;"</Heading>
+            <Heading as="h1">Editing {incomingType} of &quot;<span className="italic">{lessonName}</span>&nbsp;&quot;</Heading>
             {/* //TODO BTN below only for testing, CLEANUP when done */}
             <button className="btn btn-accent" onClick={() => console.log(editorRef.current?.getMarkdown())}>DEBUG:Print markdown to console</button>
             <ForwardedRefMDXEditor 

@@ -40,14 +40,18 @@ model Session {
 }
 
 model User {
-  id               String               @id @default(cuid())
-  name             String?
-  email            String?              @unique
-  emailVerified    DateTime?
-  image            String?
-  role             Role                 @default(BASIC)
-  accounts         Account[]
-  sessions         Session[]
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(BASIC)
+  accounts      Account[]
+  sessions      Session[]
+
+  stripeCustomerId        String?  @unique
+  stripePurchasedProducts String[]
+
   lessonsCompleted UserLessonProgress[]
 }
 
@@ -66,15 +70,26 @@ model VerificationToken {
 
 // Course, Lessons and Content related data
 model Course {
-  id          String   @id @default(cuid())
-  name        String
-  description String
-  slug        String   @unique
-  imageUrl    String?
-  parts       Part[]
-  lessons     Lesson[]
-  author      String?
-  published   Boolean  @default(false)
+  id              String         @id @default(cuid())
+  name            String
+  description     String
+  slug            String         @unique
+  stripeProductId String?        @unique
+  imageUrl        String?
+  parts           Part[]
+  lessons         Lesson[]
+  details         CourseDetails?
+  author          String?
+  published       Boolean        @default(false)
+}
+
+model CourseDetails {
+  id        String   @id @default(cuid())
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  String   @unique
+  content   Bytes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Part {
