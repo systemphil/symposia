@@ -1,30 +1,22 @@
-"use client";
-
-import { useSession } from "next-auth/react";
-import LinkButton from "./ui/LinkButton";
-import { ButtonVariantEnum } from "@/config/buttonConfig";
+import { getServerAuthSession } from "@/server/auth";
+import Link from "next/link";
 
 type CourseEnrollButtonProps = {
     slug: string
 }
 
-const CourseEnrollButton = ({ slug } : CourseEnrollButtonProps) => {
-    const { data: sessionData } = useSession();
+const CourseEnrollButton = async ({ slug }: CourseEnrollButtonProps) => {
+    const session = await getServerAuthSession();
 
-    return (
-        <LinkButton variant={ButtonVariantEnum.roundedBlue} props={
-            (sessionData) ? ({
-                text: 'Enroll',
-                href: `/enroll/${slug}`
-            }) : ({
-                text: 'Sign In to Enroll',
-                href: {
-                    pathname: '/sign-in', 
-                    query: { enroll: slug }
-                }
-            })
-        }/>
-    )
+    return ((session) ? (
+        <Link href={`/enroll/${slug}`} className='btn btn-primary'>
+            Enroll
+        </Link>
+    ) : (
+        <Link href={{ pathname: '/sign-in', query: { enroll: slug } }} className='btn btn-primary'>
+            Sign In to Enroll
+        </Link>
+    ))
 }
 
 export default CourseEnrollButton;
