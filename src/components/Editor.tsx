@@ -87,7 +87,6 @@ type EditorProps = {
  */
 export default function Editor({ initialMaterial, title }: EditorProps) {
     const editorRef = React.useRef<MDXEditorMethods>(null);
-    
     const utils = apiClientside.useContext();
     const updateMaterialMutation = apiClientside.courses.updateMdxContentByModelId.useMutation({
         onSuccess: () => {

@@ -136,11 +136,11 @@ export const dbGetLessonAndRelationsById = async (id: string) => {
  * Converts binary content of found record to string so that it can pass the tRPC network boundary
  * and/or be passed down to Client Components from Server Components.
  * @supports LessonContent | LessonTranscript | CourseDetails
- * @access "ADMIN""
+ * @access "ADMIN" | "INTERNAL"
  */
-export const dbGetMdxContentByModelId = async (id: string) => {
+export const dbGetMdxContentByModelId = async (id: string, internal?: boolean) => {
     try {
-        await requireAdminAuth();
+        if (!internal) await requireAdminAuth();
         const validId = z.string().parse(id);
         /**
          * tRPC cannot handle binary transmission, so the buffer from each below must be converted to string.
@@ -212,6 +212,22 @@ export const dbGetMdxContentByModelId = async (id: string) => {
     }
 }
 export type DBGetMdxContentByModelIdReturnType = Awaited<ReturnType<typeof dbGetMdxContentByModelId>>;
+
+export type LessonTypes = "CONTENT" | "TRANSCRIPT";
+/**
+ * TODO - WIP
+ */
+export const dbGetMdxContentBySlugs = ({ 
+    courseSlug, 
+    lessonSlug,
+    lessonType,
+}: {
+    courseSlug: string;
+    lessonSlug?: string;
+    lessonType?: LessonTypes
+}) => {
+
+}
 
 /**
  * Calls the database to retrieve specific Video entry based on the ID of the Lesson it is related to. 
