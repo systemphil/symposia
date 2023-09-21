@@ -211,6 +211,7 @@ export const dbGetMdxContentByModelId = async (id: string) => {
         throw new Error("An error occurred while fetching the course.");
     }
 }
+export type DBGetMdxContentByModelIdReturnType = Awaited<ReturnType<typeof dbGetMdxContentByModelId>>;
 
 /**
  * Calls the database to retrieve specific Video entry based on the ID of the Lesson it is related to. 
