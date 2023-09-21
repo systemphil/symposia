@@ -136,7 +136,7 @@ export const dbGetLessonAndRelationsById = async (id: string) => {
  * Converts binary content of found record to string so that it can pass the tRPC network boundary
  * and/or be passed down to Client Components from Server Components.
  * @supports LessonContent | LessonTranscript | CourseDetails
- * @access "ADMIN" | "INTERNAL"
+ * @access "ADMIN" | "INTERNAL" (add `true` as second argument to bypass Auth check)
  */
 export const dbGetMdxContentByModelId = async (id: string, internal?: boolean) => {
     try {
@@ -161,7 +161,7 @@ export const dbGetMdxContentByModelId = async (id: string, internal?: boolean) =
                 where: {
                     id: validId,
                 }
-            })
+            });
             if (!lessonTranscript) {
                 /**
                  * If no matching id found, proceed to query CourseDetails.
@@ -170,7 +170,7 @@ export const dbGetMdxContentByModelId = async (id: string, internal?: boolean) =
                     where: {
                         id: validId,
                     }
-                })
+                });
                 /**
                  * All three query attempts failed, throw error.
                  */
@@ -214,19 +214,87 @@ export const dbGetMdxContentByModelId = async (id: string, internal?: boolean) =
 export type DBGetMdxContentByModelIdReturnType = Awaited<ReturnType<typeof dbGetMdxContentByModelId>>;
 
 export type LessonTypes = "CONTENT" | "TRANSCRIPT";
+export type DBGetMdxContentBySlugsProps = {
+    courseSlug: string;
+} & (
+    {
+        lessonSlug: string,
+        lessonType: LessonTypes;
+    } | {
+        lessonSlug?: never;
+        lessonType?: never;
+    }
+)
 /**
- * TODO - WIP
+ * Get uncompiled MDX by Course slug and/or Lesson slug. If only Course slug is provided, the
+ * function will attempt to find and retrieve the MDX of the CourseDetails that is
+ * related to this course. To get the MDX pertaining to a Lesson, a lessonType must
+ * be specified.
+ * @returns object with uncompiled MDX || placeholder string if data model non-existent
  */
-export const dbGetMdxContentBySlugs = ({ 
+export const dbGetMdxContentBySlugs = async ({ 
     courseSlug, 
     lessonSlug,
     lessonType,
-}: {
-    courseSlug: string;
-    lessonSlug?: string;
-    lessonType?: LessonTypes
-}) => {
-
+}: DBGetMdxContentBySlugsProps) => {
+    const validCourseSlug = z.string().parse(courseSlug);
+    const validLessonSlug = z.string().optional().parse(lessonSlug);
+    /**
+     * Since a Course may exist without CourseDetails, and Lesson may exist
+     * without LessonContent and LessonTranscript, instead of throwing an error
+     * a string is returned when the respective MDX data models are non-existant.
+     */
+    if (validCourseSlug && validLessonSlug && lessonType) {
+        if (lessonType === "CONTENT") {
+            const lessonContent = await prisma.lessonContent.findFirst({
+                where: {
+                    lesson: {
+                        slug: validLessonSlug,
+                        course: {
+                            slug: validCourseSlug,
+                        }
+                    }
+                },
+                select: {
+                    id: true,
+                }
+            })
+            if (!lessonContent) return "No lesson content";
+            return dbGetMdxContentByModelId(lessonContent.id, true);
+        }
+        if (lessonType === "TRANSCRIPT") {
+            const lessonTranscript = await prisma.lessonTranscript.findFirst({
+                where: {
+                    lesson: {
+                        slug: validLessonSlug,
+                        course: {
+                            slug: validCourseSlug,
+                        }
+                    }
+                },
+                select: {
+                    id: true,
+                }
+            })
+            if (!lessonTranscript) return "No lesson transcript";
+            return dbGetMdxContentByModelId(lessonTranscript.id, true);
+        }
+    }
+    if (validCourseSlug) {
+        const courseDetails = await prisma.courseDetails.findFirst({
+            where: {
+                course: {
+                    slug: validCourseSlug,
+                }
+            },
+            select: {
+                id: true,
+            }
+        });
+        if (!courseDetails) return "No course details";
+        return dbGetMdxContentByModelId(courseDetails.id, true);
+    }
+    throw new Error("Error occured when attempting to find data models by slug(s)")
 }
 
 /**
