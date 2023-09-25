@@ -45,9 +45,8 @@ import {
     tablePlugin,
 } from "@mdxeditor/editor";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
-import { type dbGetMdxContentByModelId } from "@/server/controllers/coursesController";
+import { type dbGetMdxByModelId } from "@/server/controllers/coursesController";
 import Heading from "./Heading";
-import { filterMarkdownAndType } from "@/utils/utils";
 import toast from "react-hot-toast";
 import LoadingBars from "./LoadingBars";
 
@@ -76,7 +75,7 @@ ForwardedRefMDXEditor.displayName = "ForwardedRefMDXEditor";
 const EditorContext = createContext(false);
 
 type EditorProps = {
-    initialMaterial: Awaited<ReturnType<(typeof dbGetMdxContentByModelId)>>;
+    initialMaterial: Awaited<ReturnType<(typeof dbGetMdxByModelId)>>;
     title: string;
 }
 /**
@@ -88,10 +87,10 @@ type EditorProps = {
 export default function Editor({ initialMaterial, title }: EditorProps) {
     const editorRef = React.useRef<MDXEditorMethods>(null);
     const utils = apiClientside.useContext();
-    const updateMaterialMutation = apiClientside.courses.updateMdxContentByModelId.useMutation({
+    const updateMaterialMutation = apiClientside.courses.updateMdxByModelId.useMutation({
         onSuccess: () => {
             toast.success("Success! Saved to database.")
-            utils.courses.getMdxContentByModelId.invalidate();
+            utils.courses.getMdxByModelId.invalidate();
         },
         onError: (error) => {
             console.error(error)
@@ -101,7 +100,7 @@ export default function Editor({ initialMaterial, title }: EditorProps) {
 
     if (!initialMaterial) throw new Error("lessonMaterial Data missing / could not be retrieved from server");
 
-    const {data: material} = apiClientside.courses.getMdxContentByModelId.useQuery({ id: initialMaterial.id}, {
+    const {data: material} = apiClientside.courses.getMdxByModelId.useQuery({ id: initialMaterial.id}, {
         initialData: initialMaterial,
         refetchOnMount: false,
         refetchOnReconnect: false,
@@ -122,17 +121,15 @@ export default function Editor({ initialMaterial, title }: EditorProps) {
         });
     };
 
-    const [incomingMarkdown, incomingType] = filterMarkdownAndType(material);
-
     return (
         <>
-            <Heading as="h1">Editing {incomingType} of &quot;<span className="italic">{title}</span>&nbsp;&quot;</Heading>
+            <Heading as="h1">Editing {material.mdxCategory.toLowerCase()} of &quot;<span className="italic">{title}</span>&nbsp;&quot;</Heading>
             {/* //TODO BTN below only for testing, CLEANUP when done */}
             <button className="btn btn-accent" onClick={() => console.log(editorRef.current?.getMarkdown())}>DEBUG:Print markdown to console</button>
                 <EditorContext.Provider value={updateMaterialMutation.isLoading}>
                     <ForwardedRefMDXEditor 
                         ref={editorRef}
-                        markdown={incomingMarkdown}
+                        markdown={material.mdx}
                         contentEditableClassName="prose max-w-none"
                         plugins={[
                             listsPlugin(),

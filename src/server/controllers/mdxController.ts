@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { type Access, AuthenticationError, requireAdminAuth } from "../auth";
-import { dbGetMdxContentBySlugs, DBGetMdxContentBySlugsProps, type LessonTypes } from "./coursesController";
+import { dbGetMdxBySlugs, DBGetMdxContentBySlugsProps } from "./coursesController";
 import { mdxCompiler } from "../mdxCompiler";
-import { filterMarkdownAndType } from "@/utils/utils";
 
 
 export type MdxGetCompiledSourceProps = {
@@ -43,7 +42,7 @@ export const mdxGetCompiledSource = async ({
                 {
                     courseSlug: z.string().parse(courseSlug),
                 }
-        const uncompiledMdxContainer = await dbGetMdxContentBySlugs(dbGetArgs);
+        const uncompiledMdxContainer = await dbGetMdxBySlugs(dbGetArgs);
         /**
          * If records are non-existent in db, placeholder strings will be returned.
          * Otherwise, an object of one of many possible models is returned,
@@ -52,8 +51,7 @@ export const mdxGetCompiledSource = async ({
         if (typeof uncompiledMdxContainer === "string") {
             return await mdxCompiler(uncompiledMdxContainer);
         }
-        const [uncompiledMdx] = filterMarkdownAndType(uncompiledMdxContainer);
-        return await mdxCompiler(uncompiledMdx);
+        return await mdxCompiler(uncompiledMdxContainer.mdx);
     } catch (error) {
         if (error instanceof AuthenticationError) {
             throw error; // Rethrow custom error as-is

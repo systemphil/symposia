@@ -2,13 +2,12 @@ import {
     dbGetAllCourses, 
     dbGetCourseAndDetailsAndLessonsById, 
     dbGetLessonAndRelationsById, 
-    dbGetMdxContentByModelId, 
+    dbGetMdxByModelId, 
     dbGetVideoByLessonId, 
-    dbUpdateMdxContentByModelId, 
+    dbUpdateMdxByModelId, 
     dbUpsertCourseById, 
     dbUpsertLessonById, 
     dbUpsertLessonContentById, 
-    dbUpsertVideoById
 } from "@/server/controllers/coursesController";
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import * as z from "zod";
@@ -49,7 +48,7 @@ export const coursesRouter = createTRPCRouter({
                 return null;
             }
         }),
-    getMdxContentByModelId: protectedAdminProcedure
+    getMdxByModelId: protectedAdminProcedure
         .input(
             z
                 .object({
@@ -57,7 +56,7 @@ export const coursesRouter = createTRPCRouter({
                 })
         )
         .query(async (opts) => {
-            return await dbGetMdxContentByModelId(opts.input.id);
+            return await dbGetMdxByModelId(opts.input.id);
         }),
     getVideoByLessonId: protectedAdminProcedure
         .input(
@@ -100,19 +99,6 @@ export const coursesRouter = createTRPCRouter({
         .mutation(async (opts) => {
             return await dbUpsertLessonById(opts.input);
         }),
-    // TODO CLEANUP
-    // upsertVideo: protectedAdminProcedure
-    //     .input(
-    //         z   
-    //             .object({
-    //                 id: z.string().optional(),
-    //                 lessonId: z.string(),
-    //                 fileName: z.string().optional(),
-    //             })
-    //     )
-    //     .mutation(async (opts) => {
-    //         return await dbUpsertVideoById(opts.input);
-    //     }),
     upsertLessonContent: protectedAdminProcedure //TODO schedule for deletion and CLEANUP
         .input(
             z
@@ -125,7 +111,7 @@ export const coursesRouter = createTRPCRouter({
         .mutation(async (opts) => {
             return await dbUpsertLessonContentById(opts.input);
         }),
-    updateMdxContentByModelId: protectedAdminProcedure
+    updateMdxByModelId: protectedAdminProcedure
         .input(
             z
                 .object({
@@ -134,6 +120,6 @@ export const coursesRouter = createTRPCRouter({
                 })
         )
         .mutation(async (opts) => {
-            return await dbUpdateMdxContentByModelId(opts.input);
+            return await dbUpdateMdxByModelId(opts.input);
         })
 })

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Heading from '@/components/Heading';
 import AdminCourseFormContainer from '@/components/AdminCourseFormContainer'
 import CourseMaterialCard from '@/components/CourseMaterialCard';
+import toast from 'react-hot-toast';
 
 
 export default async function AdminCourseEdit ({ params }: { params: { courseId: string }}) {
@@ -13,6 +14,7 @@ export default async function AdminCourseEdit ({ params }: { params: { courseId:
     const course = await dbGetCourseAndDetailsAndLessonsById(courseId);
 
     if (!course) {
+        toast.error("Oops! No course was found here!")
         console.log("No course found");
         redirect("/");
     }

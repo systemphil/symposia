@@ -31,23 +31,3 @@ export function exclude<Obj, Key extends keyof Obj>(
     keys.forEach((key) => delete newObj[key]);
     return newObj;
 }
-
-/**
- * Utility function to extract the markdown material and type flag of the data model.
- * @return An array where 0 index is the markdown, and 1 the type. 
- */
-export function filterMarkdownAndType(material: DBGetMdxContentByModelIdReturnType) {
-    let incomingMarkdown: string;
-    let incomingType: string;
-    if ("transcript" in material) {
-        incomingMarkdown = material.transcript;
-        incomingType = "transcript";
-    } else if ("content" in material) {
-        incomingMarkdown = material.content;
-        incomingType = "content";
-    } else {
-        incomingType = "nothing";
-        incomingMarkdown = "No content available.";
-    }
-    return [incomingMarkdown, incomingType];
-}

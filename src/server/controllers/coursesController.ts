@@ -132,13 +132,13 @@ export const dbGetLessonAndRelationsById = async (id: string) => {
 }
 
 /**
- * Calls the database to retrieve mdx content by id of the model as identifier.
+ * Calls the database to retrieve mdx field by id of the model as identifier.
  * Converts binary content of found record to string so that it can pass the tRPC network boundary
  * and/or be passed down to Client Components from Server Components.
  * @supports LessonContent | LessonTranscript | CourseDetails
  * @access "ADMIN" | "INTERNAL" (add `true` as second argument to bypass Auth check)
  */
-export const dbGetMdxContentByModelId = async (id: string, internal?: boolean) => {
+export const dbGetMdxByModelId = async (id: string, internal?: boolean) => {
     try {
         if (!internal) await requireAdminAuth();
         const validId = z.string().parse(id);
@@ -178,30 +178,30 @@ export const dbGetMdxContentByModelId = async (id: string, internal?: boolean) =
                 /**
                  * Resolve third attempt if query successful.
                  */
-                const courseDetailsContentAsString = courseDetails.content.toString("utf-8");
+                const courseDetailsContentAsString = courseDetails.mdx.toString("utf-8");
                 const newResult = {
                     ...courseDetails,
-                    content: courseDetailsContentAsString,
+                    mdx: courseDetailsContentAsString,
                 }
                 return newResult;
             }
             /**
              * Resolve second attempt if query successful.
              */
-            const transcriptAsString = lessonTranscript.transcript.toString("utf-8");
+            const transcriptAsString = lessonTranscript.mdx.toString("utf-8");
             const newResult = {
                 ...lessonTranscript,
-                transcript: transcriptAsString,
+                mdx: transcriptAsString,
             }
             return newResult;
         };
         /**
          * Resolve first attempt if query successful.
          */
-        const contentAsString = lessonContent.content.toString("utf-8");
+        const contentAsString = lessonContent.mdx.toString("utf-8");
         const newResult = {
             ...lessonContent,
-            content: contentAsString,
+            mdx: contentAsString,
         }
         return newResult;
     } catch (error) {
@@ -211,7 +211,7 @@ export const dbGetMdxContentByModelId = async (id: string, internal?: boolean) =
         throw new Error("An error occurred while fetching the course.");
     }
 }
-export type DBGetMdxContentByModelIdReturnType = Awaited<ReturnType<typeof dbGetMdxContentByModelId>>;
+export type DBGetMdxContentByModelIdReturnType = Awaited<ReturnType<typeof dbGetMdxByModelId>>;
 
 export type LessonTypes = "CONTENT" | "TRANSCRIPT";
 export type DBGetMdxContentBySlugsProps = {
@@ -232,7 +232,7 @@ export type DBGetMdxContentBySlugsProps = {
  * be specified.
  * @returns object with uncompiled MDX || placeholder string if data model non-existent
  */
-export const dbGetMdxContentBySlugs = async ({ 
+export const dbGetMdxBySlugs = async ({ 
     courseSlug, 
     lessonSlug,
     lessonType,
@@ -260,7 +260,7 @@ export const dbGetMdxContentBySlugs = async ({
                 }
             })
             if (!lessonContent) return "No lesson content";
-            return dbGetMdxContentByModelId(lessonContent.id, true);
+            return dbGetMdxByModelId(lessonContent.id, true);
         }
         if (lessonType === "TRANSCRIPT") {
             const lessonTranscript = await prisma.lessonTranscript.findFirst({
@@ -277,7 +277,7 @@ export const dbGetMdxContentBySlugs = async ({
                 }
             })
             if (!lessonTranscript) return "No lesson transcript";
-            return dbGetMdxContentByModelId(lessonTranscript.id, true);
+            return dbGetMdxByModelId(lessonTranscript.id, true);
         }
     }
     if (validCourseSlug) {
@@ -292,7 +292,7 @@ export const dbGetMdxContentBySlugs = async ({
             }
         });
         if (!courseDetails) return "No course details";
-        return dbGetMdxContentByModelId(courseDetails.id, true);
+        return dbGetMdxByModelId(courseDetails.id, true);
     }
     throw new Error("Error occured when attempting to find data models by slug(s)")
 }
@@ -460,15 +460,15 @@ export const dbUpsertLessonContentById = async ({
                 id: validId
             },
             update: {
-                content: contentAsBuffer,
+                mdx: contentAsBuffer,
             },
             create: {
                 lessonId: validLessonId,
-                content: contentAsBuffer
+                mdx: contentAsBuffer
             }
         });
 
-        const resultWithoutContent = exclude(result, ["content"])
+        const resultWithoutContent = exclude(result, ["mdx"])
         return resultWithoutContent;
     } catch (error) {
         if (error instanceof AuthenticationError) {
@@ -503,15 +503,15 @@ export const dbUpsertLessonTranscriptById = async ({
                 id: validId
             },
             update: {
-                transcript: contentAsBuffer,
+                mdx: contentAsBuffer,
             },
             create: {
                 lessonId: validLessonId,
-                transcript: contentAsBuffer
+                mdx: contentAsBuffer
             }
         });
 
-        const resultWithoutTranscript = exclude(result, ["transcript"])
+        const resultWithoutTranscript = exclude(result, ["mdx"])
         return resultWithoutTranscript;
     } catch (error) {
         if (error instanceof AuthenticationError) {
@@ -546,15 +546,15 @@ export const dbUpsertCourseDetailsById = async ({
                 id: validId
             },
             update: {
-                content: contentAsBuffer,
+                mdx: contentAsBuffer,
             },
             create: {
                 courseId: validCourseId,
-                content: contentAsBuffer
+                mdx: contentAsBuffer
             }
         });
 
-        const resultWithoutContent = exclude(result, ["content"])
+        const resultWithoutContent = exclude(result, ["mdx"])
         return resultWithoutContent;
     } catch (error) {
         if (error instanceof AuthenticationError) {
@@ -570,7 +570,7 @@ export const dbUpsertCourseDetailsById = async ({
  * @description If lessonTranscript, updates the transcript field.
  * @access "ADMIN""
  */
-export const dbUpdateMdxContentByModelId = async ({
+export const dbUpdateMdxByModelId = async ({
     id, content
 }: {
     id: LessonContent["id"] | LessonTranscript["id"] | CourseDetails["id"], 
@@ -591,12 +591,12 @@ export const dbUpdateMdxContentByModelId = async ({
          * @see {@link https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#executeraw PrismaExecuteRaw}
          * @see {@link https://www.cockroachlabs.com/docs/stable/sql-statements SQL@CockroachDB}
          */
-        let result = await prisma.$executeRaw`UPDATE "LessonContent" SET content = ${contentAsBuffer} WHERE id = ${validId};`
+        let result = await prisma.$executeRaw`UPDATE "LessonContent" SET mdx = ${contentAsBuffer} WHERE id = ${validId};`
         if (result === 0) {
-            result = await prisma.$executeRaw`UPDATE "LessonTranscript" SET transcript = ${contentAsBuffer} WHERE id = ${validId};`
+            result = await prisma.$executeRaw`UPDATE "LessonTranscript" SET mdx = ${contentAsBuffer} WHERE id = ${validId};`
         }
         if (result === 0) {
-            result = await prisma.$executeRaw`UPDATE "CourseDetails" SET content = ${contentAsBuffer} WHERE id = ${validId};`
+            result = await prisma.$executeRaw`UPDATE "CourseDetails" SET mdx = ${contentAsBuffer} WHERE id = ${validId};`
         }
         if (result === 1) {
             return;

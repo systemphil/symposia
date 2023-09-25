@@ -1,5 +1,5 @@
 import Editor from "@/components/Editor";
-import { dbGetCourseAndDetailsAndLessonsById, dbGetMdxContentByModelId } from "@/server/controllers/coursesController";
+import { dbGetCourseAndDetailsAndLessonsById, dbGetMdxByModelId } from "@/server/controllers/coursesController";
 
 /**
  * Fetches data for CourseDetails and renders the MDX Editor to the UI.
@@ -13,7 +13,7 @@ export default async function AdminLessonMaterialEdit ({
     const courseDetailsId = params.courseDetailsId;
     if (typeof courseDetailsId !== "string") { throw new Error("missing lessonContent id") };
 
-    const editorMaterial = await dbGetMdxContentByModelId(courseDetailsId);
+    const editorMaterial = await dbGetMdxByModelId(courseDetailsId);
     const course = await dbGetCourseAndDetailsAndLessonsById(courseId);
 
     if (!editorMaterial) {
