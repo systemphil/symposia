@@ -2,7 +2,8 @@ import { prisma } from "../db";
 import * as z from "zod";
 import { Course, CourseDetails, LessonContent, LessonTranscript } from "@prisma/client";
 import { exclude } from "@/utils/utils";
-import { AuthenticationError, requireAdminAuth } from "@/server/auth";
+import { Access, AuthenticationError, requireAdminAuth } from "@/server/auth";
+import { mdxCompiler } from "../mdxCompiler";
 
 
 /**
@@ -214,8 +215,10 @@ export const dbGetMdxByModelId = async (id: string, internal?: boolean) => {
 export type DBGetMdxContentByModelIdReturnType = Awaited<ReturnType<typeof dbGetMdxByModelId>>;
 
 export type LessonTypes = "CONTENT" | "TRANSCRIPT";
-export type DBGetMdxContentBySlugsProps = {
+export type DBGetCompiledMdxBySlugsProps = {
     courseSlug: string;
+    partSlug?: string;
+    access: Access;
 } & (
     {
         lessonSlug: string,
@@ -226,27 +229,56 @@ export type DBGetMdxContentBySlugsProps = {
     }
 )
 /**
- * Get uncompiled MDX by Course slug and/or Lesson slug. If only Course slug is provided, the
+ * Get compiled MDX by Course slug and/or Lesson slug. If only Course slug is provided, the
  * function will attempt to find and retrieve the MDX of the CourseDetails that is
  * related to this course. To get the MDX pertaining to a Lesson, a lessonType must
  * be specified.
- * @returns object with uncompiled MDX || placeholder string if data model non-existent
+ * TODO add access guards
+ * @returns compiled MDX string OR compiled placeholder string if data model non-existent
  */
-export const dbGetMdxBySlugs = async ({ 
+export const dbGetCompiledMdxBySlugs = async ({ 
     courseSlug, 
     lessonSlug,
     lessonType,
-}: DBGetMdxContentBySlugsProps) => {
+    partSlug,
+    access,
+}: DBGetCompiledMdxBySlugsProps): Promise<string> => {
+    /**
+     * Authentication and authorization
+     */
+    if (access === "ADMIN") {
+        await requireAdminAuth();
+    } else if (access === "USER") {
+        // TODO perform "USER" checks here
+    }
     const validCourseSlug = z.string().parse(courseSlug);
     const validLessonSlug = z.string().optional().parse(lessonSlug);
+    const defaultMdx = `
+        /*@jsxRuntime automatic @jsxImportSource react*/
+        const {jsx: _jsx} = arguments[0];
+        function _createMdxContent(props) {
+            return _jsx("p", {
+                children: "Coming soon..."
+            });
+        }
+        function MDXContent(props = {}) {
+            const {wrapper: MDXLayout} = props.components || ({});
+            return MDXLayout ? _jsx(MDXLayout, Object.assign({}, props, {
+                children: _jsx(_createMdxContent, props)
+            })) : _createMdxContent(props);
+        }
+        return {
+            default: MDXContent
+        };
+    `;
     /**
      * Since a Course may exist without CourseDetails, and Lesson may exist
      * without LessonContent and LessonTranscript, instead of throwing an error
-     * a string is returned when the respective MDX data models are non-existant.
+     * a pre-compiled placeholder is returned when the respective MDX data models are non-existant.
      */
     if (validCourseSlug && validLessonSlug && lessonType) {
         if (lessonType === "CONTENT") {
-            const lessonContent = await prisma.lessonContent.findFirst({
+            const lessonContentMdx = await prisma.lessonContent.findFirst({
                 where: {
                     lesson: {
                         slug: validLessonSlug,
@@ -256,14 +288,14 @@ export const dbGetMdxBySlugs = async ({
                     }
                 },
                 select: {
-                    id: true,
+                    mdxCompiled: true
                 }
-            })
-            if (!lessonContent) return "No lesson content";
-            return dbGetMdxByModelId(lessonContent.id, true);
+            });
+            if (!lessonContentMdx || lessonContentMdx.mdxCompiled === null) return defaultMdx;
+            return lessonContentMdx.mdxCompiled;
         }
         if (lessonType === "TRANSCRIPT") {
-            const lessonTranscript = await prisma.lessonTranscript.findFirst({
+            const lessonTranscriptMdx = await prisma.lessonTranscript.findFirst({
                 where: {
                     lesson: {
                         slug: validLessonSlug,
@@ -273,28 +305,28 @@ export const dbGetMdxBySlugs = async ({
                     }
                 },
                 select: {
-                    id: true,
+                    mdxCompiled: true
                 }
-            })
-            if (!lessonTranscript) return "No lesson transcript";
-            return dbGetMdxByModelId(lessonTranscript.id, true);
+            });
+            if (!lessonTranscriptMdx || lessonTranscriptMdx.mdxCompiled === null) return defaultMdx;
+            return lessonTranscriptMdx.mdxCompiled;
         }
     }
     if (validCourseSlug) {
-        const courseDetails = await prisma.courseDetails.findFirst({
+        const courseDetailsMdx = await prisma.courseDetails.findFirst({
             where: {
                 course: {
                     slug: validCourseSlug,
                 }
             },
             select: {
-                id: true,
+                mdxCompiled: true,
             }
         });
-        if (!courseDetails) return "No course details";
-        return dbGetMdxByModelId(courseDetails.id, true);
+        if (!courseDetailsMdx || courseDetailsMdx.mdxCompiled === null) return defaultMdx;
+        return courseDetailsMdx.mdxCompiled;
     }
-    throw new Error("Error occured when attempting to find data models by slug(s)")
+    throw new Error("Error occured when attempting to find data models by slug(s)");
 }
 
 /**
@@ -586,28 +618,55 @@ export const dbUpdateMdxByModelId = async ({
          * Prisma does not allow us to traverse two tables at once, so we made SQL executions directly with $executeRaw where
          * prisma returns the number of rows affected by the query instead of an error in the usual prisma.update(). 
          * First we try to update one table where there is an id match, and, then, we check how many rows were affected.
-         * If 0, then that means the first update did not find an id match, and so we try with the second
-         * table, which should work. The overall result should be exactly 1 number of records updated.
+         * If 1, then proceed to compile mdx string for user consumption and return, otherwise proceed to check the next table until ID hit.
          * @see {@link https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#executeraw PrismaExecuteRaw}
          * @see {@link https://www.cockroachlabs.com/docs/stable/sql-statements SQL@CockroachDB}
          */
-        let result = await prisma.$executeRaw`UPDATE "LessonContent" SET mdx = ${contentAsBuffer} WHERE id = ${validId};`
-        if (result === 0) {
-            result = await prisma.$executeRaw`UPDATE "LessonTranscript" SET mdx = ${contentAsBuffer} WHERE id = ${validId};`
-        }
-        if (result === 0) {
-            result = await prisma.$executeRaw`UPDATE "CourseDetails" SET mdx = ${contentAsBuffer} WHERE id = ${validId};`
-        }
+        let result: number = await prisma.$executeRaw`UPDATE "LessonContent" SET mdx = ${contentAsBuffer} WHERE id = ${validId};`
         if (result === 1) {
+            const compiledMdx = await mdxCompiler(validContent);
+            await prisma.lessonContent.update({
+                where: {
+                    id: validId,
+                },
+                data: {
+                    mdxCompiled: compiledMdx,
+                },
+            });
             return;
-        } else {
-            throw new Error("Database update should have returned exactly 1 updated record.")
         }
+        result = await prisma.$executeRaw`UPDATE "LessonTranscript" SET mdx = ${contentAsBuffer} WHERE id = ${validId};`
+        if (result === 1) {
+            const compiledMdx = await mdxCompiler(validContent);
+            await prisma.lessonTranscript.update({
+                where: {
+                    id: validId,
+                },
+                data: {
+                    mdxCompiled: compiledMdx,
+                },
+            });
+            return;
+        }
+        result = await prisma.$executeRaw`UPDATE "CourseDetails" SET mdx = ${contentAsBuffer} WHERE id = ${validId};`
+        if (result === 1) {
+            const compiledMdx = await mdxCompiler(validContent);
+            await prisma.courseDetails.update({
+                where: {
+                    id: validId,
+                },
+                data: {
+                    mdxCompiled: compiledMdx,
+                },
+            });
+            return;
+        }
+        throw new Error("Database update should have returned exactly 1 updated record.")
     } catch (error) {
         if (error instanceof AuthenticationError) {
             throw error; // Rethrow custom error as-is
         }
-        throw new Error("An error occurred while fetching the course.");
+        throw new Error("An error occurred while updating MDX resources.");
     }
 }
 

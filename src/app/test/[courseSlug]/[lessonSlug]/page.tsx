@@ -1,6 +1,6 @@
 import LoadingBars from "@/components/LoadingBars";
 import MDXRenderer from "@/components/MDXRenderer";
-import { MdxGetCompiledSourceProps, mdxGetCompiledSource } from "@/server/controllers/mdxController";
+import { DBGetCompiledMdxBySlugsProps, dbGetCompiledMdxBySlugs } from "@/server/controllers/coursesController";
 import { Suspense } from "react";
 
 
@@ -14,21 +14,21 @@ export default async function TestPage2({ params }: { params: { courseSlug: stri
     /**
      * TODO Why must I add the Props here for TS not to yell at me!?
      */
-    const mdxGetArgs: MdxGetCompiledSourceProps = {
+    const mdxGetArgs: DBGetCompiledMdxBySlugsProps = {
         courseSlug: courseSlug,
         lessonSlug: lessonSlug,
         lessonType: "CONTENT",
         access: "PUBLIC",
     }
-    const compiledMdx = await mdxGetCompiledSource(mdxGetArgs)
+    const compiledMdx = await dbGetCompiledMdxBySlugs(mdxGetArgs)
 
-    const mdxGetArgs2: MdxGetCompiledSourceProps = {
+    const mdxGetArgs2: DBGetCompiledMdxBySlugsProps = {
         courseSlug: courseSlug,
         lessonSlug: lessonSlug,
         lessonType: "TRANSCRIPT",
         access: "PUBLIC",
     }
-    const compiledMdx2 = await mdxGetCompiledSource(mdxGetArgs2)
+    const compiledMdx2 = await dbGetCompiledMdxBySlugs(mdxGetArgs2)
 
     return (
         <main className="h-screen flex flex-col justify-front items-center gap-4 bg-slate-200">

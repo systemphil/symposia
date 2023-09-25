@@ -1,5 +1,6 @@
 import {compile} from '@mdx-js/mdx'
 import remarkGfm from "remark-gfm";
+import remarkDirective from 'remark-directive';
 
 
 /**
@@ -14,7 +15,7 @@ export const mdxCompiler = async (mdxSource: string) => {
             // ^-- Generate code for production.
             // `false` if you use `/jsx-runtime` on client, `true` if you use
             // `/jsx-dev-runtime`.
-            remarkPlugins: [remarkGfm],
+            remarkPlugins: [remarkGfm, remarkDirective],
         }))
         return mdxCompiled;
     } catch(e) {
