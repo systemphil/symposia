@@ -10,7 +10,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User Access and Permissions (necessary for NextAuth)
+// === SECTION 1 ==============================================
+// * User Access and Permissions (necessary for NextAuth)
+// ============================================================
 model Account {
   id                       String  @id @default(cuid())
   userId                   String
@@ -49,8 +51,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  stripeCustomerId        String?  @unique
-  stripePurchasedProducts String[]
+  stripeCustomerId        String?         @unique
+  stripePurchasedProducts StripeProduct[]
 
   lessonsCompleted UserLessonProgress[]
 }
@@ -68,13 +70,15 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Course, Lessons and Content related data
+// === SECTION 2 ==============================================
+// * Course, Lessons and Content related data
+// ============================================================
 model Course {
   id              String         @id @default(cuid())
   name            String
   description     String
   slug            String         @unique
-  stripeProductId String?        @unique
+  stripeProductId StripeProduct?
   imageUrl        String?
   parts           Part[]
   lessons         Lesson[]
@@ -83,20 +87,27 @@ model Course {
   published       Boolean        @default(false)
 }
 
+enum MdxCategory {
+  CONTENT
+  TRANSCRIPT
+  DETAILS
+}
+
 model CourseDetails {
-  id        String   @id @default(cuid())
-  course    Course   @relation(fields: [courseId], references: [id])
-  courseId  String   @unique
-  content   Bytes
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String      @id @default(cuid())
+  course      Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId    String      @unique
+  mdxCategory MdxCategory @default(DETAILS)
+  mdx         Bytes
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model Part {
   id       String   @id @default(cuid())
   name     String
   slug     String
-  course   Course   @relation(fields: [courseId], references: [id])
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId String
   lessons  Lesson[]
 }
@@ -108,7 +119,7 @@ model Lesson {
   slug           String
   part           Part?                @relation(fields: [partId], references: [id])
   partId         String?
-  course         Course               @relation(fields: [courseId], references: [id])
+  course         Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId       String
   content        LessonContent?
   transcript     LessonTranscript?
@@ -117,26 +128,28 @@ model Lesson {
 }
 
 model LessonContent {
-  id        String   @id @default(cuid())
-  lesson    Lesson   @relation(fields: [lessonId], references: [id])
-  lessonId  String   @unique
-  content   Bytes
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String      @id @default(cuid())
+  lesson      Lesson      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId    String      @unique
+  mdxCategory MdxCategory @default(CONTENT)
+  mdx         Bytes
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model LessonTranscript {
-  id         String   @id @default(cuid())
-  lesson     Lesson   @relation(fields: [lessonId], references: [id])
-  lessonId   String   @unique
-  transcript Bytes
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          String      @id @default(cuid())
+  lesson      Lesson      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId    String      @unique
+  mdxCategory MdxCategory @default(TRANSCRIPT)
+  mdx         Bytes
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model Video {
   id        String  @id @default(cuid())
-  lesson    Lesson? @relation(fields: [lessonId], references: [id])
+  lesson    Lesson? @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   lessonId  String? @unique
   fileName  String
   duration  Float?
@@ -144,11 +157,49 @@ model Video {
 }
 
 model UserLessonProgress {
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
-  lesson      Lesson   @relation(fields: [lessonId], references: [id])
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   lessonId    String
   completedAt DateTime @default(now())
 
   @@id([userId, lessonId])
+}
+
+// === SECTION 3 ==============================================
+// * Stripe related data
+// ============================================================
+model StripeProduct {
+  id                 String        @id @default(cuid())
+  productId          String        @unique
+  interlinkedModel   Course?       @relation(fields: [interlinkedModelId], references: [id], onDelete: Cascade)
+  interlinkedModelId String?       @unique
+  users              User[]
+  prices             StripePrice[]
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+}
+
+model StripePrice {
+  id        String        @id @default(cuid())
+  priceId   String        @unique
+  amount    Float
+  currency  String
+  product   StripeProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String        @unique
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model StripeEvent {
+  id               String   @id @unique
+  api_version      String?
+  data             Json
+  request          Json?
+  type             String
+  object           String
+  account          String?
+  created          DateTime
+  livemode         Boolean
+  pending_webhooks Int
 }

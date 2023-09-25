@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef } from "react";
+import React, { createContext, forwardRef, useContext } from "react";
 import dynamic from "next/dynamic";
 import { headingsPlugin } from '@mdxeditor/editor/plugins/headings'
 import { listsPlugin } from '@mdxeditor/editor/plugins/lists'
@@ -45,9 +45,11 @@ import {
     tablePlugin,
 } from "@mdxeditor/editor";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
-import { type dbGetLessonContentOrLessonTranscriptById } from "@/server/controllers/coursesController";
+import { type dbGetMdxByModelId } from "@/server/controllers/coursesController";
 import Heading from "./Heading";
-import { Lesson } from "@prisma/client";
+import toast from "react-hot-toast";
+import LoadingBars from "./LoadingBars";
+
 
 /**
  * NextJS dynamic import so that client-side only is enforced. Must import wrapped editor to satisfy requirements of forwardRef.
@@ -67,40 +69,44 @@ const ForwardedRefMDXEditor = forwardRef<MDXEditorMethods, MDXEditorProps>((prop
  */
 ForwardedRefMDXEditor.displayName = "ForwardedRefMDXEditor";
 
+/**
+ * Context to hold the state of mutation loading as passing props did not work with the MDXEditor Toolbar.
+ */
+const EditorContext = createContext(false);
+
 type EditorProps = {
-    initialLessonMaterial: Awaited<ReturnType<(typeof dbGetLessonContentOrLessonTranscriptById)>>;
-    lessonName: Lesson["name"];
+    initialMaterial: Awaited<ReturnType<(typeof dbGetMdxByModelId)>>;
+    title: string;
 }
 /**
  * MDX Editor that allows live, rich text editing of markdown files on the client. 
  * Renders only on Clientside through Next's dynamic import and a forwardRef wrapping so
  * that useRef hook properly is passed down to the function.
- * @param props includes LessonContent object and lessonName string
+ * @param props includes MDX string and title string
  */
-export default function Editor({ initialLessonMaterial, lessonName }: EditorProps) {
-    const editorRef = React.useRef<MDXEditorMethods>(null)
+export default function Editor({ initialMaterial, title }: EditorProps) {
+    const editorRef = React.useRef<MDXEditorMethods>(null);
     const utils = apiClientside.useContext();
-    const updateLessonMaterialMutation = apiClientside.courses.updateLessonContentOrLessonTranscript.useMutation({
+    const updateMaterialMutation = apiClientside.courses.updateMdxByModelId.useMutation({
         onSuccess: () => {
-            // toast.success('Course updated successfully')
-            console.log("success! lesson content updated/created")
-            utils.courses.getLessonContentOrLessonTranscriptById.invalidate();
+            toast.success("Success! Saved to database.")
+            utils.courses.getMdxByModelId.invalidate();
         },
         onError: (error) => {
             console.error(error)
-            // toast.error('Something went wrong')
+            toast.error('Something went wrong')
         }
-    })
+    });
 
-    if (!initialLessonMaterial) throw new Error("lessonMaterial Data missing / could not be retrieved from server")
+    if (!initialMaterial) throw new Error("lessonMaterial Data missing / could not be retrieved from server");
 
-    const {data: lessonMaterial} = apiClientside.courses.getLessonContentOrLessonTranscriptById.useQuery({ id: initialLessonMaterial.id}, {
-        initialData: initialLessonMaterial,
+    const {data: material} = apiClientside.courses.getMdxByModelId.useQuery({ id: initialMaterial.id}, {
+        initialData: initialMaterial,
         refetchOnMount: false,
         refetchOnReconnect: false,
-    })
+    });
     
-    if (!lessonMaterial) throw new Error("lessonMaterial Data missing / could not be retrieved from client query")
+    if (!material) throw new Error("lessonMaterial Data missing / could not be retrieved from client query");
 
     const handleSave = async () => {
         const markdownValue = editorRef.current?.getMarkdown();
@@ -109,57 +115,46 @@ export default function Editor({ initialLessonMaterial, lessonName }: EditorProp
             return;    
         }
         
-        updateLessonMaterialMutation.mutate({
-            id: lessonMaterial.id,
+        updateMaterialMutation.mutate({
+            id: material.id,
             content: markdownValue
         });
-    }
-
-    let incomingMarkdown: string;
-    let incomingType: string;
-    if ("transcript" in lessonMaterial) {
-        incomingMarkdown = lessonMaterial.transcript;
-        incomingType = "transcript";
-    } else if ("content" in lessonMaterial) {
-        incomingMarkdown = lessonMaterial.content;
-        incomingType = "content";
-    } else {
-        incomingType = "nothing";
-        incomingMarkdown = "No content available.";
-    }
+    };
 
     return (
         <>
-            <Heading as="h1">Editing {incomingType} of &quot;<span className="italic">{lessonName}</span>&nbsp;&quot;</Heading>
+            <Heading as="h1">Editing {material.mdxCategory.toLowerCase()} of &quot;<span className="italic">{title}</span>&nbsp;&quot;</Heading>
             {/* //TODO BTN below only for testing, CLEANUP when done */}
             <button className="btn btn-accent" onClick={() => console.log(editorRef.current?.getMarkdown())}>DEBUG:Print markdown to console</button>
-            <ForwardedRefMDXEditor 
-                ref={editorRef}
-                markdown={incomingMarkdown}
-                contentEditableClassName="prose max-w-none"
-                plugins={[
-                    listsPlugin(),
-                    quotePlugin(),
-                    headingsPlugin(),
-                    linkPlugin(),
-                    linkDialogPlugin(),
-                    imagePlugin(),
-                    tablePlugin(),
-                    thematicBreakPlugin(),
-                    frontmatterPlugin(),
-                    codeBlockPlugin({ defaultCodeBlockLanguage: 'txt' }),
-                    // codeBlockPlugin({ codeBlockEditorDescriptors: [PlainTextCodeEditorDescriptor] }),
-                    codeMirrorPlugin({ codeBlockLanguages: { js: 'JavaScript', css: 'CSS', txt: 'text', tsx: 'TypeScript' } }),
-                    directivesPlugin({ directiveDescriptors: [ AdmonitionDirectiveDescriptor] }),
-                    diffSourcePlugin({ viewMode: 'rich-text', diffMarkdown: 'boo' }),
-                    markdownShortcutPlugin(),
-                    toolbarPlugin({
-                        toolbarContents: () => (
-                            <DefaultToolbar handleSave={handleSave}/>
-                        )
-                    })
-                ]}
-            />
+                <EditorContext.Provider value={updateMaterialMutation.isLoading}>
+                    <ForwardedRefMDXEditor 
+                        ref={editorRef}
+                        markdown={material.mdx}
+                        contentEditableClassName="prose max-w-none"
+                        plugins={[
+                            listsPlugin(),
+                            quotePlugin(),
+                            headingsPlugin(),
+                            linkPlugin(),
+                            linkDialogPlugin(),
+                            imagePlugin(),
+                            tablePlugin(),
+                            thematicBreakPlugin(),
+                            frontmatterPlugin(),
+                            codeBlockPlugin({ defaultCodeBlockLanguage: 'txt' }),
+                            // codeBlockPlugin({ codeBlockEditorDescriptors: [PlainTextCodeEditorDescriptor] }),
+                            codeMirrorPlugin({ codeBlockLanguages: { js: 'JavaScript', css: 'CSS', txt: 'text', tsx: 'TypeScript' } }),
+                            directivesPlugin({ directiveDescriptors: [ AdmonitionDirectiveDescriptor] }),
+                            diffSourcePlugin({ viewMode: 'rich-text', diffMarkdown: 'boo' }),
+                            markdownShortcutPlugin(),
+                            toolbarPlugin({
+                                toolbarContents: () => (
+                                    <DefaultToolbar handleSave={handleSave} />
+                                )
+                            })
+                        ]}
+                    />
+                </EditorContext.Provider>
             <div className="border-neutral-border border-dashed border-t-[1px] mb-16"></div>
         </>
     )
@@ -169,6 +164,7 @@ type DefaultToolbarProps = {
     handleSave: () => void;
 }
 const DefaultToolbar: React.FC<DefaultToolbarProps> = ({ handleSave }) => {
+    const isLoading = useContext(EditorContext);
 
     const handleSaveButton = () => {
         handleSave();
@@ -183,7 +179,12 @@ const DefaultToolbar: React.FC<DefaultToolbarProps> = ({ handleSave }) => {
                     { fallback: () => (
                         <>  
                             <TooltipWrap title="Save to database">
-                                <Button onClick={() => handleSaveButton()}>💾</Button>
+                                <div className="w-[29px] h-[32px]">
+                                    { isLoading
+                                        ? <LoadingBars size="xs" />
+                                        : <Button onClick={() => handleSaveButton()}>💾</Button>
+                                    }
+                                </div>
                             </TooltipWrap>
                             <UndoRedo />
                             <Separator />
