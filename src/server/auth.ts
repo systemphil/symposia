@@ -42,6 +42,7 @@ export const authOptions: NextAuthOptions = {
     ],
 };
 
+export type Access = "PUBLIC" | "USER" | "ADMIN";
 /**
  * Helper function to get Auth Session on serverside.
  */

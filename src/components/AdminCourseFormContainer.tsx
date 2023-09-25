@@ -2,7 +2,7 @@
 
 import CourseForm, { UpsertCourseInputs } from "./forms/CourseForm";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
-import { type dbGetCourseAndLessonsById } from "@/server/controllers/coursesController";
+import { type dbGetCourseAndDetailsAndLessonsById } from "@/server/controllers/coursesController";
 import { useParams, useRouter } from "next/navigation";
 import { type SubmitHandler } from "react-hook-form";
 
@@ -14,7 +14,7 @@ const AdminCourseFormContainer = ({
     id 
 }: {
     id?: string;
-    initialCourse?: Awaited<ReturnType<(typeof dbGetCourseAndLessonsById)>>
+    initialCourse?: Awaited<ReturnType<(typeof dbGetCourseAndDetailsAndLessonsById)>>
 }) => {
     const router = useRouter();
     const params = useParams();

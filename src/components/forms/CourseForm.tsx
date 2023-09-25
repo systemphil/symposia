@@ -4,7 +4,7 @@ import TextAreaInput from './TextAreaInput';
 import SubmitInput from './SubmitInput';
 import Checkbox from "./Checkbox";
 import { Lesson, Course } from "@prisma/client";
-import { type dbGetCourseAndLessonsById } from "@/server/controllers/coursesController";
+import { type dbGetCourseAndDetailsAndLessonsById } from "@/server/controllers/coursesController";
 
 export type UpsertCourseInputs = {
     id: string;
@@ -17,7 +17,7 @@ export type UpsertCourseInputs = {
 };
 
 type Props = {
-    course?: Awaited<ReturnType<(typeof dbGetCourseAndLessonsById)>>;
+    course?: Awaited<ReturnType<(typeof dbGetCourseAndDetailsAndLessonsById)>>;
     onSubmit: SubmitHandler<UpsertCourseInputs>;
     isLoading: boolean;
 }

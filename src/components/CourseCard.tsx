@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import type { Course } from "@prisma/client";
 import Link from 'next/link'
 import Heading from './Heading'
