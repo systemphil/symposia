@@ -1,6 +1,6 @@
 import LoadingBars from "@/components/LoadingBars";
 import MDXRenderer from "@/components/MDXRenderer";
-import { MdxGetCompiledSourceProps, mdxGetCompiledSource } from "@/server/controllers/mdxController";
+import { DBGetCompiledMdxBySlugsProps, dbGetCompiledMdxBySlugs } from "@/server/controllers/coursesController";
 import { Suspense } from "react";
 
 
@@ -14,35 +14,40 @@ export default async function TestPage2({ params }: { params: { courseSlug: stri
     /**
      * TODO Why must I add the Props here for TS not to yell at me!?
      */
-    const mdxGetArgs: MdxGetCompiledSourceProps = {
+    const mdxGetArgs: DBGetCompiledMdxBySlugsProps = {
         courseSlug: courseSlug,
         lessonSlug: lessonSlug,
         lessonType: "CONTENT",
         access: "PUBLIC",
     }
-    const compiledMdx = await mdxGetCompiledSource(mdxGetArgs)
+    const compiledMdx = await dbGetCompiledMdxBySlugs(mdxGetArgs)
 
-    const mdxGetArgs2: MdxGetCompiledSourceProps = {
+    const mdxGetArgs2: DBGetCompiledMdxBySlugsProps = {
         courseSlug: courseSlug,
         lessonSlug: lessonSlug,
         lessonType: "TRANSCRIPT",
         access: "PUBLIC",
     }
-    const compiledMdx2 = await mdxGetCompiledSource(mdxGetArgs2)
+    const compiledMdx2 = await dbGetCompiledMdxBySlugs(mdxGetArgs2)
 
     return (
-        <main className="h-screen flex flex-col justify-front items-center gap-4 bg-slate-200">
+        <main className="h-full flex flex-col justify-front items-center gap-4 bg-slate-200">
             <p>Test page with 2 dynamic retrieval from db</p>
             <div className="container">
-                <p>Content:</p>
-                <Suspense fallback={<LoadingBars />}>
-                    <MDXRenderer data={compiledMdx} />
-                </Suspense>
+               
+                <p className="bg-red-400 w-full p-2">Content:</p>
+                <div className="border-black border-2 border-dashed">
+                    <Suspense fallback={<LoadingBars />}>
+                        <MDXRenderer data={compiledMdx} />
+                    </Suspense>
+                </div>
 
-                <p>Transcript</p>
-                <Suspense fallback={<LoadingBars />}>
-                    <MDXRenderer data={compiledMdx2} />
-                </Suspense>
+                <p className="bg-blue-400 w-full p-2 mt-12">Transcript</p>
+                <div className="border-black border-2 border-dashed mb-28">
+                    <Suspense fallback={<LoadingBars />}>
+                        <MDXRenderer data={compiledMdx2} />
+                    </Suspense>
+                </div>
             </div>
             
             

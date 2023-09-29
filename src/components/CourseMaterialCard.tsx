@@ -3,6 +3,8 @@ import Heading from "./Heading"
 
 /**
  * A click-able card that displays a heading and links to provided href. Optional key parameter for loop iteration. 
+ * TODO FIX BELOW
+ * @warning FROM TERMINAL: Warning: CourseMaterialCard: `key` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)
  */
 const CourseMaterialCard = ({ href, heading, key}: { href: string, heading: string, key?: string}) => {
     return(
