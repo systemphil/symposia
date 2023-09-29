@@ -34,8 +34,14 @@ const MDXRenderer = ({ data }: {data: MDXCompilerReturnType}) => {
             {(
                 mdxModule
             ) ? (
-                <article className="prose max-w-none w-full">
-                    <Content />
+                <article className="_editorRoot_w1wlt_36 _editorWrapper_w1wlt_133 mdxeditor">
+                    <div className="block">
+                        <div className="_rootContentEditableWrapper_w1wlt_1022">
+                            <div className="_contentEditable_w1wlt_339 prose max-w-none w-full">
+                                <Content />
+                            </div>
+                        </div>
+                    </div>
                 </article>
             ) : (
                 <LoadingBars />

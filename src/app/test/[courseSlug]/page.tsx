@@ -21,18 +21,16 @@ export default async function TestPage1({ params }: { params: { courseSlug: stri
     // const compiledMdx = await mdxGetCompiledSource(mdxGetArgs)
     const mdxCompiled = await dbGetCompiledMdxBySlugs(mdxGetArgs);
 
-    // if (!mdxResource || mdxResource.mdxCompiled === null) {
-    //     return(
-    //         <p>compiledMdx is null</p>
-    //     )
-    // }
     return (
         <main className="h-screen flex flex-col justify-front items-center gap-4 bg-slate-200">
             <p>Test page with 1 dynamic retrieval from db</p>
             <div className="container">
-                <Suspense fallback={<LoadingBars />}>
-                    <MDXRenderer data={mdxCompiled} />
-                </Suspense>
+                <p className="bg-emerald-400 w-full p-2">Course Details</p>
+                <div className="border-black border-2 border-dashed">
+                    <Suspense fallback={<LoadingBars />}>
+                        <MDXRenderer data={mdxCompiled} />
+                    </Suspense>
+                </div>
             </div>
             
             

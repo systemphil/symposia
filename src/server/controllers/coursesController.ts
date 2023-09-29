@@ -233,7 +233,8 @@ export type DBGetCompiledMdxBySlugsProps = {
  * function will attempt to find and retrieve the MDX of the CourseDetails that is
  * related to this course. To get the MDX pertaining to a Lesson, a lessonType must
  * be specified.
- * TODO add access guards
+ * @todo // TODO configure access guards properly
+ * @access CUSTOM - must be defined on call
  * @returns compiled MDX string OR compiled placeholder string if data model non-existent
  */
 export const dbGetCompiledMdxBySlugs = async ({ 
@@ -274,7 +275,7 @@ export const dbGetCompiledMdxBySlugs = async ({
     /**
      * Since a Course may exist without CourseDetails, and Lesson may exist
      * without LessonContent and LessonTranscript, instead of throwing an error
-     * a pre-compiled placeholder is returned when the respective MDX data models are non-existant.
+     * a pre-compiled placeholder is returned while the respective MDX data models are non-existant.
      */
     if (validCourseSlug && validLessonSlug && lessonType) {
         if (lessonType === "CONTENT") {
@@ -597,9 +598,7 @@ export const dbUpsertCourseDetailsById = async ({
 }
 
 /**
- * Updates an existing lessonContent or lessonTranscript by id as identifier.
- * @description If lessonContent, updates the content field.
- * @description If lessonTranscript, updates the transcript field.
+ * Updates mdx field for an existing model by id as identifier.
  * @access "ADMIN""
  */
 export const dbUpdateMdxByModelId = async ({

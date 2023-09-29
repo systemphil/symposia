@@ -31,18 +31,23 @@ export default async function TestPage2({ params }: { params: { courseSlug: stri
     const compiledMdx2 = await dbGetCompiledMdxBySlugs(mdxGetArgs2)
 
     return (
-        <main className="h-screen flex flex-col justify-front items-center gap-4 bg-slate-200">
+        <main className="h-full flex flex-col justify-front items-center gap-4 bg-slate-200">
             <p>Test page with 2 dynamic retrieval from db</p>
             <div className="container">
-                <p>Content:</p>
-                <Suspense fallback={<LoadingBars />}>
-                    <MDXRenderer data={compiledMdx} />
-                </Suspense>
+               
+                <p className="bg-red-400 w-full p-2">Content:</p>
+                <div className="border-black border-2 border-dashed">
+                    <Suspense fallback={<LoadingBars />}>
+                        <MDXRenderer data={compiledMdx} />
+                    </Suspense>
+                </div>
 
-                <p>Transcript</p>
-                <Suspense fallback={<LoadingBars />}>
-                    <MDXRenderer data={compiledMdx2} />
-                </Suspense>
+                <p className="bg-blue-400 w-full p-2 mt-12">Transcript</p>
+                <div className="border-black border-2 border-dashed mb-28">
+                    <Suspense fallback={<LoadingBars />}>
+                        <MDXRenderer data={compiledMdx2} />
+                    </Suspense>
+                </div>
             </div>
             
             

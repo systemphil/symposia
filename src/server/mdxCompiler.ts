@@ -1,6 +1,8 @@
 import {compile} from '@mdx-js/mdx'
 import remarkGfm from "remark-gfm";
 import remarkDirective from 'remark-directive';
+import {visit} from 'unist-util-visit'
+import type { ContainerDirective, LeafDirective, TextDirective } from "mdast-util-directive";
 
 
 /**
@@ -24,29 +26,20 @@ export const mdxCompiler = async (mdxSource: string) => {
 }
 export type MDXCompilerReturnType = Awaited<ReturnType<typeof mdxCompiler>>;
 
-
-// Register `hName`, `hProperties` types, used when turning markdown to HTML:
-/// <reference types="mdast-util-to-hast" />
-// Register directive nodes in mdast:
-/// <reference types="mdast-util-directive" />
-
-import {h} from 'hastscript'
-import {visit} from 'unist-util-visit'
-
 const ADMONITION_TYPES = ["note", "tip", "danger", "info", "caution"]
-
-// import {Node as MDASTNode} from 'mdast-util-definitions/lib';
-
-// This plugin is an example to turn `::youtube` into iframes.
-// This plugin is an example to turn `::note` into divs, passing arbitrary
-// attributes.
+/**
+ * Plugin for the MDX compiler that adds admonition/callout nodes and classes to compiled output. Traverses the tree
+ * to check for `directives` (Markdown items tagged with `:::`) with special names. E.g. `:::danger <content-here> :::`.
+ * @todo type-checking is switched off owing to possible issues in the library or cross-library dependency. 
+ * The unifiedjs/mdx-packages ecosystem are currently transitioning into new versions with stricter typing, so types should be updated
+ * here when the new versions are out. See: https://github.com/orgs/mdx-js/discussions/2355#discussioncomment-7139230
+ */
 function adminitionPlugin() {
-    // TODO review library
     // tree ought to be Node from mdast-util-definitions/lib but TS is throwing that
     // type instantiation is excessively deep and possibly infinite.
     // @ts-ignore
     return (tree) => {
-        visit(tree, (node) => {
+        visit(tree, (node: ContainerDirective | LeafDirective | TextDirective ) => {
             if (
                 node.type === 'containerDirective' ||
                 node.type === 'leafDirective' ||
@@ -54,38 +47,54 @@ function adminitionPlugin() {
             ) {
                 if (ADMONITION_TYPES.includes(node.name)) {
 
-                    const data = node.data || (node.data = {})
-                    const tagName = node.type === 'textDirective' ? 'span' : 'div'
+                    const tagName = node.type === 'textDirective' ? 'span' : 'div';
                     
                     if (node.name === ADMONITION_TYPES[0]) {
                         node.attributes = {
                             ...node.attributes,
-                            class: '_admonitionNote_13nbk_63', 
+                            className: '_admonitionNote_13nbk_63', 
                         };
                     } else if (node.name === ADMONITION_TYPES[1]) {
                         node.attributes = {
                             ...node.attributes,
-                            class: '_admonitionTip_13nbk_63', 
+                            className: '_admonitionTip_13nbk_63', 
                         };
                     } else if (node.name === ADMONITION_TYPES[2]) {
                         node.attributes = {
                             ...node.attributes,
-                            class: '_admonitionDanger_13nbk_63', 
+                            className: '_admonitionDanger_13nbk_63', 
                         };
                     } else if (node.name === ADMONITION_TYPES[3]) {
                         node.attributes = {
                             ...node.attributes,
-                            class: '_admonitionInfo_13nbk_63', 
+                            className: '_admonitionInfo_13nbk_63', 
                         };
                     } else if (node.name === ADMONITION_TYPES[4]) {
                         node.attributes = {
                             ...node.attributes,
-                            class: '_admonitionCaution_13nbk_63', 
+                            className: '_admonitionCaution_13nbk_63', 
                         };
                     }
                     
-                    data.hName = tagName
-                    data.hProperties = h(tagName, node.attributes || {}).properties
+                    // @ts-ignore
+                    node.type = 'paragraph';
+                    node.data = {
+                        ...node.data,
+                        hName: tagName,
+                        hProperties: node.attributes,
+                    };
+
+                    node.children = [
+                        {
+                        type: 'paragraph',
+                        data: {
+                            hName: 'div',
+                            hProperties: { className: ['_nestedEditor_w1wlt_891'] },
+                        },
+                        // @ts-ignore
+                        children: node.children,
+                        },
+                    ];
                 }
             }
         })
