@@ -1,9 +1,12 @@
 import {compile} from '@mdx-js/mdx'
 import remarkGfm from "remark-gfm";
+import remarkDirective from 'remark-directive';
+import {visit} from 'unist-util-visit'
+import type { ContainerDirective, LeafDirective, TextDirective } from "mdast-util-directive";
 
 
 /**
- * Compiles strings into MDX. Configure additional plugins here.
+ * Compiles MDX strings into JavaScript. Configure additional plugins here.
  * @docs {@link https://mdxjs.com/packages/mdx/#compilefile-options | MDX compiler options}
  */
 export const mdxCompiler = async (mdxSource: string) => {
@@ -14,11 +17,86 @@ export const mdxCompiler = async (mdxSource: string) => {
             // ^-- Generate code for production.
             // `false` if you use `/jsx-runtime` on client, `true` if you use
             // `/jsx-dev-runtime`.
-            remarkPlugins: [remarkGfm],
-        }))
+            remarkPlugins: [remarkGfm, remarkDirective, adminitionPlugin],
+        }));
         return mdxCompiled;
     } catch(e) {
         throw new Error("An error occured in the mdxCompiler");
     }
 }
 export type MDXCompilerReturnType = Awaited<ReturnType<typeof mdxCompiler>>;
+
+const ADMONITION_TYPES = ["note", "tip", "danger", "info", "caution"]
+/**
+ * Plugin for the MDX compiler that adds admonition/callout nodes and classes to compiled output. Traverses the tree
+ * to check for `directives` (Markdown items tagged with `:::`) with special names. E.g. `:::danger <content-here> :::`.
+ * @todo type-checking is switched off owing to possible issues in the library or cross-library dependency. 
+ * The unifiedjs/mdx-packages ecosystem are currently transitioning into new versions with stricter typing, so types should be updated
+ * here when the new versions are out. See: https://github.com/orgs/mdx-js/discussions/2355#discussioncomment-7139230
+ */
+function adminitionPlugin() {
+    // tree ought to be Node from mdast-util-definitions/lib but TS is throwing that
+    // type instantiation is excessively deep and possibly infinite.
+    // @ts-ignore
+    return (tree) => {
+        visit(tree, (node: ContainerDirective | LeafDirective | TextDirective ) => {
+            if (
+                node.type === 'containerDirective' ||
+                node.type === 'leafDirective' ||
+                node.type === 'textDirective'
+            ) {
+                if (ADMONITION_TYPES.includes(node.name)) {
+
+                    const tagName = node.type === 'textDirective' ? 'span' : 'div';
+                    
+                    if (node.name === ADMONITION_TYPES[0]) {
+                        node.attributes = {
+                            ...node.attributes,
+                            className: '_admonitionNote_13nbk_63', 
+                        };
+                    } else if (node.name === ADMONITION_TYPES[1]) {
+                        node.attributes = {
+                            ...node.attributes,
+                            className: '_admonitionTip_13nbk_63', 
+                        };
+                    } else if (node.name === ADMONITION_TYPES[2]) {
+                        node.attributes = {
+                            ...node.attributes,
+                            className: '_admonitionDanger_13nbk_63', 
+                        };
+                    } else if (node.name === ADMONITION_TYPES[3]) {
+                        node.attributes = {
+                            ...node.attributes,
+                            className: '_admonitionInfo_13nbk_63', 
+                        };
+                    } else if (node.name === ADMONITION_TYPES[4]) {
+                        node.attributes = {
+                            ...node.attributes,
+                            className: '_admonitionCaution_13nbk_63', 
+                        };
+                    }
+                    
+                    // @ts-ignore
+                    node.type = 'paragraph';
+                    node.data = {
+                        ...node.data,
+                        hName: tagName,
+                        hProperties: node.attributes,
+                    };
+
+                    node.children = [
+                        {
+                        type: 'paragraph',
+                        data: {
+                            hName: 'div',
+                            hProperties: { className: ['_nestedEditor_w1wlt_891'] },
+                        },
+                        // @ts-ignore
+                        children: node.children,
+                        },
+                    ];
+                }
+            }
+        })
+    }
+}
