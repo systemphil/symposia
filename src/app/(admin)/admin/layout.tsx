@@ -1,3 +1,4 @@
+import { DeleteEntryProvider } from "@/components/ContextDeleteEntry";
 import { getServerAuthSession } from "@/server/auth";
 import { redirect } from "next/navigation";
 
@@ -20,11 +21,13 @@ export default async function AdminLayout({
     }
 
     return (
-        <section>
-            <p className="w-full bg-red-200 flex flex-col justify-center items-center">ADMIN Navbar Placeholder</p>
-            <div className="container">
-                {children}
-            </div>
-        </section>
+        <DeleteEntryProvider>
+            <section>
+                <p className="w-full bg-red-200 flex flex-col justify-center items-center">ADMIN Navbar Placeholder</p>
+                <div className="container">
+                    {children}
+                </div>
+            </section>
+        </DeleteEntryProvider>
     )
 }

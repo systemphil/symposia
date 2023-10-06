@@ -1,6 +1,6 @@
 import { prisma } from "../db";
 import * as z from "zod";
-import { Course, CourseDetails, LessonContent, LessonTranscript } from "@prisma/client";
+import { Course, CourseDetails, LessonContent, LessonTranscript, Video } from "@prisma/client";
 import { exclude } from "@/utils/utils";
 import { Access, AuthenticationError, requireAdminAuth } from "@/server/auth";
 import { mdxCompiler } from "../mdxCompiler";
@@ -14,7 +14,7 @@ import { mdxCompiler } from "../mdxCompiler";
  * @param retrieveFunc 
  * @returns 
  */
-const adminDatabaseErrorHandling = async <T>(retrieveFunc: () => Promise<T>): Promise<T> => {
+const checkIfAdmin = async <T>(retrieveFunc: () => Promise<T>): Promise<T> => {
     try {
         await requireAdminAuth();
         return await retrieveFunc();
@@ -706,4 +706,125 @@ export const dbUpsertVideoById = async ({
         }
         throw new Error("An error occurred while fetching the course.");
     }
+}
+
+// TODO cleanup?
+export const BACKUP_dbDeleteLessonContentById = async ({id}: {id: LessonContent["id"]}) => {
+    try {
+        await requireAdminAuth();
+        const validId = z.string().parse(id);
+
+        return await prisma.lessonContent.delete({
+            where: {
+                id: validId
+            }
+        });
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occured wile trying to delete LessonContent");
+    }
+}
+
+// TODO cleanup?
+export const BACKUP_dbDeleteLessonTranscriptById = async ({id}: {id: LessonTranscript["id"]}) => {
+    try {
+        await requireAdminAuth();
+        const validId = z.string().parse(id);
+
+        return await prisma.lessonTranscript.delete({
+            where: {
+                id: validId
+            }
+        });
+    } catch (error) {
+        
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow custom error as-is
+        }
+        throw new Error("An error occured wile trying to delete LessonTranscript");
+    }
+}
+/**
+ * Deletes entry from the LessonTranscript model.
+ * @access ADMIN
+ */
+export const dbDeleteLessonTranscriptById = async ({id}: {id: LessonTranscript["id"]}) => {
+    const deleteEntry = async () => {
+        const validId = z.string().parse(id);
+        return await prisma.lessonTranscript.delete({
+            where: { id: validId },
+            select: { id: true },
+        });
+    }
+    return await checkIfAdmin(deleteEntry);
+}
+/**
+ * Deletes entry from the LessonContent model.
+ * @access ADMIN
+ */
+export const dbDeleteLessonContentById = async ({id}: {id: LessonContent["id"]}) => {
+    const deleteEntry = async () => {
+        const validId = z.string().parse(id);
+        return await prisma.lessonContent.delete({
+            where: { id: validId },
+            select: { id: true },
+        });
+    }
+    return await checkIfAdmin(deleteEntry);
+}
+/**
+ * Deletes entry from the Video model.
+ * @access ADMIN
+ */
+export const dbDeleteVideoById = async ({id}: {id: Video["id"]}) => {
+    const deleteEntry = async () => {
+        const validId = z.string().parse(id);
+        return await prisma.video.delete({
+            where: { id: validId },
+            select: { id: true },
+        });
+    }
+    return await checkIfAdmin(deleteEntry);
+}
+/**
+ * Deletes entry from the CourseDetails model
+ * @access ADMIN
+ */
+export const dbDeleteCourseDetailsById = async ({id}: {id: CourseDetails["id"]}) => {
+    const deleteEntry = async () => {
+        const validId = z.string().parse(id);
+        return await prisma.courseDetails.delete({ 
+            where: { id: validId },
+            select: { id: true },
+        });
+    }
+    return await checkIfAdmin(deleteEntry);
+}
+export type ModelName = "LessonTranscript" | "LessonContent" | "Video" | "CourseDetails" | "Lesson"
+type dbDeleteModelEntryProps = {
+    id: string;
+    modelName: ModelName;
+}
+
+export const dbDeleteModelEntry = async({id, modelName}: dbDeleteModelEntryProps) => {
+    const deleteEntry = async () => {
+        const validId = z.string().parse(id);
+
+        switch(modelName) {
+            case "CourseDetails":
+                return await dbDeleteCourseDetailsById({ id: validId });
+            case "LessonContent":
+                return await dbDeleteLessonContentById({ id: validId });
+            case "LessonTranscript":
+                return await dbDeleteLessonTranscriptById({ id: validId });
+            case "Video":
+                return await dbDeleteVideoById({ id: validId });
+            case "Lesson":
+                console.error("INCOMPLETE");
+                throw new Error("INCOMPLETE");
+        }
+    }
+    return await checkIfAdmin(deleteEntry);
 }
