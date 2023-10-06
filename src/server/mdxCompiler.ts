@@ -25,7 +25,8 @@ export const mdxCompiler = async (mdxSource: string) => {
     }
 }
 export type MDXCompilerReturnType = Awaited<ReturnType<typeof mdxCompiler>>;
-
+// import type {Root} from 'mdast'
+// import type {Root} from 'remark-directive/node_modules/@types/mdast'
 const ADMONITION_TYPES = ["note", "tip", "danger", "info", "caution"]
 /**
  * Plugin for the MDX compiler that adds admonition/callout nodes and classes to compiled output. Traverses the tree
@@ -35,11 +36,11 @@ const ADMONITION_TYPES = ["note", "tip", "danger", "info", "caution"]
  * here when the new versions are out. See: https://github.com/orgs/mdx-js/discussions/2355#discussioncomment-7139230
  */
 function adminitionPlugin() {
-    // tree ought to be Node from mdast-util-definitions/lib but TS is throwing that
+    // tree ought to be Root from 'mdast' but TS is throwing that
     // type instantiation is excessively deep and possibly infinite.
     // @ts-ignore
     return (tree) => {
-        visit(tree, (node: ContainerDirective | LeafDirective | TextDirective ) => {
+        visit(tree, (node: ContainerDirective | LeafDirective | TextDirective) => {
             if (
                 node.type === 'containerDirective' ||
                 node.type === 'leafDirective' ||
