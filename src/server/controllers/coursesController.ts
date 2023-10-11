@@ -784,7 +784,7 @@ type dbDeleteModelEntryProps = {
     modelName: ModelName;
 }
 /**
- * Higher order function that organizes the deletion of model entries by calling the correct function
+ * Organizes the deletion of model entries by calling the correct function
  * via filter of the model name.
  * @access ADMIN
  */
