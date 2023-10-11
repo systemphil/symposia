@@ -1,16 +1,14 @@
 import { prisma } from "../db";
 import * as z from "zod";
-import { Course, CourseDetails, LessonContent, LessonTranscript, Video } from "@prisma/client";
+import { Course, CourseDetails, Lesson, LessonContent, LessonTranscript, Video } from "@prisma/client";
 import { exclude } from "@/utils/utils";
 import { Access, AuthenticationError, requireAdminAuth } from "@/server/auth";
 import { mdxCompiler } from "../mdxCompiler";
+import { gcDeleteVideoFile } from "./gcController";
 
 
 /**
- * Exception handler with admin check.
- * TODO consider scrapping or using
- * ? validation needs to be part of the error handling but these can be quite varied,
- * ? and would have to be accounted for here, which increases complexity and defeats the purpose of the function
+ * Admin check wrapper with exception handling. Use by inputting the intended function as an argument to this one.
  * @param retrieveFunc 
  * @returns 
  */
@@ -21,11 +19,11 @@ const checkIfAdmin = async <T>(retrieveFunc: () => Promise<T>): Promise<T> => {
     } catch (error) {
         if (error instanceof AuthenticationError) {
             throw error; // Rethrow error as-is
+            // TODO add forbidden response here
         }
-        throw new Error("An error occured while fetching the data.");
+        throw error;
     }
 }
-
 /**
  * Calls the database to retrieve all courses.
  * @access "ADMIN""
@@ -41,7 +39,6 @@ export const dbGetAllCourses = async () => {
         throw new Error("An error occurred while fetching courses.");
     }
 }
-
 /**
  * Calls the database to retrieve all published courses.
  * @access PUBLIC
@@ -53,7 +50,6 @@ export const dbGetAllPublishedCourses = async () => {
         }
     })
 }
-
 /**
  * Calls the database to retrieve specific course by slug identifier
  * @access PUBLIC
@@ -65,7 +61,6 @@ export const dbGetCourseBySlug = async (slug: string) => {
         }
     })
 }
-
 /**
  * Calls the database to retrieve specific course, its course details and lessons by id identifier.
  * @access "ADMIN""
@@ -94,7 +89,6 @@ export const dbGetCourseAndDetailsAndLessonsById = async (id: string) => {
         throw new Error("An error occurred while fetching the course.");
     }
 }
-
 /**
  * Calls the database to retrieve specific lesson and relations by id identifier. Does not include fields with byte objects, only plain objects.
  * @access "ADMIN""
@@ -131,7 +125,6 @@ export const dbGetLessonAndRelationsById = async (id: string) => {
         throw new Error("An error occurred while fetching the course.");
     }
 }
-
 /**
  * Calls the database to retrieve mdx field by id of the model as identifier.
  * Converts binary content of found record to string so that it can pass the tRPC network boundary
@@ -213,7 +206,6 @@ export const dbGetMdxByModelId = async (id: string, internal?: boolean) => {
     }
 }
 export type DBGetMdxContentByModelIdReturnType = Awaited<ReturnType<typeof dbGetMdxByModelId>>;
-
 export type LessonTypes = "CONTENT" | "TRANSCRIPT";
 export type DBGetCompiledMdxBySlugsProps = {
     courseSlug: string;
@@ -329,7 +321,6 @@ export const dbGetCompiledMdxBySlugs = async ({
     }
     throw new Error("Error occured when attempting to find data models by slug(s)");
 }
-
 /**
  * Calls the database to retrieve specific Video entry based on the ID of the Lesson it is related to. 
  * Returns null when either Lesson or its related Video is not found.
@@ -361,7 +352,6 @@ export const dbGetVideoByLessonId = async (id: string) => {
         throw new Error("An error occurred while retrieving the video from database.");
     }
 }
-
 type DbUpsertCourseByIdProps = {
     id?: string, 
     slug: string, 
@@ -371,7 +361,6 @@ type DbUpsertCourseByIdProps = {
     published?: boolean | null, 
     author?: string | null,
 }
-
 /**
  * Updates an existing course details by id as identifier or creates a new one if id is not provided.
  * @access "ADMIN""
@@ -418,7 +407,6 @@ export const dbUpsertCourseById = async ({
         throw new Error("An error occurred while fetching the course.");
     }
 }
-
 /**
  * Updates an existing lesson details by id as identifier or creates a new one if id is not provided.
  * @access "ADMIN""
@@ -468,7 +456,6 @@ export const dbUpsertLessonById = async ({
         throw new Error("An error occurred while fetching the course.");
     }
 }
-
 /**
  * Updates an existing lessonContent details by id as identifier or creates a new one if id is not provided.
  * @access "ADMIN""
@@ -510,7 +497,6 @@ export const dbUpsertLessonContentById = async ({
         throw new Error("An error occurred while fetching the course.");
     }
 }
-
 /**
  * Updates an existing LessonTranscript model by id as identifier or creates a new one if id is not provided.
  * Must have the id of the Lesson this LessonTranscript relates to.
@@ -553,7 +539,6 @@ export const dbUpsertLessonTranscriptById = async ({
         throw new Error("An error occurred while fetching the course.");
     }
 }
-
 /**
  * Updates an existing CourseDetails  model by id as identifier or creates a new one if id is not provided.
  * Must have the id of the Course this CourseDetails relates to.
@@ -596,7 +581,6 @@ export const dbUpsertCourseDetailsById = async ({
         throw new Error("An error occurred while upserting CourseDetails.");
     }
 }
-
 /**
  * Updates mdx field for an existing model by id as identifier.
  * @access "ADMIN""
@@ -668,7 +652,6 @@ export const dbUpdateMdxByModelId = async ({
         throw new Error("An error occurred while updating MDX resources.");
     }
 }
-
 /**
  * Updates Video details by id as identifier or creates a new one if id is not provided, in which case 
  * the id of the lesson this video is related to must be provided.
@@ -707,107 +690,104 @@ export const dbUpsertVideoById = async ({
         throw new Error("An error occurred while fetching the course.");
     }
 }
-
-// TODO cleanup?
-export const BACKUP_dbDeleteLessonContentById = async ({id}: {id: LessonContent["id"]}) => {
-    try {
-        await requireAdminAuth();
-        const validId = z.string().parse(id);
-
-        return await prisma.lessonContent.delete({
-            where: {
-                id: validId
-            }
-        });
-    } catch (error) {
-        if (error instanceof AuthenticationError) {
-            throw error; // Rethrow custom error as-is
-        }
-        throw new Error("An error occured wile trying to delete LessonContent");
-    }
-}
-
-// TODO cleanup?
-export const BACKUP_dbDeleteLessonTranscriptById = async ({id}: {id: LessonTranscript["id"]}) => {
-    try {
-        await requireAdminAuth();
-        const validId = z.string().parse(id);
-
-        return await prisma.lessonTranscript.delete({
-            where: {
-                id: validId
-            }
-        });
-    } catch (error) {
-        
-        if (error instanceof AuthenticationError) {
-            throw error; // Rethrow custom error as-is
-        }
-        throw new Error("An error occured wile trying to delete LessonTranscript");
-    }
-}
 /**
- * Deletes entry from the LessonTranscript model.
+ * Deletes entry from the LessonTranscript model. Returns only id of deleted model.
  * @access ADMIN
  */
 export const dbDeleteLessonTranscriptById = async ({id}: {id: LessonTranscript["id"]}) => {
-    const deleteEntry = async () => {
+    const deleteLessonTranscriptEntry = async () => {
         const validId = z.string().parse(id);
         return await prisma.lessonTranscript.delete({
             where: { id: validId },
             select: { id: true },
         });
     }
-    return await checkIfAdmin(deleteEntry);
+    return await checkIfAdmin(deleteLessonTranscriptEntry);
 }
 /**
- * Deletes entry from the LessonContent model.
+ * Deletes entry from the LessonContent model. Returns only id of deleted model.
  * @access ADMIN
  */
 export const dbDeleteLessonContentById = async ({id}: {id: LessonContent["id"]}) => {
-    const deleteEntry = async () => {
+    const deleteLessonContentEntry = async () => {
         const validId = z.string().parse(id);
         return await prisma.lessonContent.delete({
             where: { id: validId },
             select: { id: true },
         });
     }
-    return await checkIfAdmin(deleteEntry);
+    return await checkIfAdmin(deleteLessonContentEntry);
 }
 /**
- * Deletes entry from the Video model.
+ * Deletes entry from the Video model. Returns only id of deleted model.
  * @access ADMIN
  */
 export const dbDeleteVideoById = async ({id}: {id: Video["id"]}) => {
-    const deleteEntry = async () => {
+    const deleteVideoEntry = async () => {
         const validId = z.string().parse(id);
         return await prisma.video.delete({
             where: { id: validId },
             select: { id: true },
         });
     }
-    return await checkIfAdmin(deleteEntry);
+    return await checkIfAdmin(deleteVideoEntry);
 }
 /**
- * Deletes entry from the CourseDetails model
+ * Deletes entry from the CourseDetails model. Returns only id of deleted model.
  * @access ADMIN
  */
 export const dbDeleteCourseDetailsById = async ({id}: {id: CourseDetails["id"]}) => {
-    const deleteEntry = async () => {
+    const deleteCourseDetailsEntry = async () => {
         const validId = z.string().parse(id);
         return await prisma.courseDetails.delete({ 
             where: { id: validId },
             select: { id: true },
         });
     }
-    return await checkIfAdmin(deleteEntry);
+    return await checkIfAdmin(deleteCourseDetailsEntry);
+}
+/**
+ * 
+*/
+// todo
+export const dbDeleteLesson = async ({id}: {id: Lesson["id"]}) => {
+    const deleteLesson = async () => {
+        const validId = z.string().parse(id);
+        const videoExists = await prisma.lesson.findUnique({
+            where: { id: validId },
+            select: {
+                video: {
+                    select: {
+                        id: true,
+                        fileName: true,
+                    }
+                }
+            }
+        });
+        if (videoExists && videoExists.video) {
+            const directoryAndVideoToDelete = {
+                fileName: videoExists.video.fileName,
+                id: videoExists.video.id,
+                directory: true,
+            }
+            await gcDeleteVideoFile(directoryAndVideoToDelete);
+        }
+        return await prisma.lesson.delete({
+            where: { id: validId },
+        })
+    }
+    return await checkIfAdmin(deleteLesson);
 }
 export type ModelName = "LessonTranscript" | "LessonContent" | "Video" | "CourseDetails" | "Lesson"
 type dbDeleteModelEntryProps = {
     id: string;
     modelName: ModelName;
 }
-
+/**
+ * Higher order function that organizes the deletion of model entries by calling the correct function
+ * via filter of the model name.
+ * @access ADMIN
+ */
 export const dbDeleteModelEntry = async({id, modelName}: dbDeleteModelEntryProps) => {
     const deleteEntry = async () => {
         const validId = z.string().parse(id);
@@ -820,6 +800,7 @@ export const dbDeleteModelEntry = async({id, modelName}: dbDeleteModelEntryProps
             case "LessonTranscript":
                 return await dbDeleteLessonTranscriptById({ id: validId });
             case "Video":
+                // TODO create new HoF to delete db video and gc video separately
                 return await dbDeleteVideoById({ id: validId });
             case "Lesson":
                 console.error("INCOMPLETE");

@@ -59,18 +59,21 @@ export const gcGenerateSignedPostUploadUrl = async ({
 type gcVideoFilePathProps = {
     fileName: string;
     id: string;
+    directory?: boolean;
 }
 /**
- * Deletes a video file in storage. Requires the ID of the Video entry from db and the filename.
+ * Deletes a video file in storage. Requires the ID of the Video entry from db and the filename. 
+ * Set optional directory flag to true in order to delete the directory of the file as well.
  * @access "ADMIN"
  */
 export const gcDeleteVideoFile = async ({
     fileName,
     id,
+    directory = false,
 }: gcVideoFilePathProps) => {
     try {
         await requireAdminAuth();
-        const filePath = `video/${id}/${fileName}`
+        const filePath = directory ? `video/${id}` : `video/${id}/${fileName}`
         const res = await bucket
             .file(filePath)
             .delete()
@@ -78,7 +81,7 @@ export const gcDeleteVideoFile = async ({
                 return data[0];
             });
         if (res && res.statusCode === 204) {
-            console.log(`${new Date().toLocaleString()} | Object ${fileName} deleted successfully.`);
+            console.log(`${new Date().toLocaleString()} | Object ${filePath} deleted successfully.`);
             return;
         } else {
             console.error(`Failed to delete object ${filePath}`);
@@ -90,6 +93,19 @@ export const gcDeleteVideoFile = async ({
             throw error; // Rethrow error as-is
         }
         throw new Error("An error occurred while attempting to delete file in storage.");
+    }
+}
+// TODO delete if the above one works
+export const gcDeleteVideoFileDirectory = async ({ id }: { id: string}) => {
+    try {
+        await requireAdminAuth();
+        const filePath = `video/${id}`
+        const res = await bucket.delete()
+    } catch(error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow error as-is
+        }
+        throw error;
     }
 }
 /**
