@@ -34,6 +34,8 @@ export default async function AdminLessonEdit ({ params }: { params: { courseId:
                     ) ? (
                         <CourseMaterialCard 
                             href={`/admin/courses/${courseId}/lessons/${lessonId}/lesson-material/${lesson.content.id}`} 
+                            id={lesson.content.id}
+                            modelName='LessonContent'
                             heading={lesson.name}
                         />
                     ) : (
@@ -72,7 +74,9 @@ export default async function AdminLessonEdit ({ params }: { params: { courseId:
                         lesson.transcript
                     ) ? (
                         <CourseMaterialCard 
-                            href={`/admin/courses/${courseId}/lessons/${lessonId}/lesson-material/${lesson.transcript.id}`} 
+                            href={`/admin/courses/${courseId}/lessons/${lessonId}/lesson-material/${lesson.transcript.id}`}
+                            id={lesson.transcript.id}
+                            modelName='LessonTranscript'
                             heading={lesson.name}
                         />
                     ) : (
