@@ -12,22 +12,26 @@ If you'd like to be part of the development of this app, kindly follow the instr
 
 0.3. Set the newly made development branch as the current active branch, run `git checkout <your-branch-name>`.
 
-0.4. In future, when getting the latest changes from the main development branch, run `git merge dev` whilst on your development branch to incorporate the changes into your branch. 
+0.4. In future, when getting the latest changes from the main development branch, run `git merge dev` whilst on your development branch to incorporate the changes into your branch.
 
 ### Packages Installation
+
 1.0. Once inside, run `npm i` (alias `npm install`) to install all the packages. This will create the `/node_modules` folder.
 
 ### Environmental Variables
+
 2.0. After installation, run `touch .env` (or `ni .env` if you use Powershell or some windowsy thing).
 
-2.1. Then, run `cp env.example .env` to copy the example env file. 
+2.1. Then, run `cp env.example .env` to copy the example env file.
 
 2.2. Open the newly created `.env` file and check that it's populated. Ask Filip/Firgrep directly for the missing values.
 
 ### Setting Up Local Prisma Client
+
 3.0. Run `npx prisma generate` to generate the prisma client, this will be important for keeping your local types up to date with the database schema.
 
 ### Running the Server
+
 9.9. Finally, to start a local development server, run `npm run dev` and open up `http://localhost:3000` on your favorite browser.
 
 - Whenever you make any edits to the source files while the server is running, the server will pick up those changes and output them immediately. This is extremely handy during development, as you can input code and hit `ctrl` + `k` then `s` (save-all) and view directly your latest changes.
@@ -41,7 +45,7 @@ A high-level abstraction of the relationship between Client- and Server Componen
 
 ## File Structure
 
-```
+```txt
 /
 ├───logs
 ├───prisma
@@ -84,6 +88,7 @@ A high-level abstraction of the relationship between Client- and Server Componen
 ```
 
 ## Explanation
+
 - `/` Project root directory.
 - `logs` Various text and resources directory.
 - `prisma` Prisma directory, holds the `.prisma` schema database models. **This is the source of truth for all data.** Through the Prisma Client, the application gains type-safety of the db models.
@@ -117,3 +122,7 @@ A high-level abstraction of the relationship between Client- and Server Componen
 - `.env` **DO NOT COMMIT TO GIT** Environenmental variables. If the requisite variables are not populated, parts of the app won't work.
 - `.env.example` Example file of `.env` but without sensitive values.
 - `package.json` Top-level dependencies and configurations of the project.
+
+## Git Etiquette
+
+Please review our guidelines concerning naming conventions for branches and commit messages in `./GIT-ETIQUETTE.md`.
