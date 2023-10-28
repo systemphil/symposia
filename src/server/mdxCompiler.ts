@@ -1,8 +1,8 @@
-import {compile} from '@mdx-js/mdx'
+import {compile} from '@mdx-js/mdx';
 import remarkGfm from "remark-gfm";
 import remarkDirective from 'remark-directive';
-import {visit} from 'unist-util-visit'
-import type { ContainerDirective, LeafDirective, TextDirective } from "mdast-util-directive";
+import {visit} from 'unist-util-visit';
+import type {Root} from 'mdast';
 
 
 /**
@@ -25,22 +25,17 @@ export const mdxCompiler = async (mdxSource: string) => {
     }
 }
 export type MDXCompilerReturnType = Awaited<ReturnType<typeof mdxCompiler>>;
-// import type {Root} from 'mdast'
-// import type {Root} from 'remark-directive/node_modules/@types/mdast'
 const ADMONITION_TYPES = ["note", "tip", "danger", "info", "caution"]
 /**
  * Plugin for the MDX compiler that adds admonition/callout nodes and classes to compiled output. Traverses the tree
  * to check for `directives` (Markdown items tagged with `:::`) with special names. E.g. `:::danger <content-here> :::`.
- * @todo type-checking is switched off owing to possible issues in the library or cross-library dependency. 
+ * @todo some type-checking is switched off owing to possible issues in the library or cross-library dependency. 
  * The unifiedjs/mdx-packages ecosystem are currently transitioning into new versions with stricter typing, so types should be updated
  * here when the new versions are out. See: https://github.com/orgs/mdx-js/discussions/2355#discussioncomment-7139230
  */
 function adminitionPlugin() {
-    // tree ought to be Root from 'mdast' but TS is throwing that
-    // type instantiation is excessively deep and possibly infinite.
-    // @ts-ignore
-    return (tree) => {
-        visit(tree, (node: ContainerDirective | LeafDirective | TextDirective) => {
+    return (tree: Root) => {
+        visit(tree, (node) => {
             if (
                 node.type === 'containerDirective' ||
                 node.type === 'leafDirective' ||

@@ -1,4 +1,5 @@
 import { 
+    dbDeleteModelEntry,
     dbGetAllCourses, 
     dbGetCourseAndDetailsAndLessonsById, 
     dbGetLessonAndRelationsById, 
@@ -121,5 +122,16 @@ export const coursesRouter = createTRPCRouter({
         )
         .mutation(async (opts) => {
             return await dbUpdateMdxByModelId(opts.input);
-        })
+        }),
+    deleteModelEntry: protectedAdminProcedure
+        .input(
+            z
+                .object({
+                    id: z.string(),
+                    modelName: z.enum(["LessonTranscript", "LessonContent", "Video", "CourseDetails", "Lesson"]),
+                })
+        )
+        .mutation(async (opts) => {
+            return await dbDeleteModelEntry(opts.input);
+        }),
 })

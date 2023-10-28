@@ -32,6 +32,8 @@ export default async function AdminCourseEdit ({ params }: { params: { courseId:
                         <CourseMaterialCard 
                             href={`/admin/courses/${courseId}/course-details/${course.details.id}`} 
                             heading="General details of the course"
+                            id={course.details.id}
+                            modelName="CourseDetails"
                         />
                     ) : (
                         <div>
@@ -52,9 +54,11 @@ export default async function AdminCourseEdit ({ params }: { params: { courseId:
                     <>
                         {course.lessons.map(lesson => (
                             <CourseMaterialCard 
-                                key={lesson.id} 
+                                key={lesson.id}
                                 href={`/admin/courses/${course.id}/lessons/${lesson.id}`} 
-                                heading={lesson.name} 
+                                heading={lesson.name}
+                                id={lesson.id}
+                                modelName='Lesson'
                             />
                         ))}
                     </>
