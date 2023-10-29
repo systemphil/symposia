@@ -73,3 +73,20 @@ export class AuthenticationError extends Error {
         this.name = "AuthenticationError";
     }
 }
+/**
+ * Admin check wrapper with exception handling. Use by inputting the intended function as an argument to this one.
+ * @param retrieveFunc 
+ * @returns void if successful, throws error if not
+ */
+export const checkIfAdmin = async <T>(retrieveFunc: () => Promise<T>): Promise<T> => {
+    try {
+        await requireAdminAuth();
+        return await retrieveFunc();
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Rethrow error as-is
+            // TODO add forbidden response here
+        }
+        throw error;
+    }
+}

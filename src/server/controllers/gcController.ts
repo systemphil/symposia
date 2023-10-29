@@ -81,7 +81,7 @@ export const gcDeleteVideoFile = async ({
                 return data[0];
             });
         if (res && res.statusCode === 204) {
-            console.log(`${new Date().toLocaleString()} | Object ${filePath} deleted successfully.`);
+            console.log(`${new Date().toLocaleString()} - Object ${filePath} deleted successfully.`);
             return;
         } else {
             console.error(`Failed to delete object ${filePath}`);

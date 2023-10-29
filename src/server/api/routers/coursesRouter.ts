@@ -1,5 +1,5 @@
 import { 
-    dbDeleteModelEntry,
+    orderDeleteModelEntry,
     dbGetAllCourses, 
     dbGetCourseAndDetailsAndLessonsById, 
     dbGetLessonAndRelationsById, 
@@ -132,6 +132,6 @@ export const coursesRouter = createTRPCRouter({
                 })
         )
         .mutation(async (opts) => {
-            return await dbDeleteModelEntry(opts.input);
+            return await orderDeleteModelEntry(opts.input);
         }),
 })

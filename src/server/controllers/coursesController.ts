@@ -2,28 +2,10 @@ import { prisma } from "../db";
 import * as z from "zod";
 import { Course, CourseDetails, Lesson, LessonContent, LessonTranscript, Video } from "@prisma/client";
 import { exclude } from "@/utils/utils";
-import { Access, AuthenticationError, requireAdminAuth } from "@/server/auth";
+import { Access, AuthenticationError, checkIfAdmin, requireAdminAuth } from "@/server/auth";
 import { mdxCompiler } from "../mdxCompiler";
-import { gcDeleteVideoFile } from "./gcController";
+import { orderDeleteVideo } from "./orderController";
 
-
-/**
- * Admin check wrapper with exception handling. Use by inputting the intended function as an argument to this one.
- * @param retrieveFunc 
- * @returns 
- */
-const checkIfAdmin = async <T>(retrieveFunc: () => Promise<T>): Promise<T> => {
-    try {
-        await requireAdminAuth();
-        return await retrieveFunc();
-    } catch (error) {
-        if (error instanceof AuthenticationError) {
-            throw error; // Rethrow error as-is
-            // TODO add forbidden response here
-        }
-        throw error;
-    }
-}
 /**
  * Calls the database to retrieve all courses.
  * @access "ADMIN""
@@ -351,6 +333,26 @@ export const dbGetVideoByLessonId = async (id: string) => {
         }
         throw new Error("An error occurred while retrieving the video from database.");
     }
+}
+
+/**
+ * Calls the database to retrieve specific video.fileName by id identifier.
+ * @access "ADMIN""
+ */
+export const dbGetVideoFileNameByVideoId = async (id: string) => {
+    const getVideoFileName = async () => {
+        const validId = z.string().parse(id);
+        const video = await prisma.video.findUnique({
+            where: {
+                id: validId,
+            },
+            select: {
+                fileName: true,
+            }
+        });
+        return video;
+    }
+    return await checkIfAdmin(getVideoFileName);
 }
 type DbUpsertCourseByIdProps = {
     id?: string, 
@@ -721,6 +723,7 @@ export const dbDeleteLessonContentById = async ({id}: {id: LessonContent["id"]})
 /**
  * Deletes entry from the Video model. Returns only id of deleted model.
  * @access ADMIN
+ * @note This function DOES NOT delete video from storage. Consider using `orderDeleteVideo()` instead.
  */
 export const dbDeleteVideoById = async ({id}: {id: Video["id"]}) => {
     const deleteVideoEntry = async () => {
@@ -770,42 +773,9 @@ export const dbDeleteLesson = async ({id}: {id: Lesson["id"]}) => {
                 id: videoExists.video.id,
                 directory: true,
             }
-            await gcDeleteVideoFile(directoryAndVideoToDelete);
+            await orderDeleteVideo(directoryAndVideoToDelete);
         }
-        return await prisma.lesson.delete({
-            where: { id: validId },
-        })
+        // TODO
     }
     return await checkIfAdmin(deleteLesson);
-}
-export type ModelName = "LessonTranscript" | "LessonContent" | "Video" | "CourseDetails" | "Lesson"
-type dbDeleteModelEntryProps = {
-    id: string;
-    modelName: ModelName;
-}
-/**
- * Organizes the deletion of model entries by calling the correct function
- * via filter of the model name.
- * @access ADMIN
- */
-export const dbDeleteModelEntry = async({id, modelName}: dbDeleteModelEntryProps) => {
-    const deleteEntry = async () => {
-        const validId = z.string().parse(id);
-
-        switch(modelName) {
-            case "CourseDetails":
-                return await dbDeleteCourseDetailsById({ id: validId });
-            case "LessonContent":
-                return await dbDeleteLessonContentById({ id: validId });
-            case "LessonTranscript":
-                return await dbDeleteLessonTranscriptById({ id: validId });
-            case "Video":
-                // TODO create new HoF to delete db video and gc video separately
-                return await dbDeleteVideoById({ id: validId });
-            case "Lesson":
-                console.error("INCOMPLETE");
-                throw new Error("INCOMPLETE");
-        }
-    }
-    return await checkIfAdmin(deleteEntry);
 }
