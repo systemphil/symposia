@@ -2,9 +2,11 @@ import { Video } from "@prisma/client";
 import * as z from "zod";
 import { 
     dbDeleteCourseDetailsById, 
+    dbDeleteLesson, 
     dbDeleteLessonContentById, 
     dbDeleteLessonTranscriptById, 
     dbDeleteVideoById, 
+    dbGetLessonAndRelationsById, 
     dbGetVideoFileNameByVideoId 
 } from "./coursesController";
 import { gcDeleteVideoFile } from "./gcController";
@@ -47,9 +49,34 @@ type OrderDeleteModelEntryProps = {
     modelName: ModelName;
 }
 /**
+ * Higher order controller function that organizes the deletion of a lesson entry by
+ * calling the correct function using the lesson id. Will first check if the lesson has a video entry,
+ * and if so, will delete the video file in storage and the video entry in the database, before
+ * deleting the lesson entry and cascade delete all related model entries.
+ * @access ADMIN
+ */
+const orderDeleteLesson = async (id: string) => {
+    const deletionAtOrderDeleteLession = async () => {
+        const validId = z.string().parse(id);
+        const lesson = await dbGetLessonAndRelationsById(validId);
+        if (lesson && lesson.video) {
+            const videoArgs = {
+                id: lesson.video.id,
+                directory: true,
+            }
+            await orderDeleteVideo(videoArgs);
+        }
+        const isLessonWithoutVideo = await dbGetLessonAndRelationsById(validId);
+        if (isLessonWithoutVideo && isLessonWithoutVideo.video !== null) throw new Error("Lesson video not deleted");
+        await dbDeleteLesson({ id: validId });
+    }
+    return await checkIfAdmin(deletionAtOrderDeleteLession);
+}
+/**
  * Higher order controller function that organizes the deletion of model entries by 
  * calling the correct function using the model name as a switch statement filter.
  * @access ADMIN
+ * @description For video entries, the deletion of the video file in storage is also handled.
  */
 export const orderDeleteModelEntry = async({id, modelName}: OrderDeleteModelEntryProps) => {
     const deleteEntry = async () => {
@@ -69,9 +96,10 @@ export const orderDeleteModelEntry = async({id, modelName}: OrderDeleteModelEntr
                 }
                 return await orderDeleteVideo(videoArgs);
             case "Lesson":
-                console.error("INCOMPLETE");
-                throw new Error("INCOMPLETE");
+                return await orderDeleteLesson(validId);
         }
     }
     return await checkIfAdmin(deleteEntry);
 }
+
+// TODO - add orderDeleteCourse
