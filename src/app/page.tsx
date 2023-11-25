@@ -1,3 +1,4 @@
+import ClientErrorToasts from "@/components/ClientErrorToasts";
 import AuthShowcase from "../components/test/AuthShowcase";
 import ToastTest from "@/components/test/ToastTest";
 
@@ -12,6 +13,7 @@ export default async function Home() {
             */}
             <AuthShowcase />
             <ToastTest />
+            <ClientErrorToasts />
         </main>
     )
 }
