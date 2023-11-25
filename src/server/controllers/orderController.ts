@@ -13,14 +13,14 @@ import { gcDeleteVideoFile } from "./gcController";
 import { checkIfAdmin } from "../auth";
 
 
-type CtrlVideoProps = Pick<Video, "id"> & Partial<Pick<Video, "fileName">> & { directory?: boolean };
+type OrderDeleteVideoProps = Pick<Video, "id"> & Partial<Pick<Video, "fileName">> & { directory?: boolean };
 /**
  * Higher order controller function that organizes the deletion of video file in storage and the entry from the database.
  * Requires the ID of the Video entry from db. `fileName` will be queried in the db if not provided.
  * @access "ADMIN"
  * @optional deleting `directory` of video file on storage is set to true by default but can be overridden to false
  */
-export const orderDeleteVideo = async({id, fileName = "", directory = true}: CtrlVideoProps ) => {
+export async function orderDeleteVideo ({id, fileName = "", directory = true}: OrderDeleteVideoProps ) {
     const deletionProcess = async () => {
         const validId = z.string().parse(id);
         let validFileName = z.string().parse(fileName);
@@ -43,7 +43,7 @@ export const orderDeleteVideo = async({id, fileName = "", directory = true}: Ctr
     }
     return await checkIfAdmin(deletionProcess);
 }
-export type ModelName = "LessonTranscript" | "LessonContent" | "Video" | "CourseDetails" | "Lesson"
+export type ModelName = "LessonTranscript" | "LessonContent" | "Video" | "CourseDetails" | "Lesson" | "Course";
 type OrderDeleteModelEntryProps = {
     id: string;
     modelName: ModelName;
@@ -55,7 +55,7 @@ type OrderDeleteModelEntryProps = {
  * deleting the lesson entry and cascade delete all related model entries.
  * @access ADMIN
  */
-const orderDeleteLesson = async (id: string) => {
+async function orderDeleteLesson (id: string) {
     const deletionAtOrderDeleteLession = async () => {
         const validId = z.string().parse(id);
         const lesson = await dbGetLessonAndRelationsById(validId);
@@ -78,7 +78,7 @@ const orderDeleteLesson = async (id: string) => {
  * @access ADMIN
  * @description For video entries, the deletion of the video file in storage is also handled.
  */
-export const orderDeleteModelEntry = async({id, modelName}: OrderDeleteModelEntryProps) => {
+export async function orderDeleteModelEntry ({id, modelName}: OrderDeleteModelEntryProps) {
     const deleteEntry = async () => {
         const validId = z.string().parse(id);
 
@@ -97,6 +97,8 @@ export const orderDeleteModelEntry = async({id, modelName}: OrderDeleteModelEntr
                 return await orderDeleteVideo(videoArgs);
             case "Lesson":
                 return await orderDeleteLesson(validId);
+            case "Course":
+                throw new Error("Course deletion not implemented");
         }
     }
     return await checkIfAdmin(deleteEntry);

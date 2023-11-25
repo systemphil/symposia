@@ -3,7 +3,6 @@ import { bucket } from "../bucket";
 import { dbUpsertVideoById } from "./coursesController";
 import { AuthenticationError, requireAdminAuth } from "@/server/auth";
 
-
 type gcGenerateSignedPostUploadURLProps = {
     fileName: string;
     id?: string;
@@ -16,11 +15,11 @@ type gcGenerateSignedPostUploadURLProps = {
  * @description All lesson videos will be stored the directory named after their ID in the Video entry: /video/[VideoId]/[fileName].ext
  * @access "ADMIN"
  */
-export const gcGenerateSignedPostUploadUrl = async ({
+export async function gcGenerateSignedPostUploadUrl ({
     fileName,
     id,
     lessonId,
-}: gcGenerateSignedPostUploadURLProps) => {
+}: gcGenerateSignedPostUploadURLProps) {
     try {
         await requireAdminAuth();
         const videoEntry = {
@@ -66,11 +65,11 @@ type gcVideoFilePathProps = {
  * Set optional directory flag to true in order to delete the directory of the file as well.
  * @access "ADMIN"
  */
-export const gcDeleteVideoFile = async ({
+export async function gcDeleteVideoFile ({
     fileName,
     id,
     directory = false,
-}: gcVideoFilePathProps) => {
+}: gcVideoFilePathProps) {
     try {
         await requireAdminAuth();
         const filePath = directory ? `video/${id}` : `video/${id}/${fileName}`
@@ -95,27 +94,14 @@ export const gcDeleteVideoFile = async ({
         throw new Error("An error occurred while attempting to delete file in storage.");
     }
 }
-// TODO delete if the above one works
-export const gcDeleteVideoFileDirectory = async ({ id }: { id: string}) => {
-    try {
-        await requireAdminAuth();
-        const filePath = `video/${id}`
-        const res = await bucket.delete()
-    } catch(error) {
-        if (error instanceof AuthenticationError) {
-            throw error; // Rethrow error as-is
-        }
-        throw error;
-    }
-}
 /**
  * Generates a signed Read Url for specific video from bucket. Requires the ID of the Video entry from db and the filename.
  * @access PUBLIC
  */
-export const gcGenerateReadSignedUrl = async ({
+export async function  gcGenerateReadSignedUrl ({
     fileName,
     id,
-}: gcVideoFilePathProps) => {
+}: gcVideoFilePathProps) {
     try {
         const filePath = `video/${id}/${fileName}`
         const options: GetSignedUrlConfig = {

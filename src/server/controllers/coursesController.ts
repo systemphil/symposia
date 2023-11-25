@@ -4,7 +4,6 @@ import { Course, CourseDetails, Lesson, LessonContent, LessonTranscript, Video }
 import { exclude } from "@/utils/utils";
 import { Access, AuthenticationError, checkIfAdmin, requireAdminAuth } from "@/server/auth";
 import { mdxCompiler } from "../mdxCompiler";
-import { orderDeleteVideo } from "./orderController";
 
 /**
  * Calls the database to retrieve all courses.
