@@ -763,3 +763,19 @@ export const dbDeleteLesson = async ({id}: {id: Lesson["id"]}) => {
     }
     return await checkIfAdmin(deleteLesson);
 }
+
+/**
+ * Deletes entry from the Lesson model (and all related models). Returns only id of deleted model.
+ * @access ADMIN
+ * @warning Does NOT delete video from storage. Consider using `orderDeleteVideo()` or `orderDeleteLesson()` instead.
+*/
+export const dbDeleteCourse = async ({id}: {id: Course["id"]}) => {
+    const deleteCourse = async () => {
+        const validId = z.string().parse(id);
+        return await prisma.course.delete({
+            where: { id: validId },
+            select: { id: true },
+        });
+    }
+    return await checkIfAdmin(deleteCourse);
+}

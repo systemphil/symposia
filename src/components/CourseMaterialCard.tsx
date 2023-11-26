@@ -4,7 +4,7 @@ import Link from "next/link"
 import Heading from "./Heading"
 import ButtonDeleteCross from "./ButtonDeleteCross";
 import { useDeleteEntry } from "./ContextDeleteEntry";
-import { type ModelName } from "@/server/controllers/coursesController";
+import { type ModelName } from "@/server/controllers/orderController";
 
 type CourseMaterialCardProps = {
     href: string,
