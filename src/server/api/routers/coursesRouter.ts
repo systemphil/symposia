@@ -1,5 +1,4 @@
-import { 
-    dbDeleteModelEntry,
+import {
     dbGetAllCourses, 
     dbGetCourseAndDetailsAndLessonsById, 
     dbGetLessonAndRelationsById, 
@@ -12,6 +11,7 @@ import {
 } from "@/server/controllers/coursesController";
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import * as z from "zod";
+import { orderDeleteModelEntry } from "@/server/controllers/orderController";
 
 /**
  * TypeScript Remote Procedure Call router for all matters related to the Course data model and its relations.
@@ -128,10 +128,10 @@ export const coursesRouter = createTRPCRouter({
             z
                 .object({
                     id: z.string(),
-                    modelName: z.enum(["LessonTranscript", "LessonContent", "Video", "CourseDetails", "Lesson"]),
+                    modelName: z.enum(["LessonTranscript", "LessonContent", "Video", "CourseDetails", "Lesson", "Course"]),
                 })
         )
         .mutation(async (opts) => {
-            return await dbDeleteModelEntry(opts.input);
+            return await orderDeleteModelEntry(opts.input);
         }),
 })

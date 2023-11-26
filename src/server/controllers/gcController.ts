@@ -2,7 +2,7 @@ import { type GetSignedUrlConfig, type GenerateSignedPostPolicyV4Options } from 
 import { bucket } from "../bucket";
 import { dbUpsertVideoById } from "./coursesController";
 import { AuthenticationError, requireAdminAuth } from "@/server/auth";
-
+import { colorLog } from "@/utils/utils";
 
 type gcGenerateSignedPostUploadURLProps = {
     fileName: string;
@@ -16,11 +16,11 @@ type gcGenerateSignedPostUploadURLProps = {
  * @description All lesson videos will be stored the directory named after their ID in the Video entry: /video/[VideoId]/[fileName].ext
  * @access "ADMIN"
  */
-export const gcGenerateSignedPostUploadUrl = async ({
+export async function gcGenerateSignedPostUploadUrl ({
     fileName,
     id,
     lessonId,
-}: gcGenerateSignedPostUploadURLProps) => {
+}: gcGenerateSignedPostUploadURLProps) {
     try {
         await requireAdminAuth();
         const videoEntry = {
@@ -59,63 +59,41 @@ export const gcGenerateSignedPostUploadUrl = async ({
 type gcVideoFilePathProps = {
     fileName: string;
     id: string;
-    directory?: boolean;
 }
 /**
  * Deletes a video file in storage. Requires the ID of the Video entry from db and the filename. 
- * Set optional directory flag to true in order to delete the directory of the file as well.
  * @access "ADMIN"
+ * @note "Directories" are automatically deleted when empty.
  */
-export const gcDeleteVideoFile = async ({
+export async function gcDeleteVideoFile ({
     fileName,
     id,
-    directory = false,
-}: gcVideoFilePathProps) => {
-    try {
-        await requireAdminAuth();
-        const filePath = directory ? `video/${id}` : `video/${id}/${fileName}`
-        const res = await bucket
-            .file(filePath)
-            .delete()
-            .then((data) => {
-                return data[0];
-            });
-        if (res && res.statusCode === 204) {
-            console.log(`${new Date().toLocaleString()} | Object ${filePath} deleted successfully.`);
-            return;
-        } else {
-            console.error(`Failed to delete object ${filePath}`);
-            console.log(res);
-            throw new Error("Failed to delete object.");
-        }
-    } catch(error) {
-        if (error instanceof AuthenticationError) {
-            throw error; // Rethrow error as-is
-        }
-        throw new Error("An error occurred while attempting to delete file in storage.");
-    }
-}
-// TODO delete if the above one works
-export const gcDeleteVideoFileDirectory = async ({ id }: { id: string}) => {
-    try {
-        await requireAdminAuth();
-        const filePath = `video/${id}`
-        const res = await bucket.delete()
-    } catch(error) {
-        if (error instanceof AuthenticationError) {
-            throw error; // Rethrow error as-is
-        }
-        throw error;
+}: gcVideoFilePathProps) {
+    await requireAdminAuth();
+    const filePath = `video/${id}/${fileName}`;
+    const res = await bucket
+        .file(filePath)
+        .delete()
+        .then((data) => {
+            return data[0];
+        });
+    if (res && res.statusCode === 204) {
+        colorLog(`===OBJECT DELETED->${filePath}`);
+        return;
+    } else {
+        console.error(`Failed to delete object ${filePath}`);
+        console.log(res);
+        throw new Error("Failed to delete object.");
     }
 }
 /**
  * Generates a signed Read Url for specific video from bucket. Requires the ID of the Video entry from db and the filename.
  * @access PUBLIC
  */
-export const gcGenerateReadSignedUrl = async ({
+export async function gcGenerateReadSignedUrl ({
     fileName,
     id,
-}: gcVideoFilePathProps) => {
+}: gcVideoFilePathProps) {
     try {
         const filePath = `video/${id}/${fileName}`
         const options: GetSignedUrlConfig = {
@@ -128,7 +106,7 @@ export const gcGenerateReadSignedUrl = async ({
             .getSignedUrl(options);
         return url;
     } catch(error) {
-        throw new Error("An error occurred while attempting to delete file in storage.");
+        throw new Error("An error occurred while attempting to generate signed URL.");
     }
 }
 

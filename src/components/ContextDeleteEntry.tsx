@@ -1,7 +1,7 @@
 "use client";
 
 import { apiClientside } from '@/lib/trpc/trpcClientside';
-import { type ModelName } from '@/server/controllers/coursesController';
+import { type ModelName } from '@/server/controllers/orderController';
 import React, { createContext, useContext, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -11,7 +11,7 @@ const DeleteContext = createContext({deleteEntry: (id: string, modelName: ModelN
 
 /**
  * Custom Hook to call tRPC to delete an entry from db. 
- * @method .deleteEntry Use method to execute call. Requires the model name and entry ID.
+ * @method `.deleteEntry` Use method to execute call. Requires the model name and entry ID.
  * @access ADMIN
  */
 export const useDeleteEntry = () => {

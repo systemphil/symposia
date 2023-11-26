@@ -31,3 +31,12 @@ export function exclude<Obj, Key extends keyof Obj>(
     keys.forEach((key) => delete newObj[key]);
     return newObj;
 }
+
+/**
+ * Utility function to log to console with color. Default color is teal.
+ * Adds a timestamp to the log.
+ */
+export function colorLog(text: string, color?: "teal" | null) {
+    if (!color) console.log(`\x1b[36m${new Date().toLocaleString()} - ${text}\x1b[0m`);
+    if (color === "teal") console.log(`\x1b[36m${new Date().toLocaleString()} - ${text}\x1b[0m`);
+}

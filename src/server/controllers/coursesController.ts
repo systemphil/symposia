@@ -2,28 +2,9 @@ import { prisma } from "../db";
 import * as z from "zod";
 import { Course, CourseDetails, Lesson, LessonContent, LessonTranscript, Video } from "@prisma/client";
 import { exclude } from "@/utils/utils";
-import { Access, AuthenticationError, requireAdminAuth } from "@/server/auth";
+import { Access, AuthenticationError, checkIfAdmin, requireAdminAuth } from "@/server/auth";
 import { mdxCompiler } from "../mdxCompiler";
-import { gcDeleteVideoFile } from "./gcController";
 
-
-/**
- * Admin check wrapper with exception handling. Use by inputting the intended function as an argument to this one.
- * @param retrieveFunc 
- * @returns 
- */
-const checkIfAdmin = async <T>(retrieveFunc: () => Promise<T>): Promise<T> => {
-    try {
-        await requireAdminAuth();
-        return await retrieveFunc();
-    } catch (error) {
-        if (error instanceof AuthenticationError) {
-            throw error; // Rethrow error as-is
-            // TODO add forbidden response here
-        }
-        throw error;
-    }
-}
 /**
  * Calls the database to retrieve all courses.
  * @access "ADMIN""
@@ -351,6 +332,26 @@ export const dbGetVideoByLessonId = async (id: string) => {
         }
         throw new Error("An error occurred while retrieving the video from database.");
     }
+}
+
+/**
+ * Calls the database to retrieve specific video.fileName by id identifier.
+ * @access "ADMIN""
+ */
+export const dbGetVideoFileNameByVideoId = async (id: string) => {
+    const getVideoFileName = async () => {
+        const validId = z.string().parse(id);
+        const video = await prisma.video.findUnique({
+            where: {
+                id: validId,
+            },
+            select: {
+                fileName: true,
+            }
+        });
+        return video;
+    }
+    return await checkIfAdmin(getVideoFileName);
 }
 type DbUpsertCourseByIdProps = {
     id?: string, 
@@ -721,6 +722,7 @@ export const dbDeleteLessonContentById = async ({id}: {id: LessonContent["id"]})
 /**
  * Deletes entry from the Video model. Returns only id of deleted model.
  * @access ADMIN
+ * @note This function DOES NOT delete video from storage. Consider using `orderDeleteVideo()` instead.
  */
 export const dbDeleteVideoById = async ({id}: {id: Video["id"]}) => {
     const deleteVideoEntry = async () => {
@@ -747,65 +749,33 @@ export const dbDeleteCourseDetailsById = async ({id}: {id: CourseDetails["id"]})
     return await checkIfAdmin(deleteCourseDetailsEntry);
 }
 /**
- * 
+ * Deletes entry from the Lesson model (and all related models). Returns only id of deleted model.
+ * @access ADMIN
+ * @warning Does NOT delete video from storage. Consider using `orderDeleteVideo()` or `orderDeleteLesson()` instead.
 */
-// todo
 export const dbDeleteLesson = async ({id}: {id: Lesson["id"]}) => {
     const deleteLesson = async () => {
         const validId = z.string().parse(id);
-        const videoExists = await prisma.lesson.findUnique({
-            where: { id: validId },
-            select: {
-                video: {
-                    select: {
-                        id: true,
-                        fileName: true,
-                    }
-                }
-            }
-        });
-        if (videoExists && videoExists.video) {
-            const directoryAndVideoToDelete = {
-                fileName: videoExists.video.fileName,
-                id: videoExists.video.id,
-                directory: true,
-            }
-            await gcDeleteVideoFile(directoryAndVideoToDelete);
-        }
         return await prisma.lesson.delete({
             where: { id: validId },
-        })
+            select: { id: true },
+        });
     }
     return await checkIfAdmin(deleteLesson);
 }
-export type ModelName = "LessonTranscript" | "LessonContent" | "Video" | "CourseDetails" | "Lesson"
-type dbDeleteModelEntryProps = {
-    id: string;
-    modelName: ModelName;
-}
-/**
- * Organizes the deletion of model entries by calling the correct function
- * via filter of the model name.
- * @access ADMIN
- */
-export const dbDeleteModelEntry = async({id, modelName}: dbDeleteModelEntryProps) => {
-    const deleteEntry = async () => {
-        const validId = z.string().parse(id);
 
-        switch(modelName) {
-            case "CourseDetails":
-                return await dbDeleteCourseDetailsById({ id: validId });
-            case "LessonContent":
-                return await dbDeleteLessonContentById({ id: validId });
-            case "LessonTranscript":
-                return await dbDeleteLessonTranscriptById({ id: validId });
-            case "Video":
-                // TODO create new HoF to delete db video and gc video separately
-                return await dbDeleteVideoById({ id: validId });
-            case "Lesson":
-                console.error("INCOMPLETE");
-                throw new Error("INCOMPLETE");
-        }
+/**
+ * Deletes entry from the Lesson model (and all related models). Returns only id of deleted model.
+ * @access ADMIN
+ * @warning Does NOT delete video from storage. Consider using `orderDeleteVideo()` or `orderDeleteLesson()` instead.
+*/
+export const dbDeleteCourse = async ({id}: {id: Course["id"]}) => {
+    const deleteCourse = async () => {
+        const validId = z.string().parse(id);
+        return await prisma.course.delete({
+            where: { id: validId },
+            select: { id: true },
+        });
     }
-    return await checkIfAdmin(deleteEntry);
+    return await checkIfAdmin(deleteCourse);
 }

@@ -20,7 +20,11 @@ const storage = new Storage({
     credentials: creds,
 });
 
-const BUCKET_NAME = "sphil-test-assets-bucket"
+const BUCKET_NAME = env.GCP_PRIMARY_BUCKET_NAME ?? "invalid";
+
+if (BUCKET_NAME === "invalid") {
+    throw new Error("GCP_PRIMARY_BUCKET_NAME is not set");
+}
 
 /**
  * Storage bucket reference instance. Call methods on this object to interact with the bucket.

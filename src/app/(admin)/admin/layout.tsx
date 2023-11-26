@@ -17,7 +17,7 @@ export default async function AdminLayout({
     const session = await getServerAuthSession();
 
     if (!session || session.user.role !== "ADMIN") {
-        redirect("/");
+        redirect("/?error=unauthorized");
     }
 
     return (
