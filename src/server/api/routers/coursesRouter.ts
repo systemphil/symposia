@@ -11,7 +11,7 @@ import {
 } from "@/server/controllers/coursesController";
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import * as z from "zod";
-import { orderDeleteModelEntry } from "@/server/controllers/orderController";
+import { orderCreateOrUpdateCourse, orderDeleteModelEntry } from "@/server/controllers/orderController";
 
 /**
  * TypeScript Remote Procedure Call router for all matters related to the Course data model and its relations.
@@ -77,13 +77,20 @@ export const coursesRouter = createTRPCRouter({
                     name: z.string(),
                     slug: z.string().toLowerCase(),
                     description: z.string(),
-                    imageUrl: z.string().url().optional().nullish(),
-                    author: z.string().optional().nullish(),
-                    published: z.boolean().optional().nullish(),
+                    basePrice: z.number().positive(),
+                    seminarPrice: z.number().positive(),
+                    dialoguePrice: z.number().positive(),
+                    imageUrl: z.string().url().nullable(),
+                    stripeProductId: z.string().nullable(),
+                    stripeBasePriceId: z.string().nullable(),
+                    stripeSeminarPriceId: z.string().nullable(),
+                    stripeDialoguePriceId: z.string().nullable(),
+                    author: z.string().nullable(),
+                    published: z.boolean(),
                 })
         )
         .mutation(async (opts) => {
-            return await dbUpsertCourseById(opts.input);
+            return await orderCreateOrUpdateCourse(opts.input);
         }),
     upsertLesson: protectedAdminProcedure
         .input(

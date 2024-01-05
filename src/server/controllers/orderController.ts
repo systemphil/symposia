@@ -1,6 +1,7 @@
 import { Video } from "@prisma/client";
 import * as z from "zod";
 import { 
+    DbUpsertCourseByIdProps,
     dbDeleteCourse,
     dbDeleteCourseDetailsById, 
     dbDeleteLesson, 
@@ -9,11 +10,13 @@ import {
     dbDeleteVideoById, 
     dbGetCourseAndDetailsAndLessonsById, 
     dbGetLessonAndRelationsById, 
-    dbGetVideoFileNameByVideoId 
+    dbGetVideoFileNameByVideoId, 
+    dbUpsertCourseById
 } from "./coursesController";
 import { gcDeleteVideoFile } from "./gcController";
 import { checkIfAdmin } from "../auth";
 import { colorLog } from "@/utils/utils";
+import { stripeCreatePrice, stripeCreateProduct } from "./stripeController";
 
 type OrderDeleteVideoProps = Pick<Video, "id"> & Partial<Pick<Video, "fileName">>
 /**
@@ -127,4 +130,69 @@ async function orderDeleteCourse (id: string) {
         return deletedCourse;
     }
     return await checkIfAdmin(deleteCourse);
+}
+
+type OrderCreateOrUpdateCourseProps = {
+
+} & DbUpsertCourseByIdProps
+
+export async function orderCreateOrUpdateCourse ({ 
+    id, 
+    name, 
+    description, 
+    slug,
+    basePrice,
+    seminarPrice,
+    dialoguePrice, 
+    imageUrl, 
+    published, 
+    author 
+}: OrderCreateOrUpdateCourseProps) {
+    async function createStripeResources() {
+        const product = await stripeCreateProduct({ name, description });
+        const stripeBasePrice = await stripeCreatePrice({ stripeProductId: product.id, unitPrice: basePrice });
+        const stripeSeminarPrice = await stripeCreatePrice({ stripeProductId: product.id, unitPrice: seminarPrice });
+        const stripeDialoguePrice = await stripeCreatePrice({ stripeProductId: product.id, unitPrice: dialoguePrice });
+        return { product, stripeBasePrice, stripeSeminarPrice, stripeDialoguePrice }
+    }
+
+    async function updateStripeResources() {
+        //TODO
+        // ! stripe prices cannot be edited; must be archived and new price created
+    }
+
+
+    try {
+        const existingCourse = await dbGetCourseAndDetailsAndLessonsById(id ?? "x");
+
+        if (!existingCourse) {
+            const { product, stripeBasePrice, stripeSeminarPrice, stripeDialoguePrice } = await createStripeResources();
+            const dbPayload = {
+                id,
+                name,
+                description,
+                slug,
+                imageUrl,
+                published,
+                author,
+                basePrice,
+                seminarPrice,
+                dialoguePrice,
+                stripeProductId: product.id,
+                stripeBasePriceId: stripeBasePrice.id,
+                stripeSeminarPriceId: stripeSeminarPrice.id,
+                stripeDialoguePriceId: stripeDialoguePrice.id,
+            }
+            const course = dbUpsertCourseById(dbPayload);
+            //TODO finish this
+            return;
+        }
+
+        //TODO update pattern for stripe resources and db
+
+    } catch(e) {
+
+        throw e;
+    }
+
 }

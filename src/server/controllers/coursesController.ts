@@ -353,21 +353,26 @@ export const dbGetVideoFileNameByVideoId = async (id: string) => {
     }
     return await checkIfAdmin(getVideoFileName);
 }
-type DbUpsertCourseByIdProps = {
-    id?: string, 
-    slug: string, 
-    name: string, 
-    description: string, 
-    imageUrl?: string | null, 
-    published?: boolean | null, 
-    author?: string | null,
-}
+export type DbUpsertCourseByIdProps = Omit<Course, 'id'> & { id?: string };
 /**
  * Updates an existing course details by id as identifier or creates a new one if id is not provided.
  * @access "ADMIN""
  */
 export const dbUpsertCourseById = async ({
-    id, name, description, slug, imageUrl, published, author
+    id, 
+    name, 
+    description, 
+    slug, 
+    stripeProductId, 
+    stripeBasePriceId,
+    stripeSeminarPriceId,
+    stripeDialoguePriceId,
+    imageUrl, 
+    published, 
+    author, 
+    basePrice, 
+    seminarPrice, 
+    dialoguePrice
 }: DbUpsertCourseByIdProps) => {
     try {
         await requireAdminAuth();
@@ -376,6 +381,13 @@ export const dbUpsertCourseById = async ({
         const validName = z.string().parse(name);
         const validDescription = z.string().parse(description);
         const validSlug = z.string().toLowerCase().parse(slug);
+        const validProductId = stripeProductId ? z.string().parse(stripeProductId) : undefined;
+        const validBasePriceId = stripeBasePriceId ? z.string().parse(stripeBasePriceId) : undefined;
+        const validStripeSeminarPriceId = stripeSeminarPriceId ? z.string().parse(stripeSeminarPriceId) : undefined;
+        const validStripeDialoguePriceId = stripeDialoguePriceId ? z.string().parse(stripeDialoguePriceId) : undefined;
+        const validBasePrice = z.number().parse(basePrice);
+        const validSeminarPrice = z.number().parse(seminarPrice);
+        const validDialoguePrice = z.number().parse(dialoguePrice);
         const validImageUrl = imageUrl ? z.string().url().parse(imageUrl) : undefined;
         const validAuthor = author ? z.string().parse(author) : undefined;
         const validPublished = published ? z.boolean().parse(published) : undefined;
@@ -388,14 +400,28 @@ export const dbUpsertCourseById = async ({
                 name: validName,
                 slug: validSlug,
                 description: validDescription,
+                stripeProductId: validProductId,
+                stripeBasePriceId: validBasePriceId,
+                stripeSeminarPriceId: validStripeSeminarPriceId,
+                stripeDialoguePriceId: validStripeDialoguePriceId,
+                basePrice: validBasePrice,
+                seminarPrice: validSeminarPrice,
+                dialoguePrice: validDialoguePrice,
                 imageUrl: validImageUrl,
                 author: validAuthor,
                 published: validPublished
             },
             create: {
                 name: validName,
-                description: validDescription,
                 slug: validSlug,
+                description: validDescription,
+                stripeProductId: validProductId,
+                stripeBasePriceId: validBasePriceId,
+                stripeSeminarPriceId: validStripeSeminarPriceId,
+                stripeDialoguePriceId: validStripeDialoguePriceId,
+                basePrice: validBasePrice,
+                seminarPrice: validSeminarPrice,
+                dialoguePrice: validDialoguePrice,
                 imageUrl: validImageUrl,
                 author: validAuthor,
                 published: validPublished,
@@ -779,3 +805,5 @@ export const dbDeleteCourse = async ({id}: {id: Course["id"]}) => {
     }
     return await checkIfAdmin(deleteCourse);
 }
+
+
