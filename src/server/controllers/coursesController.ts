@@ -2,7 +2,7 @@ import { prisma } from "../db";
 import * as z from "zod";
 import { Course, CourseDetails, Lesson, LessonContent, LessonTranscript, Video } from "@prisma/client";
 import { exclude } from "@/utils/utils";
-import { Access, AuthenticationError, checkIfAdmin, requireAdminAuth } from "@/server/auth";
+import { type Access, AuthenticationError, checkIfAdmin, requireAdminAuth } from "@/server/auth";
 import { mdxCompiler } from "../mdxCompiler";
 
 /**
@@ -39,6 +39,17 @@ export const dbGetCourseBySlug = async (slug: string) => {
     return await prisma.course.findUnique({
         where: {
             slug: slug,
+        }
+    })
+}
+/**
+ * Calls the database to retrieve specific course by id identifier
+ * @access PUBLIC
+ */
+export const dbGetCourseById = async (id: string) => {
+    return await prisma.course.findUnique({
+        where: {
+            id: id,
         }
     })
 }

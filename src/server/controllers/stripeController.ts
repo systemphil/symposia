@@ -43,6 +43,11 @@ export async function stripeCreatePrice ({stripeProductId, unitPrice, currency =
     return price;
 }
 
+export async function stripeRetrievePrice ({stripePriceId}: {stripePriceId: string}) {
+    const price = await stripe.prices.retrieve(stripePriceId);
+    return price;
+}
+
 export async function stripeArchivePrice ({
     stripePriceId,
 }: {

@@ -2,9 +2,9 @@ import Link from 'next/link'
 import { dbGetCourseAndDetailsAndLessonsById } from '@/server/controllers/coursesController';
 import { redirect } from "next/navigation";
 import Heading from '@/components/Heading';
-import AdminCourseFormContainer from '@/components/AdminCourseFormContainer'
 import CourseMaterialCard from '@/components/CourseMaterialCard';
 import toast from 'react-hot-toast';
+import { CourseForm } from '@/components/forms/CourseForm';
 
 
 export default async function AdminCourseEdit ({ params }: { params: { courseId: string }}) {
@@ -23,7 +23,7 @@ export default async function AdminCourseEdit ({ params }: { params: { courseId:
         <div className='grid md:grid-cols-2'>
             <div>
                 <Heading as='h2'>{course.name}</Heading>
-                <AdminCourseFormContainer initialCourse={course} id={courseId}/>
+                <CourseForm id={courseId}/>
                 <div className="mt-6">
                     <Heading as='h4'>Course Details</Heading>
                     {(

@@ -81,10 +81,6 @@ export const coursesRouter = createTRPCRouter({
                     seminarPrice: z.number().positive(),
                     dialoguePrice: z.number().positive(),
                     imageUrl: z.string().url().nullable(),
-                    stripeProductId: z.string().nullable(),
-                    stripeBasePriceId: z.string().nullable(),
-                    stripeSeminarPriceId: z.string().nullable(),
-                    stripeDialoguePriceId: z.string().nullable(),
                     author: z.string().nullable(),
                     published: z.boolean(),
                 })
