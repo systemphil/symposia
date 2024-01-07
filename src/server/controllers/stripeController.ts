@@ -28,6 +28,13 @@ export async function stripeUpdateProduct ({
     return product;
 }
 
+export async function stripeArchiveProduct ({stripeProductId}: {stripeProductId: string}) {
+    const product = await stripe.products.update(stripeProductId, {
+        active: false,
+    });
+    return product;
+}
+
 interface StripeCreatePriceProps {
     stripeProductId: string,
     unitPrice: number,

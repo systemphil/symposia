@@ -36,9 +36,10 @@ export const dbGetAllPublishedCourses = async () => {
  * @access PUBLIC
  */
 export const dbGetCourseBySlug = async (slug: string) => {
+    const validSlug = z.string().parse(slug);
     return await prisma.course.findUnique({
         where: {
-            slug: slug,
+            slug: validSlug,
         }
     })
 }
@@ -47,9 +48,10 @@ export const dbGetCourseBySlug = async (slug: string) => {
  * @access PUBLIC
  */
 export const dbGetCourseById = async (id: string) => {
+    const validId = z.string().parse(id);
     return await prisma.course.findUnique({
         where: {
-            id: id,
+            id: validId,
         }
     })
 }
@@ -802,7 +804,7 @@ export const dbDeleteLesson = async ({id}: {id: Lesson["id"]}) => {
 }
 
 /**
- * Deletes entry from the Lesson model (and all related models). Returns only id of deleted model.
+ * Deletes entry from the Course model (and all related models, including CourseDetails). Returns only id of deleted model.
  * @access ADMIN
  * @warning Does NOT delete video from storage. Consider using `orderDeleteVideo()` or `orderDeleteLesson()` instead.
 */
@@ -816,5 +818,3 @@ export const dbDeleteCourse = async ({id}: {id: Course["id"]}) => {
     }
     return await checkIfAdmin(deleteCourse);
 }
-
-

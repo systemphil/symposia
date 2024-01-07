@@ -35,8 +35,10 @@ export function exclude<Obj, Key extends keyof Obj>(
 /**
  * Utility function to log to console with color. Default color is teal.
  * Adds a timestamp to the log.
+ * New colors need to be manually added to the function.
  */
-export function colorLog(text: string, color?: "teal" | null) {
+export function colorLog(text: string, color?: "teal" | "orange" | null) {
     if (!color) console.log(`\x1b[36m${new Date().toLocaleString()} - ${text}\x1b[0m`);
     if (color === "teal") console.log(`\x1b[36m${new Date().toLocaleString()} - ${text}\x1b[0m`);
+    if (color === "orange") console.log(`\x1b[33m${new Date().toLocaleString()} - ${text}\x1b[0m`);
 }

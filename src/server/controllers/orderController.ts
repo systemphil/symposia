@@ -17,7 +17,13 @@ import {
 import { gcDeleteVideoFile } from "./gcController";
 import { checkIfAdmin, requireAdminAuth } from "../auth";
 import { colorLog } from "@/utils/utils";
-import { stripeArchivePrice, stripeCreatePrice, stripeCreateProduct, stripeRetrievePrice, stripeUpdateProduct } from "./stripeController";
+import { 
+    stripeArchivePrice, 
+    stripeArchiveProduct, 
+    stripeCreatePrice, 
+    stripeCreateProduct, 
+    stripeUpdateProduct 
+} from "./stripeController";
 
 type OrderDeleteVideoProps = Pick<Video, "id"> & Partial<Pick<Video, "fileName">>
 /**
@@ -104,16 +110,39 @@ export async function orderDeleteModelEntry ({id, modelName}: OrderDeleteModelEn
 }
 /**
  * Higher order controller function that organizes the deletion of a course entry by
- * calling the correct function using the lesson id. Will first check if course has any lessons, and, if so,
- * will order the deletion of the lesson (which will handle its video). After that, will cascade delete 
- * all remaining related model entries of course.
+ * calling the correct function using the course id. Will first check if course has any lessons, and, if so,
+ * will order the deletion of the lesson (which will handle its video). Then archives attached Stripe resources.
+ * After that, will cascade delete all remaining related model entries of course.
  * @access ADMIN
  */
 async function orderDeleteCourse (id: string) {
+    // Locally scoped helper functions
+    async function archiveStripeResources ({ 
+        stripeProductId, 
+        stripeBasePriceId, 
+        stripeSeminarPriceId, 
+        stripeDialoguePriceId 
+    }: {
+        stripeProductId: string, 
+        stripeBasePriceId: string, 
+        stripeSeminarPriceId: string, 
+        stripeDialoguePriceId: string
+    }) {
+        const archivedProduct = await stripeArchiveProduct({ stripeProductId });
+        const archivedBasePrice = await stripeArchivePrice({ stripePriceId: stripeBasePriceId });
+        const archivedSeminarPrice = await stripeArchivePrice({ stripePriceId: stripeSeminarPriceId });
+        const archivedDialoguePrice = await stripeArchivePrice({ stripePriceId: stripeDialoguePriceId });
+        return { archivedProduct, archivedBasePrice, archivedSeminarPrice, archivedDialoguePrice };
+    }
+
+    // Main function execution
     const deleteCourse = async () => {
         const validId = z.string().parse(id);
         const course = await dbGetCourseAndDetailsAndLessonsById(validId);
-        if (!course) throw new Error("Course not found at db call");
+        if (!course) throw new Error("orderDeleteCourse Func: Course not found at db call");
+        /**
+         * Delete all related lessons and resources.
+         */
         if (course.lessons.length > 0) {
             /**
              * Using `forEach()` will not work here, as it will not wait for the async function to finish.
@@ -122,13 +151,30 @@ async function orderDeleteCourse (id: string) {
              */
             const deleteLessonPromises = course.lessons.map(async (lesson) => {
                 const deletedLesson = await orderDeleteLesson(lesson.id);
-                colorLog(`===LESSON DELETED->ID: ${deletedLesson.id}`)
+                colorLog(`===LESSON DELETED->ID: ${deletedLesson.id}`);
             })
             await Promise.all(deleteLessonPromises);
         }
-        // TODO add deletion of stripe resources
+        /**
+         * Archive related Stripe resources if they exist.
+         */
+        if (course.stripeProductId && course.stripeBasePriceId && course.stripeSeminarPriceId && course.stripeDialoguePriceId) {
+            await archiveStripeResources({
+                stripeProductId: course.stripeProductId,
+                stripeBasePriceId: course.stripeBasePriceId,
+                stripeSeminarPriceId: course.stripeSeminarPriceId,
+                stripeDialoguePriceId: course.stripeDialoguePriceId,
+            });
+            colorLog(`===STRIPE RESOURCES ARCHIVED->COURSE ID: ${course.id}`);
+        } else {
+            colorLog(`===NO OR INCOMPLETE STRIPE RESOURCES TO ARCHIVE->COURSE ID: ${course.id}`, "orange");
+            throw new Error("orderDeleteCourse Func: Could not archive all stripe resources. Terminating delete process.");
+        }
+        /**
+         * Finally, delete course entry.
+         */
         const deletedCourse = await dbDeleteCourse({ id: validId });
-        colorLog(`===COURSE DELETED->ID: ${deletedCourse.id}`)
+        colorLog(`===COURSE DELETED->ID: ${deletedCourse.id}`);
         return deletedCourse;
     }
     return await checkIfAdmin(deleteCourse);
@@ -160,7 +206,7 @@ export async function orderCreateOrUpdateCourse ({
     }) {
         /**
          * This check occurs *only* between incoming price from the App and the registered price in the database.
-         * This saves an API call but less rigorous.
+         * This saves an API call but is less rigorous.
          * Consider a fault  where the price in the database check fails, but the prices is updated in db but
          * not in Stripe. This would result in a price mismatch between the App and Stripe.
          */
@@ -289,6 +335,8 @@ export async function orderCreateOrUpdateCourse ({
         return course;
 
     } catch(e) {
+        // Here we may want to check which resources were created and delete them if necessary,
+        // but it is preferable to preserve data and handle errors manually.
         throw e;
     }
 }
