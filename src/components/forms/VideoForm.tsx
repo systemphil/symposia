@@ -9,8 +9,6 @@ import { apiClientside } from "@/lib/trpc/trpcClientside";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import VideoViewer from "../VideoViewer";
-import Heading from "../Heading";
-
 
 type VideoFormValues = Video & {
     fileInput: FileList;
@@ -30,6 +28,8 @@ const VideoForm = () => {
     const params = useParams();
     const utils = apiClientside.useContext();
     const lessonId = typeof params.lessonId === "string" ? params.lessonId : "";
+
+    // Queries and mutations
     const { data: videoEntry } = apiClientside.courses.getVideoByLessonId.useQuery({ id: lessonId});
     const createSignedPostUrlMutation = apiClientside.gc.createSignedPostUrl.useMutation({
         onError: (error) => {
@@ -46,6 +46,8 @@ const VideoForm = () => {
     const createSignedReadUrlMutation = apiClientside.gc.createSignedReadUrl.useMutation({
         onError: (error) => { console.error(error)}
     })
+
+    // Event handlers and other hooks
     const handleSelectedFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target && e.target.files && e.target.files[0];
         if (file) {
@@ -121,17 +123,16 @@ const VideoForm = () => {
             // 3. Upload complete. Cleanup of form and resetting queries and states.
             //
             void utils.courses.getVideoByLessonId.invalidate();
-            setSelectedFile(undefined);
-            methods.reset();
-            setHandlerLoading(false);
         } catch(error) {
-            setSelectedFile(undefined);
-            methods.reset();
-            setHandlerLoading(false);
             toast.error('Oops! Something went wrong');
             throw error;
+        } finally  {
+            setSelectedFile(undefined);
+            methods.reset();
+            setHandlerLoading(false);
         }
     };
+
     useEffect(() => {
         if (videoEntry) {
             createSignedReadUrlMutation
@@ -145,6 +146,7 @@ const VideoForm = () => {
                 });
         }
     }, [videoEntry]);
+
     return(
         <FormProvider {...methods}>
             <form 
@@ -168,6 +170,7 @@ const VideoForm = () => {
                 <SubmitInput value={`${(videoEntry && videoEntry.id) ? 'Update' : 'Upload'} video`} isLoading={handlerLoading} />
             </form>
         </FormProvider>
-    )
+    );
 }
+
 export default VideoForm;

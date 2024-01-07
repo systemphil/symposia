@@ -44,7 +44,7 @@ const CourseCard = ({ course, isAdmin }: CourseCardProps) => {
                 </Link>
                 {isAdmin && (
                     <div className="flex justify-center p-6">
-                        <button className="btn btn-error hover:bg-red-500 hover:outline-dashed hover:outline-yellow-200" onClick={() => void handleDelete()}>Delete</button>
+                        <button className="btn btn-sm btn-error hover:bg-red-500 hover:outline-dashed hover:outline-yellow-200" onClick={() => void handleDelete()}>Delete</button>
                     </div>
                 )}
             </div>
