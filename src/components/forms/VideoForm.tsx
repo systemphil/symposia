@@ -31,7 +31,7 @@ const VideoForm = () => {
     const lessonId = typeof params.lessonId === "string" ? params.lessonId : "";
 
     // Queries and mutations
-    const { data: videoEntry } = apiClientside.courses.getVideoByLessonId.useQuery({ id: lessonId});
+    const { data: videoEntry } = apiClientside.db.getVideoByLessonId.useQuery({ id: lessonId});
     const createSignedPostUrlMutation = apiClientside.gc.createSignedPostUrl.useMutation({
         onError: (error) => {
             console.error(error)
@@ -125,7 +125,7 @@ const VideoForm = () => {
             //
             // 3. Upload complete. Cleanup of form and resetting queries and states.
             //
-            void utils.courses.getVideoByLessonId.invalidate();
+            void utils.db.getVideoByLessonId.invalidate();
         } catch(error) {
             toast.error('Oops! Something went wrong');
             throw error;

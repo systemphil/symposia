@@ -1,4 +1,4 @@
-import { coursesRouter } from "./routers/coursesRouter";
+import { dbRouter } from "./routers/dbRouter";
 import { fictionRouter } from "./routers/fiction";
 import { gcRouter } from "./routers/gcRouter";
 import { createTRPCRouter } from "./trpc";
@@ -10,7 +10,7 @@ import { createTRPCRouter } from "./trpc";
  */
 export const appRouter = createTRPCRouter({
     fiction: fictionRouter,
-    courses: coursesRouter,
+    db: dbRouter,
     gc: gcRouter,
 });
 

@@ -9,7 +9,7 @@ import Heading from "./Heading";
  * Clientside rendered course grid. Only used on admin page, so it activates admin mode on course cards.
  */
 export const CourseGridCSR = () => {
-    const { data: courses, isLoading } = apiClientside.courses.getAllCourses.useQuery();
+    const { data: courses, isLoading } = apiClientside.db.getAllCourses.useQuery();
     const isAdmin = true;
 
     if (isLoading) {

@@ -50,7 +50,6 @@ import Heading from "./Heading";
 import toast from "react-hot-toast";
 import LoadingBars from "./LoadingBars";
 
-
 /**
  * NextJS dynamic import so that client-side only is enforced. Must import wrapped editor to satisfy requirements of forwardRef.
  */
@@ -87,10 +86,10 @@ type EditorProps = {
 export default function Editor({ initialMaterial, title }: EditorProps) {
     const editorRef = React.useRef<MDXEditorMethods>(null);
     const utils = apiClientside.useContext();
-    const updateMaterialMutation = apiClientside.courses.updateMdxByModelId.useMutation({
+    const updateMaterialMutation = apiClientside.db.updateMdxByModelId.useMutation({
         onSuccess: () => {
             toast.success("Success! Saved to database.")
-            utils.courses.getMdxByModelId.invalidate();
+            utils.db.getMdxByModelId.invalidate();
         },
         onError: (error) => {
             console.error(error)
@@ -100,7 +99,7 @@ export default function Editor({ initialMaterial, title }: EditorProps) {
 
     if (!initialMaterial) throw new Error("lessonMaterial Data missing / could not be retrieved from server");
 
-    const {data: material} = apiClientside.courses.getMdxByModelId.useQuery({ id: initialMaterial.id}, {
+    const {data: material} = apiClientside.db.getMdxByModelId.useQuery({ id: initialMaterial.id}, {
         initialData: initialMaterial,
         refetchOnMount: false,
         refetchOnReconnect: false,

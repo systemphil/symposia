@@ -28,14 +28,14 @@ const LessonForm = ({
     const router = useRouter();
     const params = useParams();
     const utils = apiClientside.useContext();
-    const {data: lesson} = apiClientside.courses.getLessonAndRelationsById.useQuery({id: lessonId}, {
+    const {data: lesson} = apiClientside.db.getLessonAndRelationsById.useQuery({id: lessonId}, {
         initialData: initialLesson,
         refetchOnMount: false,
         refetchOnReconnect: false,
         enabled: lessonId ? true : false,
     });
 
-    const upsertLessonMutation = apiClientside.courses.upsertLesson.useMutation({
+    const upsertLessonMutation = apiClientside.db.upsertLesson.useMutation({
         onSuccess: (newLesson) => {
             // toast.success('Course updated successfully')
             // If course is new, it should not match existing path and push user to new path. Otherwise, refresh data.
@@ -43,7 +43,7 @@ const LessonForm = ({
                 console.log("pushing to new route")
                 router.push(`/admin/courses/${courseId}/lessons/${newLesson.id}`)
             } else {
-                void utils.courses.invalidate();
+                void utils.db.invalidate();
             }
         },
         onError: (error) => {
