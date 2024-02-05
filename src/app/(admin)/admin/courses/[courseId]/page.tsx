@@ -1,11 +1,10 @@
 import Link from 'next/link'
-import { dbGetCourseAndDetailsAndLessonsById } from '@/server/controllers/coursesController';
+import { dbGetCourseAndDetailsAndLessonsById } from '@/server/controllers/dbController';
 import { redirect } from "next/navigation";
 import Heading from '@/components/Heading';
 import CourseMaterialCard from '@/components/CourseMaterialCard';
 import toast from 'react-hot-toast';
 import { CourseForm } from '@/components/forms/CourseForm';
-
 
 export default async function AdminCourseEdit ({ params }: { params: { courseId: string }}) {
     const courseId = params.courseId;

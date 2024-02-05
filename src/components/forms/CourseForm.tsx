@@ -5,7 +5,7 @@ import TextInput from './TextInput';
 import TextAreaInput from './TextAreaInput';
 import SubmitInput from './SubmitInput';
 import Checkbox from "./Checkbox";
-import { DbUpsertCourseByIdProps } from "@/server/controllers/coursesController";
+import { DbUpsertCourseByIdProps } from "@/server/controllers/dbController";
 import NumberInput from "./NumberInput";
 import { useParams, useRouter } from "next/navigation";
 import { apiClientside } from "@/lib/trpc/trpcClientside";

@@ -1,6 +1,6 @@
 import { type GetSignedUrlConfig, type GenerateSignedPostPolicyV4Options } from "@google-cloud/storage";
 import { bucket } from "../bucket";
-import { dbUpsertVideoById } from "./coursesController";
+import { dbUpsertVideoById } from "./dbController";
 import { AuthenticationError, requireAdminAuth } from "@/server/auth";
 import { colorLog } from "@/utils/utils";
 

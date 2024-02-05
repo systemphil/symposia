@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import VideoFileInput from "./VideoFileInput";
 import { Video } from "@prisma/client";
@@ -25,6 +25,7 @@ const VideoForm = () => {
     const [selectedFile, setSelectedFile] = useState<File>();
     const [handlerLoading, setHandlerLoading] = useState<boolean>(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const isCalledRef = useRef(false);
     const params = useParams();
     const utils = apiClientside.useContext();
     const lessonId = typeof params.lessonId === "string" ? params.lessonId : "";
@@ -54,6 +55,7 @@ const VideoForm = () => {
             setSelectedFile(file);
         }
     };
+
     const methods = useForm<VideoFormValues>({ 
         defaultValues: {
             id: videoEntry?.id || "",
@@ -62,6 +64,7 @@ const VideoForm = () => {
             fileInput: undefined,
         }
     });
+
     const onSubmit: SubmitHandler<VideoFormValues> = async (data) => {
         try {
             //
@@ -135,6 +138,8 @@ const VideoForm = () => {
 
     useEffect(() => {
         if (videoEntry) {
+            if (isCalledRef.current === true) return;
+            isCalledRef.current = true; // Stop double call in strict mode.
             createSignedReadUrlMutation
                 .mutateAsync({ id: videoEntry.id, fileName: videoEntry.fileName})
                 .then((url) => {
@@ -143,9 +148,12 @@ const VideoForm = () => {
                 .catch((error) => {
                     toast.error("Oops! Unable to get video preview");
                     console.error("Error retrieving preview URL: ", error);
+                })
+                .finally(() => {
+                    isCalledRef.current = false;
                 });
         }
-    }, [videoEntry]);
+    }, [videoEntry, createSignedReadUrlMutation]);
 
     return(
         <FormProvider {...methods}>

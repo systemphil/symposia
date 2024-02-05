@@ -1,9 +1,8 @@
 import CourseEnrollButton from "@/components/CourseEnrollButton";
 import Heading from "@/components/Heading";
 import { stylesConfig } from "@/config/stylesConfig";
-import { dbGetCourseBySlug } from "@/server/controllers/coursesController";
+import { dbGetCourseBySlug } from "@/server/controllers/dbController";
 import { redirect } from "next/navigation";
-
 
 export default async function CourseFrontPage ({ params }: { params: { slug: string }}) {
     const slug = params.slug;

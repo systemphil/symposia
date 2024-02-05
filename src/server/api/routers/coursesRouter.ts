@@ -5,10 +5,9 @@ import {
     dbGetMdxByModelId, 
     dbGetVideoByLessonId, 
     dbUpdateMdxByModelId, 
-    dbUpsertCourseById, 
     dbUpsertLessonById, 
     dbUpsertLessonContentById, 
-} from "@/server/controllers/coursesController";
+} from "@/server/controllers/dbController";
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import * as z from "zod";
 import { orderCreateOrUpdateCourse, orderDeleteModelEntry } from "@/server/controllers/orderController";

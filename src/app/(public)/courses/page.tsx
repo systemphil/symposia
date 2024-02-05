@@ -1,7 +1,7 @@
 import CourseGrid from "@/components/CourseGrid";
 import Heading from "@/components/Heading";
 import { stylesConfig } from "@/config/stylesConfig";
-import { dbGetAllPublishedCourses } from "@/server/controllers/coursesController";
+import { dbGetAllPublishedCourses } from "@/server/controllers/dbController";
 
 
 export default async function PublicCourses() {

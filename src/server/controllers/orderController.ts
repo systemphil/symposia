@@ -13,7 +13,7 @@ import {
     dbGetLessonAndRelationsById, 
     dbGetVideoFileNameByVideoId, 
     dbUpsertCourseById
-} from "./coursesController";
+} from "./dbController";
 import { gcDeleteVideoFile } from "./gcController";
 import { checkIfAdmin, requireAdminAuth } from "../auth";
 import { colorLog } from "@/utils/utils";
@@ -68,6 +68,7 @@ async function orderDeleteLesson (id: string) {
     const deletionAtOrderDeleteLession = async () => {
         const validId = z.string().parse(id);
         const lesson = await dbGetLessonAndRelationsById(validId);
+
         if (lesson && lesson.video) {
             const videoArgs = {
                 id: lesson.video.id,
@@ -75,7 +76,9 @@ async function orderDeleteLesson (id: string) {
             }
             await orderDeleteVideo(videoArgs);
         }
+
         const isLessonWithoutVideo = await dbGetLessonAndRelationsById(validId);
+
         if (isLessonWithoutVideo && isLessonWithoutVideo.video !== null) throw new Error("Lesson video not deleted");
         return await dbDeleteLesson({ id: validId });
     }
@@ -332,6 +335,7 @@ export async function orderCreateOrUpdateCourse ({
             stripeDialoguePriceId: updatedStripeDialoguePriceId,
         }
         const course = await dbUpsertCourseById(dbPayload);
+        
         return course;
 
     } catch(e) {

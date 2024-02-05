@@ -45,7 +45,7 @@ import {
     tablePlugin,
 } from "@mdxeditor/editor";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
-import { type dbGetMdxByModelId } from "@/server/controllers/coursesController";
+import { type dbGetMdxByModelId } from "@/server/controllers/dbController";
 import Heading from "./Heading";
 import toast from "react-hot-toast";
 import LoadingBars from "./LoadingBars";

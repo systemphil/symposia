@@ -1,4 +1,3 @@
-import { DBGetMdxContentByModelIdReturnType } from "@/server/controllers/coursesController";
 import { env } from "process";
 
 /**
