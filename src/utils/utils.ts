@@ -41,3 +41,7 @@ export function colorLog(text: string, color?: "teal" | "orange" | null) {
     if (color === "teal") console.log(`\x1b[36m${new Date().toLocaleString()} - ${text}\x1b[0m`);
     if (color === "orange") console.log(`\x1b[33m${new Date().toLocaleString()} - ${text}\x1b[0m`);
 }
+
+export async function sleep(ms: number) {
+    return await new Promise(r => setTimeout(r, ms));
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormProvider, useForm, SubmitHandler } from "react-hook-form";
+import { FormProvider, useForm, SubmitHandler, set } from "react-hook-form";
 import TextInput from './TextInput';
 import TextAreaInput from './TextAreaInput';
 import SubmitInput from './SubmitInput';
@@ -10,12 +10,19 @@ import NumberInput from "./NumberInput";
 import { useParams, useRouter } from "next/navigation";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
 import toast from "react-hot-toast";
+import ImageFileInput from "./ImageFileInput";
+import { useState } from "react";
+import Image from 'next/image'
+import { UploadProfileImageResponse } from "@/app/api/image-upload/route";
+import { sleep } from "@/utils/utils";
 
 export const CourseForm = ({id}: {id?: string}) => {
+    const [ currentImageUrl, setCurrentImageUrl ] = useState<string>("");
+    const [ submitLoading, setSubmitLoading ] = useState<boolean>(false);
     const router = useRouter();
     const params = useParams();
     const utils = apiClientside.useContext();
-    const {data: course, isLoading } = apiClientside.db.getCourseAndLessonsById.useQuery({id: id}, {
+    const { data: course, isLoading } = apiClientside.db.getCourseAndLessonsById.useQuery({ id: id }, {
         refetchOnMount: false,
         refetchOnReconnect: false,
         enabled: id ? true : false,
@@ -40,7 +47,16 @@ export const CourseForm = ({id}: {id?: string}) => {
     })
 
     const onSubmit: SubmitHandler<DbUpsertCourseByIdProps> = async data => {
-        updateCourseMutation.mutate(data);
+        try {
+            setSubmitLoading(true); 
+            // todo - handle image upload here
+            updateCourseMutation.mutate(data);
+        } catch (error) {
+            console.error(error);
+            toast.error('Oops! Something went wrong');
+        } finally {
+            setSubmitLoading(false);
+        }
     };
 
     const methods = useForm<DbUpsertCourseByIdProps>({
@@ -62,6 +78,42 @@ export const CourseForm = ({id}: {id?: string}) => {
         },
     });
 
+    // Event handlers and other hooks
+    const handleSelectedFileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault();
+        const file = e.target && e.target.files && e.target.files[0];
+        if (!file) {
+            toast.error('No file selected');
+            return;
+        }
+        const { imageUrl } = await uploadImage(file);
+        toast.success('Image uploaded!');
+        methods.setValue('imageUrl', imageUrl);
+        await sleep(1000);
+        setCurrentImageUrl(imageUrl);
+    }
+
+    const uploadImage = async (file: File) => {
+        const body = new FormData();
+        body.set('image', file);
+
+        const response = await fetch('/api/image-upload', {
+            method: 'POST',
+            body,
+        });
+        if (!response.ok) {
+            toast.error('Error uploading profile image');
+            throw new Error('Error uploading profile image');
+        }
+
+        const result: UploadProfileImageResponse = await response.json();
+        if (!result) {
+            toast.error('Error uploading profile image');
+            throw new Error('Error uploading profile image');
+        }
+        return result;
+    }
+
     return (
         <FormProvider {...methods}>
             <form className='flex flex-col max-w-lg' onSubmit={methods.handleSubmit(onSubmit)}>
@@ -72,11 +124,37 @@ export const CourseForm = ({id}: {id?: string}) => {
                 <NumberInput label='Base Price* (in cents)' name='basePrice' options={{ valueAsNumber: true, required: true }} />
                 <NumberInput label='Seminar Price* (in cents)' name='seminarPrice' options={{ valueAsNumber: true, required: true }} />
                 <NumberInput label='Dialogue Price* (in cents)' name='dialoguePrice' options={{ valueAsNumber: true, required: true }} />
-                <TextInput label='Image URL' name='imageUrl' options={{ required: false }} />
+                <div className="h-[500px] min-w-[500px]">
+                    { course?.imageUrl && !currentImageUrl &&
+                        <>
+                            <p className="font-bold">Current Course Image:</p>
+                            <Image src={course.imageUrl} alt="Current Course Image" width={500} height={500} /> 
+                        </>
+                    }
+                    {currentImageUrl && (
+                        <>
+                            <p style={{ fontWeight: "bolder" }}>New Course Image:</p>
+                            {/* <img src={currentImageUrl} alt="New Course Image" width={500} /> */}
+                            <Image src={currentImageUrl} alt="New Course Image" width={500} height={500} /> 
+                        </>
+                    )}
+                    {!course?.imageUrl && !currentImageUrl &&
+                        <p>No image uploaded</p>
+                    }
+                </div>
+                <ImageFileInput 
+                    label='Image' 
+                    name='fileInput' 
+                    options={{ 
+                        required: false,
+                        onChange: (e) => handleSelectedFileImageChange(e),
+                    }}  
+                />
                 <TextInput label='Author' name='author' options={{ required: false }} />
                 <Checkbox label='Publish' name='published' />
-                <SubmitInput value={`${course ? 'Update' : 'Create'} course`} isLoading={buttonLoading} />
+                <SubmitInput value={`${course ? 'Update' : 'Create'} course`} isLoading={buttonLoading || submitLoading} />
             </form>
+            <button className="btn btn-accent" onClick={() => {console.log(methods.getValues())}}>DEBUG: Get form values</button>
         </FormProvider>
     )
 }

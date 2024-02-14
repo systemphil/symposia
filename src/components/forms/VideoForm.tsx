@@ -73,9 +73,6 @@ const VideoForm = () => {
             setHandlerLoading(true);
             if (!data.fileInput || data.fileInput.length === 0) {
                 toast.error('No files selected!');
-                setSelectedFile(undefined);
-                methods.reset();
-                setHandlerLoading(false);
                 return;
             }
             //
@@ -167,7 +164,7 @@ const VideoForm = () => {
                     name='fileInput'
                     options={{ 
                         required: true,
-                        onChange: (e) => handleSelectedFileChange(e)
+                        onChange: (e) => handleSelectedFileChange(e),
                     }} 
                 />
                 {selectedFile && (

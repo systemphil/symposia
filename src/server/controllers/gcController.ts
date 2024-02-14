@@ -1,10 +1,10 @@
 import { type GetSignedUrlConfig, type GenerateSignedPostPolicyV4Options } from "@google-cloud/storage";
-import { bucket } from "../bucket";
+import { primaryBucket, secondaryBucket } from "../bucket";
 import { dbUpsertVideoById } from "./dbController";
 import { AuthenticationError, requireAdminAuth } from "@/server/auth";
 import { colorLog } from "@/utils/utils";
 
-type gcGenerateSignedPostUploadURLProps = {
+type GcGenerateSignedPostUploadURLProps = {
     fileName: string;
     id?: string;
     lessonId: string;
@@ -20,7 +20,7 @@ export async function gcGenerateSignedPostUploadUrl ({
     fileName,
     id,
     lessonId,
-}: gcGenerateSignedPostUploadURLProps) {
+}: GcGenerateSignedPostUploadURLProps) {
     try {
         await requireAdminAuth();
         const videoEntry = {
@@ -33,7 +33,7 @@ export async function gcGenerateSignedPostUploadUrl ({
             videoEntry.id = newVideoEntry.id;
         }
         const filePath = `video/${videoEntry.id}/${videoEntry.fileName}`
-        const file = bucket.file(filePath);
+        const file = primaryBucket.file(filePath);
         const options: GenerateSignedPostPolicyV4Options = {
             expires: Date.now() + 1 * 60 * 1000, //  1 minute,
             fields: { 'x-goog-meta-test': 'data' },
@@ -51,12 +51,12 @@ export async function gcGenerateSignedPostUploadUrl ({
         return response;
     } catch (error) {
         if (error instanceof AuthenticationError) {
-            throw error; // Rethrow error as-is
+            throw new Error("Unauthorized.");
         }
-        throw new Error("An error occurred while attempting to get the upload link.");
+        throw error; // Rethrow error as-is
     }
 }
-type gcVideoFilePathProps = {
+type GcVideoFilePathProps = {
     fileName: string;
     id: string;
 }
@@ -68,10 +68,10 @@ type gcVideoFilePathProps = {
 export async function gcDeleteVideoFile ({
     fileName,
     id,
-}: gcVideoFilePathProps) {
+}: GcVideoFilePathProps) {
     await requireAdminAuth();
     const filePath = `video/${id}/${fileName}`;
-    const res = await bucket
+    const res = await primaryBucket
         .file(filePath)
         .delete()
         .then((data) => {
@@ -93,21 +93,39 @@ export async function gcDeleteVideoFile ({
 export async function gcGenerateReadSignedUrl ({
     fileName,
     id,
-}: gcVideoFilePathProps) {
-    try {
-        const filePath = `video/${id}/${fileName}`
-        const options: GetSignedUrlConfig = {
-            version: 'v4',
-            action: "read",
-            expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-        };
-        const [url] = await bucket
-            .file(filePath)
-            .getSignedUrl(options);
-        return url;
-    } catch(error) {
-        throw new Error("An error occurred while attempting to generate signed URL.");
-    }
+}: GcVideoFilePathProps) {
+    const filePath = `video/${id}/${fileName}`
+    const options: GetSignedUrlConfig = {
+        version: 'v4',
+        action: "read",
+        expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    };
+    const [url] = await primaryBucket
+        .file(filePath)
+        .getSignedUrl(options);
+    return url;
+}
+/**
+ * Uploads image to secondary bucket and returns the public URL.
+ * @access "ADMIN"
+ */
+export function gcPipeImageUpload ({
+    file,
+    fileName,
+}: {file: Buffer, fileName: string}) {
+    const filePath = `images/${fileName}`;
+    const blob = secondaryBucket.file(filePath);
+    const blobStream = blob.createWriteStream();
+    blobStream.write(file);
+    blobStream.on('error', (err) => {
+        console.error(err);
+        throw new Error("Failed to upload image");
+    });
+    blobStream.on('finish', () => {
+        console.log(`Image ${fileName} uploaded`);
+    });
+    blobStream.end(file);
+    return `https://storage.googleapis.com/${process.env.GCP_SECONDARY_BUCKET_NAME}/${filePath}`;
 }
 
 // Optional for Options:
