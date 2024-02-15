@@ -1,6 +1,6 @@
 "use client";
 
-import { FormProvider, useForm, SubmitHandler, set } from "react-hook-form";
+import { FormProvider, useForm, SubmitHandler } from "react-hook-form";
 import TextInput from './TextInput';
 import TextAreaInput from './TextAreaInput';
 import SubmitInput from './SubmitInput';
@@ -35,8 +35,10 @@ export const CourseForm = ({id}: {id?: string}) => {
             // If course is new, it should not match existing path and push user to new path. Otherwise, refresh data.
             if (params.courseId !== newData.id) {
                 console.log("pushing to new route")
+                setSubmitLoading(false);
                 router.push(`/admin/courses/${newData.id}`)
             } else {
+                setSubmitLoading(false);
                 void utils.db.invalidate();
             }
         },
@@ -49,7 +51,6 @@ export const CourseForm = ({id}: {id?: string}) => {
     const onSubmit: SubmitHandler<DbUpsertCourseByIdProps> = async data => {
         try {
             setSubmitLoading(true); 
-            // todo - handle image upload here
             updateCourseMutation.mutate(data);
         } catch (error) {
             console.error(error);
