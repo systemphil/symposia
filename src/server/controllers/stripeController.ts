@@ -3,27 +3,35 @@ import { type Stripe } from 'stripe';
 import { type Session } from "next-auth";
 import { stripe } from "@/lib/stripe/stripeClient";
 
-interface StripeCreateProductProps {
+type StripeCreateProductProps = {
     name: string,
     description?: string,
+    imageUrl?: string | null, // images cannot be nullified, only replaced
 }
 
-export async function stripeCreateProduct ({name, description}: StripeCreateProductProps) {
+export async function stripeCreateProduct ({name, description, imageUrl}: StripeCreateProductProps) {
     const product = await stripe.products.create({
         name: name,
         description: description ?? undefined,
+        images: imageUrl ? [imageUrl] : undefined,
     });
     return product;
 }
 
+type StripeUpdateProductProps = {
+    stripeProductId: string,
+    name?: string,
+    description?: string,
+    imageUrl?: string | null, // images cannot be nullified, only replaced
+}
+
 export async function stripeUpdateProduct ({
-    stripeProductId, name, description
-}: {
-    stripeProductId: string, name?: string, description?: string
-}) {
+    stripeProductId, name, description, imageUrl
+}: StripeUpdateProductProps) {
     const product = await stripe.products.update(stripeProductId, {
         name: name ?? undefined,
         description: description ?? undefined,
+        images: imageUrl ? [imageUrl] : undefined,
     });
     return product;
 }

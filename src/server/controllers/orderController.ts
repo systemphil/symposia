@@ -222,7 +222,7 @@ export async function orderCreateOrUpdateCourse ({
     }
 
     async function createStripeResources() {
-        const product = await stripeCreateProduct({ name, description });
+        const product = await stripeCreateProduct({ name, description, imageUrl });
         const stripeBasePrice = await stripeCreatePrice({ stripeProductId: product.id, unitPrice: basePrice });
         const stripeSeminarPrice = await stripeCreatePrice({ stripeProductId: product.id, unitPrice: seminarPrice });
         const stripeDialoguePrice = await stripeCreatePrice({ stripeProductId: product.id, unitPrice: dialoguePrice });
@@ -246,7 +246,7 @@ export async function orderCreateOrUpdateCourse ({
         existingSeminarPrice: number, 
         existingDialoguePrice: number
     }) {
-        const product = await stripeUpdateProduct({ stripeProductId, name, description });
+        const product = await stripeUpdateProduct({ stripeProductId, name, description, imageUrl });
         const stripeBasePrice = await updateStripePriceIfNeeded({ 
             stripePriceId: stripeBasePriceId, 
             productId: product.id, 

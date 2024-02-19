@@ -1,9 +1,10 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
+
 import type { Course } from "@prisma/client";
 import Link from 'next/link'
 import Heading from './Heading'
 import { useDeleteEntry } from "@/components/ContextDeleteEntry";
+import Image from "next/image";
 
 type CourseCardProps = {
     isAdmin: boolean;
@@ -27,11 +28,11 @@ const CourseCard = ({ course, isAdmin }: CourseCardProps) => {
             <div className='w-full rounded-lg bg-blue-300 transition shadow-sm hover:shadow-md'>
                 <Link href={href}>
                     {course.imageUrl && (
-                        <img
+                        <Image
                             className="w-full rounded-t-lg"
                             src={course.imageUrl}
                             alt={`Video thumbnail preview for ${course.name}`}
-                            width={320}
+                            width={340}
                             height={240}
                         />
                     )}

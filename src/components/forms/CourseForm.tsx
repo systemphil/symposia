@@ -45,19 +45,13 @@ export const CourseForm = ({id}: {id?: string}) => {
         onError: (error) => {
             console.error(error)
             toast.error('Something went wrong. Please try again. If the problem persists, contact support.')
+            setSubmitLoading(false);
         }
     })
 
     const onSubmit: SubmitHandler<DbUpsertCourseByIdProps> = async data => {
-        try {
-            setSubmitLoading(true); 
-            updateCourseMutation.mutate(data);
-        } catch (error) {
-            console.error(error);
-            toast.error('Oops! Something went wrong');
-        } finally {
-            setSubmitLoading(false);
-        }
+        setSubmitLoading(true); 
+        updateCourseMutation.mutate(data); // mutate will set loading to false on success or error
     };
 
     const methods = useForm<DbUpsertCourseByIdProps>({
@@ -119,24 +113,23 @@ export const CourseForm = ({id}: {id?: string}) => {
         <FormProvider {...methods}>
             <form className='flex flex-col max-w-lg' onSubmit={methods.handleSubmit(onSubmit)}>
                 <TextInput label='Name*' name='name' options={{ required: true }} />
-                <TextInput label='Slug*' name='slug' options={{ required: true }} />
+                <TextInput label='Slug* (the course link)' name='slug' options={{ required: true }} />
                 <TextAreaInput label='Description*' name='description' options={{ required: true }} />
                 <p className="font-semibold">⚠️ Price is in <b>cents</b>, so be sure to add two extra 00 at the end</p>
                 <NumberInput label='Base Price* (in cents)' name='basePrice' options={{ valueAsNumber: true, required: true }} />
                 <NumberInput label='Seminar Price* (in cents)' name='seminarPrice' options={{ valueAsNumber: true, required: true }} />
                 <NumberInput label='Dialogue Price* (in cents)' name='dialoguePrice' options={{ valueAsNumber: true, required: true }} />
-                <div className="h-[500px] min-w-[500px]">
+                <div className="h-[250px] max-w-[500px]">
                     { course?.imageUrl && !currentImageUrl &&
                         <>
                             <p className="font-bold">Current Course Image:</p>
-                            <Image src={course.imageUrl} alt="Current Course Image" width={500} height={500} /> 
+                            <Image src={course.imageUrl} alt="Current Course Image" width={250} height={250} /> 
                         </>
                     }
                     {currentImageUrl && (
                         <>
                             <p style={{ fontWeight: "bolder" }}>New Course Image:</p>
-                            {/* <img src={currentImageUrl} alt="New Course Image" width={500} /> */}
-                            <Image src={currentImageUrl} alt="New Course Image" width={500} height={500} /> 
+                            <Image src={currentImageUrl} alt="New Course Image" width={250} height={250} /> 
                         </>
                     )}
                     {!course?.imageUrl && !currentImageUrl &&
