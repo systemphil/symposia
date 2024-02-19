@@ -14,6 +14,7 @@ type CourseCardProps = {
 /**
  * Displays a Course to the UI. 
  * * NOTICE It generates distinct routes based on admin status.
+ * Todo - this needs to be tested for non-admin; potentially we must split the component into two (CSR and SSR)
  */
 const CourseCard = ({ course, isAdmin }: CourseCardProps) => {
     const href = isAdmin ? `/admin/courses/${course.id}` : `/courses/${course.slug}`;
