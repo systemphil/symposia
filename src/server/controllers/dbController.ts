@@ -56,6 +56,24 @@ export const dbGetCourseById = async (id: string) => {
     })
 }
 /**
+ * Gets all the courses that the user has purchased. Returns an array of objects.
+ * @access PUBLIC
+ */
+export async function dbGetUserPurchasedCourses (userId: string) {
+    const validUserId = z.string().parse(userId);
+    const res= await prisma.user.findUnique({
+        where: {
+            id: validUserId,
+        },
+        select: {
+            coursesPurchased: true,
+        }
+    });
+    if (!res) return null;
+    const courses = res.coursesPurchased;
+    return courses;
+}
+/**
  * Calls the database to retrieve specific course, its course details and lessons by id identifier.
  * @access "ADMIN""
  */

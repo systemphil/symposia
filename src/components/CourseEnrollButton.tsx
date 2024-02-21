@@ -1,22 +1,33 @@
 import { getServerAuthSession } from "@/server/auth";
+import { dbGetUserPurchasedCourses } from "@/server/controllers/dbController";
 import Link from "next/link";
 
 type CourseEnrollButtonProps = {
-    slug: string
+    slug: string;
 }
 
 const CourseEnrollButton = async ({ slug }: CourseEnrollButtonProps) => {
     const session = await getServerAuthSession();
+    if (!session) {
+        return (
+            <Link href={{ pathname: '/sign-in', query: { enroll: slug } }} className='btn btn-primary'>
+                Sign In to Buy
+            </Link>
+        );
+    }
 
-    return ((session) ? (
+    const userCourses = await dbGetUserPurchasedCourses(session.user.id);
+    if (!!userCourses && userCourses.find(course => course.slug === slug)) {
+        return (
+            <div className="badge badge-success">Owned</div>
+        );
+    }
+
+    return (
         <Link href={`/enroll/${slug}`} className='btn btn-primary'>
-            Enroll
+            Enroll Now
         </Link>
-    ) : (
-        <Link href={{ pathname: '/sign-in', query: { enroll: slug } }} className='btn btn-primary'>
-            Sign In to Enroll
-        </Link>
-    ))
+    );
 }
 
 export default CourseEnrollButton;
