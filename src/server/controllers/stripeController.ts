@@ -2,6 +2,7 @@ import { type PrismaClient } from "@prisma/client";
 import { type Stripe } from 'stripe';
 import { type Session } from "next-auth";
 import { stripe } from "@/lib/stripe/stripeClient";
+import { getBaseUrl } from "@/utils/utils";
 
 type StripeCreateProductProps = {
     name: string,
@@ -77,6 +78,42 @@ export async function stripeArchivePrice ({
 export async function stripeDeleteProduct ({stripeProductId}: {stripeProductId: string}) {
     const product = await stripe.products.del(stripeProductId);
     return product;
+}
+
+type StripeCreateCheckoutSessionProps = {
+    customerId: string,
+    userId: string,
+    purchase: {
+        price: string,
+        quantity: number,
+    }
+}
+
+export async function stripeCreateCheckoutSessions({
+    customerId, userId, purchase
+}: StripeCreateCheckoutSessionProps) {
+    const baseUrl = getBaseUrl();
+    const stripeSession = await stripe.checkout.sessions.create({
+        customer: customerId,
+        client_reference_id: userId,
+        payment_method_types: ["card"],
+        mode: "subscription",
+        line_items: [ purchase ],
+        success_url: `${baseUrl}/account/billing`,
+        cancel_url: `${baseUrl}/account/billing`,
+        subscription_data: {
+            metadata: {
+                userId: userId,
+            },
+        },
+    });
+
+    if (!stripeSession) {
+        throw new Error("Could not create checkout session");
+    }
+
+    return { url: stripeSession.url };
+
 }
 
 

@@ -22,7 +22,7 @@ const CourseEnrollButton = async ({ slug }: CourseEnrollButtonProps) => {
             <div className="badge badge-success">Owned</div>
         );
     }
-
+    // TODO see stripeController for checkout function, this needs to be activated by a next action.
     return (
         <Link href={`/enroll/${slug}`} className='btn btn-primary'>
             Enroll Now

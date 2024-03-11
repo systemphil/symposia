@@ -61,7 +61,7 @@ export const dbGetCourseById = async (id: string) => {
  */
 export async function dbGetUserPurchasedCourses (userId: string) {
     const validUserId = z.string().parse(userId);
-    const res= await prisma.user.findUnique({
+    const res = await prisma.user.findUnique({
         where: {
             id: validUserId,
         },
@@ -279,7 +279,7 @@ export const dbGetCompiledMdxBySlugs = async ({
     /**
      * Since a Course may exist without CourseDetails, and Lesson may exist
      * without LessonContent and LessonTranscript, instead of throwing an error
-     * a pre-compiled placeholder is returned while the respective MDX data models are non-existant.
+     * a pre-compiled placeholder is returned while the respective MDX data models are non-existent.
      */
     if (validCourseSlug && validLessonSlug && lessonType) {
         if (lessonType === "CONTENT") {
@@ -331,7 +331,7 @@ export const dbGetCompiledMdxBySlugs = async ({
         if (!courseDetailsMdx || courseDetailsMdx.mdxCompiled === null) return defaultMdx;
         return courseDetailsMdx.mdxCompiled;
     }
-    throw new Error("Error occured when attempting to find data models by slug(s)");
+    throw new Error("Error occurred when attempting to find data models by slug(s)");
 }
 /**
  * Calls the database to retrieve specific Video entry based on the ID of the Lesson it is related to. 
@@ -636,7 +636,7 @@ export const dbUpsertCourseDetailsById = async ({
         if (error instanceof AuthenticationError) {
             throw error; // Rethrow custom error as-is
         }
-        throw new Error("An error occurred while upserting CourseDetails.");
+        throw new Error("An error occurred during upsert of CourseDetails.");
     }
 }
 /**
