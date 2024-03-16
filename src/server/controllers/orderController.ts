@@ -404,6 +404,7 @@ export async function orderCreateCheckout(slug: string, priceTier: string) {
             }
         },
         slug: slug,
+        courseId: course.id,
     })
 
     return { url: checkout.url };

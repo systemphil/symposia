@@ -89,10 +89,21 @@ type StripeCreateCheckoutSessionProps = {
         }
     }
     slug: string,
+    courseId: string,
+}
+
+export type StripeCheckoutSessionMetadata = {
+    userId: string,
+    purchase: string,
+    courseId: string,
 }
 
 export async function stripeCreateCheckoutSession({
-    customerId, userId, purchase, slug
+    customerId, 
+    userId, 
+    purchase, 
+    slug, 
+    courseId,
 }: StripeCreateCheckoutSessionProps) {
     const baseUrl = serverGetDomain();
     const stripeSession = await stripe.checkout.sessions.create({
@@ -106,7 +117,8 @@ export async function stripeCreateCheckoutSession({
         metadata: {
             userId: userId,
             purchase: purchase.price,
-        },
+            courseId: courseId,
+        } satisfies StripeCheckoutSessionMetadata,
     });
 
     if (!stripeSession) {

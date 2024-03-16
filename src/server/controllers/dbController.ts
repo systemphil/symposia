@@ -4,6 +4,7 @@ import { Course, CourseDetails, Lesson, LessonContent, LessonTranscript, Video }
 import { exclude } from "@/utils/utils";
 import { type Access, AuthenticationError, checkIfAdmin, requireAdminAuth } from "@/server/auth";
 import { mdxCompiler } from "../mdxCompiler";
+import type Stripe from "stripe";
 
 /**
  * Calls the database to retrieve all courses.
@@ -100,6 +101,33 @@ export async function dbUpdateUserStripeCustomerId ({userId, stripeCustomerId}: 
             stripeCustomerId: validStripeCustomerId,
         }
     });
+}
+/**
+ * Gets user data by id. Returns an object.
+ * @access PUBLIC
+ */
+export async function dbUpdateUserPurchases ({
+    userId, courseId, purchase
+}: {
+    userId: string, courseId: string, purchase: string
+}) {
+    const validUserId = z.string().parse(userId);
+    const existingUser = await prisma.user.findUnique({ where: { id: validUserId } });
+    if (!existingUser) throw new Error("User not found");
+
+    const updatedPurchases = [ ...existingUser.productsPurchased, purchase ];
+    const updatedUser = await prisma.user.update({
+        where: {
+            id: validUserId,
+        },
+        data: {
+            coursesPurchased: {
+                connect: { id: courseId }
+            },
+            productsPurchased: updatedPurchases,
+        }
+    });
+    return updatedUser;
 }
 /**
  * Calls the database to retrieve specific course, its course details and lessons by id identifier.
@@ -863,4 +891,27 @@ export const dbDeleteCourse = async ({id}: {id: Course["id"]}) => {
         });
     }
     return await checkIfAdmin(deleteCourse);
+}
+
+export async function dbCreateStripeEventRecord (event: Stripe.Event) {
+    return await prisma.stripeEvent.create({
+        data: {
+            id: event.id,
+            type: event.type,
+            object: event.object,
+            api_version: event.api_version,
+            account: event.account,
+            created: new Date(event.created * 1000),
+            data: {
+                object: JSON.stringify(event.data.object),
+                previous_attributes: event.data.previous_attributes,
+            },
+            livemode: event.livemode,
+            pending_webhooks: event.pending_webhooks,
+            request: {
+                id: event.request?.id,
+                idempotency_key: event.request?.idempotency_key,
+            },
+        },
+    });
 }
