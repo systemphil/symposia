@@ -3,6 +3,7 @@ import { dbGetUserPurchasedCourses } from "@/server/controllers/dbController";
 import { orderCreateCheckout } from "@/server/controllers/orderController";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { SubmitButton } from "./forms/SubmitButton";
 
 type CourseEnrollButtonProps = {
     slug: string;
@@ -17,7 +18,7 @@ const CourseEnrollButton = async ({ slug }: CourseEnrollButtonProps) => {
             </Link>
         );
     }
-    
+
     const userCourses = await dbGetUserPurchasedCourses(session.user.id);
     if (!!userCourses && userCourses.find(course => course.slug === slug)) {
         return (
@@ -34,23 +35,26 @@ const CourseEnrollButton = async ({ slug }: CourseEnrollButtonProps) => {
     const handleEnrollWithBasePrice = handleEnroll.bind(null, "base");
     const handleEnrollWithSeminarPrice = handleEnroll.bind(null, "seminar");
     const handleEnrollWithDialoguePrice = handleEnroll.bind(null, "dialogue")
-
+    /**
+     * TODO
+     * refactor to use single form with radio selection
+     */
     return (
-        <div className="flex flex-col gap-2 justify-center">
+        <div className="flex flex-col</form> gap-2 justify-center">
             <form action={handleEnrollWithBasePrice}>
-                <button type="submit" className='btn btn-primary'>
+                <SubmitButton>
                     Enroll base!
-                </button>
+                </SubmitButton>
             </form>
             <form action={handleEnrollWithSeminarPrice}>
-                <button type="submit" className='btn btn-primary'>
+                <SubmitButton>
                     Enroll seminar!
-                </button>
+                </SubmitButton>
             </form>
             <form action={handleEnrollWithDialoguePrice}>
-                <button type="submit" className='btn btn-primary'>
+                <SubmitButton>
                     Enroll dialogue!
-                </button>
+                </SubmitButton>
             </form>
         </div>
         

@@ -9,6 +9,9 @@ export async function handleSessionCompleted (event: Stripe.CheckoutSessionCompl
         courseId: sessionMetadata.courseId,
         purchase: sessionMetadata.purchase,
     });
+    /**
+     * TODO add email response here
+     */
     console.log("<==Updated user purchases: ", updatedUser);
     return updatedUser;
 }
