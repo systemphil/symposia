@@ -4,7 +4,7 @@ import { env } from "process";
  * Utility function for obtaining the base URL of the application.
  * @returns base URL
  */
-export const getBaseUrl = (): string => {
+export const getBaseUrlClientside = (): string => {
     // Check if the code is running in a browser environment
     if (typeof window !== "undefined") return "";
 
@@ -42,6 +42,9 @@ export function colorLog(text: string, color?: "teal" | "orange" | null) {
     if (color === "orange") console.log(`\x1b[33m${new Date().toLocaleString()} - ${text}\x1b[0m`);
 }
 
+/**
+ * Don't forget to use `await` when calling this function.
+ */
 export async function sleep(ms: number) {
     return await new Promise(r => setTimeout(r, ms));
 }

@@ -1,8 +1,6 @@
-import { type PrismaClient } from "@prisma/client";
 import { type Stripe } from 'stripe';
-import { type Session } from "next-auth";
 import { stripe } from "@/lib/stripe/stripeClient";
-import { getBaseUrl } from "@/utils/utils";
+import { serverGetDomain } from "@/utils/serverUtils";
 
 type StripeCreateProductProps = {
     name: string,
@@ -86,25 +84,28 @@ type StripeCreateCheckoutSessionProps = {
     purchase: {
         price: string,
         quantity: number,
+        adjustable_quantity: {
+            enabled: boolean,
+        }
     }
+    slug: string,
 }
 
-export async function stripeCreateCheckoutSessions({
-    customerId, userId, purchase
+export async function stripeCreateCheckoutSession({
+    customerId, userId, purchase, slug
 }: StripeCreateCheckoutSessionProps) {
-    const baseUrl = getBaseUrl();
+    const baseUrl = serverGetDomain();
     const stripeSession = await stripe.checkout.sessions.create({
         customer: customerId,
         client_reference_id: userId,
-        payment_method_types: ["card"],
-        mode: "subscription",
+        payment_method_types: ["card", "paypal"],
+        mode: "payment",
         line_items: [ purchase ],
-        success_url: `${baseUrl}/account/billing`,
-        cancel_url: `${baseUrl}/account/billing`,
-        subscription_data: {
-            metadata: {
-                userId: userId,
-            },
+        success_url: `${baseUrl}/purchase-success`,
+        cancel_url: `${baseUrl}/courses/${slug}?canceled=true`,
+        metadata: {
+            userId: userId,
+            purchase: purchase.price,
         },
     });
 
@@ -114,6 +115,21 @@ export async function stripeCreateCheckoutSessions({
 
     return { url: stripeSession.url };
 
+}
+
+export async function stripeCreateCustomer({
+    email, userId, name = undefined
+}: {
+    email: string, userId: string, name?: string
+}) {
+    const customer = await stripe.customers.create({
+        name: name,
+        email: email,
+        metadata: {
+            userId: userId,
+        },
+    });
+    return customer;
 }
 
 

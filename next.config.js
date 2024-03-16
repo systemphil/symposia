@@ -9,7 +9,6 @@ const nextConfig = {
                 pathname: `/${process.env.GCP_SECONDARY_BUCKET_NAME}/**`,
             },
         ],
-        domains: ['storage.googleapis.com'],
     },
 }
 

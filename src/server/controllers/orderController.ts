@@ -10,16 +10,21 @@ import {
     dbDeleteVideoById, 
     dbGetCourseAndDetailsAndLessonsById, 
     dbGetCourseById, 
+    dbGetCourseBySlug, 
     dbGetLessonAndRelationsById, 
+    dbGetUserData, 
     dbGetVideoFileNameByVideoId, 
+    dbUpdateUserStripeCustomerId, 
     dbUpsertCourseById
 } from "./dbController";
 import { gcDeleteVideoFile } from "./gcController";
-import { checkIfAdmin, requireAdminAuth } from "../auth";
-import { colorLog } from "@/utils/utils";
+import { checkIfAdmin, getServerAuthSession, requireAdminAuth } from "../auth";
+import { colorLog, sleep } from "@/utils/utils";
 import { 
     stripeArchivePrice, 
     stripeArchiveProduct, 
+    stripeCreateCheckoutSession, 
+    stripeCreateCustomer, 
     stripeCreatePrice, 
     stripeCreateProduct, 
     stripeUpdateProduct 
@@ -343,4 +348,63 @@ export async function orderCreateOrUpdateCourse ({
         // but it is preferable to preserve data and handle errors manually.
         throw e;
     }
+}
+
+export async function orderCreateCheckout(slug: string, priceTier: string) {
+    const session = await getServerAuthSession();
+    if (!session) throw new Error("Session missing");
+
+    let userData = await dbGetUserData(session.user.id);
+    if (!userData) throw new Error("Could not retrieve user data");
+
+    if (userData.stripeCustomerId === null) {
+        if (userData.email === null) throw new Error("User email is null");
+        const customer = await stripeCreateCustomer({
+            email: userData.email,
+            userId: userData.id,
+            name: userData.name ?? undefined,
+        });
+        userData = await dbUpdateUserStripeCustomerId({
+            userId: userData.id,
+            stripeCustomerId: customer.id,
+        });
+    }
+
+    const course = await dbGetCourseBySlug(slug);
+    if (!course) throw new Error("Course not found");
+
+    let priceId = "";
+    switch(priceTier) {
+        case "base":
+            if (!course.stripeBasePriceId) throw new Error("Course does not have a base price");
+            priceId = course.stripeBasePriceId;
+            break;
+        case "seminar":
+            if (!course.stripeSeminarPriceId) throw new Error("Course does not have a seminar price");
+            priceId = course.stripeSeminarPriceId;
+            break;
+        case "dialogue":
+            if (!course.stripeDialoguePriceId) throw new Error("Course does not have a dialogue price");
+            priceId = course.stripeDialoguePriceId;
+            break;
+        default:
+            throw new Error("Invalid priceTier");
+    }
+
+    if (!userData.stripeCustomerId) throw new Error("User does not have a stripeCustomerId");
+
+    const checkout = await stripeCreateCheckoutSession({
+        customerId: userData.stripeCustomerId,
+        userId: userData.id,
+        purchase: {
+            price: priceId,
+            quantity: 1,
+            adjustable_quantity: {
+                enabled: false,
+            }
+        },
+        slug: slug,
+    })
+
+    return { url: checkout.url };
 }

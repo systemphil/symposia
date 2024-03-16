@@ -74,6 +74,34 @@ export async function dbGetUserPurchasedCourses (userId: string) {
     return courses;
 }
 /**
+ * Gets user data by id. Returns an object.
+ * @access PUBLIC
+ */
+export async function dbGetUserData (userId: string) {
+    const validUserId = z.string().parse(userId);
+    return await prisma.user.findUnique({
+        where: {
+            id: validUserId,
+        }
+    });
+}
+/**
+ * Gets user data by id. Returns an object.
+ * @access PUBLIC
+ */
+export async function dbUpdateUserStripeCustomerId ({userId, stripeCustomerId}: {userId: string, stripeCustomerId: string}) {
+    const validUserId = z.string().parse(userId);
+    const validStripeCustomerId = z.string().parse(stripeCustomerId);
+    return await prisma.user.update({
+        where: {
+            id: validUserId,
+        },
+        data: {
+            stripeCustomerId: validStripeCustomerId,
+        }
+    });
+}
+/**
  * Calls the database to retrieve specific course, its course details and lessons by id identifier.
  * @access "ADMIN""
  */
