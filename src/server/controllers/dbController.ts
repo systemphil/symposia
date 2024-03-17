@@ -459,7 +459,9 @@ export const dbUpsertCourseById = async ({
     author, 
     basePrice, 
     seminarPrice, 
-    dialoguePrice
+    dialoguePrice,
+    seminarAvailability,
+    dialogueAvailability,
 }: DbUpsertCourseByIdProps) => {
     try {
         await requireAdminAuth();
@@ -478,6 +480,8 @@ export const dbUpsertCourseById = async ({
         const validImageUrl = imageUrl ? z.string().url().parse(imageUrl) : undefined;
         const validAuthor = author ? z.string().parse(author) : undefined;
         const validPublished = published ? z.boolean().parse(published) : undefined;
+        const validSeminarAvailability = z.date().parse(seminarAvailability);
+        const validDialogueAvailability = z.date().parse(dialogueAvailability);
         
         return await prisma.course.upsert({
             where: {
@@ -496,7 +500,9 @@ export const dbUpsertCourseById = async ({
                 dialoguePrice: validDialoguePrice,
                 imageUrl: validImageUrl,
                 author: validAuthor,
-                published: validPublished
+                published: validPublished,
+                seminarAvailability: validSeminarAvailability,
+                dialogueAvailability: validDialogueAvailability,
             },
             create: {
                 name: validName,
@@ -512,6 +518,8 @@ export const dbUpsertCourseById = async ({
                 imageUrl: validImageUrl,
                 author: validAuthor,
                 published: validPublished,
+                seminarAvailability: validSeminarAvailability,
+                dialogueAvailability: validDialogueAvailability,
             }
         });
     } catch (error) {

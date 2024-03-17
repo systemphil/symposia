@@ -90,6 +90,8 @@ model Course {
   lessons               Lesson[]
   details               CourseDetails?
   author                String?
+  seminarAvailability   DateTime       @default(now())
+  dialogueAvailability  DateTime       @default(now())
   published             Boolean        @default(false)
 }
 

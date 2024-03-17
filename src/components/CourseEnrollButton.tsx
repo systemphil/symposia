@@ -4,6 +4,7 @@ import { orderCreateCheckout } from "@/server/controllers/orderController";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SubmitButton } from "./forms/SubmitButton";
+import { z } from "zod";
 
 type CourseEnrollButtonProps = {
     slug: string;
@@ -26,41 +27,65 @@ const CourseEnrollButton = async ({ slug }: CourseEnrollButtonProps) => {
         );
     }
 
-    async function handleEnroll(priceTier: string) {
-        "use server"
+    async function handleEnroll(formData: FormData) {
+        "use server";
+        const rawFormData = {
+            rawPriceTier: formData.get('price-tier') as string,
+        }
+        const priceTier = z.enum(["base", "seminar", "dialogue"]).parse(rawFormData.rawPriceTier);
         const { url } = await orderCreateCheckout(slug, priceTier);
         if (!url) throw new Error("Could not create checkout session");
         redirect(url);
     }
-    const handleEnrollWithBasePrice = handleEnroll.bind(null, "base");
-    const handleEnrollWithSeminarPrice = handleEnroll.bind(null, "seminar");
-    const handleEnrollWithDialoguePrice = handleEnroll.bind(null, "dialogue")
+
     /**
      * TODO
-     * refactor to use single form with radio selection
+     * add control for seminar and dialogue availability
      */
     return (
-        <div className="flex flex-col</form> gap-2 justify-center">
-            <form action={handleEnrollWithBasePrice}>
-                <SubmitButton>
-                    Enroll base!
-                </SubmitButton>
-            </form>
-            <form action={handleEnrollWithSeminarPrice}>
-                <SubmitButton>
-                    Enroll seminar!
-                </SubmitButton>
-            </form>
-            <form action={handleEnrollWithDialoguePrice}>
-                <SubmitButton>
-                    Enroll dialogue!
-                </SubmitButton>
-            </form>
-        </div>
-        
-        // <Link href={`/enroll/${slug}`} className='btn btn-primary'>
-        //     Enroll Now
-        // </Link>
+        <form action={handleEnroll} className="flex flex-col gap-2 justify-center">
+            <p className="text-slate-800">Select your course tier</p>
+            <div className="form-control">
+                <label className="label cursor-pointer gap-16 flex">
+                    <input
+                        type="radio" 
+                        name="price-tier" 
+                        className="radio checked:bg-red-500" 
+                        defaultChecked
+                        value="base"
+                    />
+                    <span className="label-text">Base Tier</span> 
+                </label>
+            </div>
+            <div className="form-control">
+                <label className="label cursor-pointer">
+                    <input 
+                        type="radio" 
+                        name="price-tier" 
+                        className="radio checked:bg-blue-500"
+                        value="seminar"
+                        disabled
+                    />
+                    <span className="label-text">Seminar Tier
+                        <span className="absolute text-xs text-slate-500">Currently unavailable</span>
+                    </span> 
+                </label>
+            </div>
+            <div className="form-control">
+                <label className="label cursor-pointer">
+                    <input 
+                        type="radio" 
+                        name="price-tier" 
+                        className="radio checked:bg-green-500"
+                        value="dialogue"
+                    />
+                    <span className="label-text">Dialogue Tier</span> 
+                </label>
+            </div>
+            <SubmitButton>
+                Enroll!
+            </SubmitButton>
+        </form>
     );
 }
 

@@ -15,6 +15,12 @@ import { useState } from "react";
 import Image from 'next/image'
 import { UploadProfileImageResponse } from "@/app/api/image-upload/route";
 import { sleep } from "@/utils/utils";
+import DateInput from "./DateInput";
+
+type AmendedDbUpsertCourseByIdProps = Omit<DbUpsertCourseByIdProps, "seminarAvailability" | "dialogueAvailability"> & {
+    seminarAvailability: string;
+    dialogueAvailability: string;
+}
 
 export const CourseForm = ({id}: {id?: string}) => {
     const [ currentImageUrl, setCurrentImageUrl ] = useState<string>("");
@@ -49,12 +55,17 @@ export const CourseForm = ({id}: {id?: string}) => {
         }
     })
 
-    const onSubmit: SubmitHandler<DbUpsertCourseByIdProps> = async data => {
-        setSubmitLoading(true); 
-        updateCourseMutation.mutate(data); // mutate will set loading to false on success or error
+    const onSubmit: SubmitHandler<AmendedDbUpsertCourseByIdProps> = async data => {
+        setSubmitLoading(true);
+        const dataWithConvertedDates = {
+            ...data,
+            seminarAvailability: new Date(data.seminarAvailability),
+            dialogueAvailability: new Date(data.dialogueAvailability),
+        } satisfies DbUpsertCourseByIdProps;
+        updateCourseMutation.mutate(dataWithConvertedDates); // mutate will set loading to false on success or error
     };
 
-    const methods = useForm<DbUpsertCourseByIdProps>({
+    const methods = useForm<AmendedDbUpsertCourseByIdProps>({
         values: {
             id: course?.id ?? "",
             name: course?.name ?? "", 
@@ -69,6 +80,14 @@ export const CourseForm = ({id}: {id?: string}) => {
             dialoguePrice: course?.dialoguePrice ?? 0,
             imageUrl: course?.imageUrl ?? "",
             author: course?.author ?? "",
+            seminarAvailability: 
+                course?.seminarAvailability 
+                    ? course.seminarAvailability.toISOString().slice(0, 16)
+                    : new Date().toISOString().slice(0, 16),
+            dialogueAvailability: 
+                course?.dialogueAvailability 
+                    ? course.dialogueAvailability.toISOString().slice(0, 16)
+                    : new Date().toISOString().slice(0, 16),
             published: course?.published ?? false,
         },
     });
@@ -112,10 +131,25 @@ export const CourseForm = ({id}: {id?: string}) => {
     return (
         <FormProvider {...methods}>
             <form className='flex flex-col max-w-lg' onSubmit={methods.handleSubmit(onSubmit)}>
-                <TextInput label='Name*' name='name' options={{ required: true }} />
-                <TextInput label='Slug* (the course link)' name='slug' options={{ required: true }} />
+                <TextInput 
+                    label='Name*' 
+                    name='name' 
+                    options={{ required: true }} 
+                />
+                <p className="font-semibold text-xs dark:text-gray-500">ℹ️ For slug, only lowercase letters, numbers, and hyphens are allowed, no whitespace</p>
+                <TextInput 
+                    label='Slug* (the course link)' 
+                    name='slug' 
+                    options={{ 
+                        required: true,
+                        pattern: {
+                            value: /^[a-z0-9-]+$/,
+                            message: 'Only lowercase letters, numbers, and hyphens are allowed',
+                        },
+                    }} 
+                />
                 <TextAreaInput label='Description*' name='description' options={{ required: true }} />
-                <p className="font-semibold">⚠️ Price is in <b>cents</b>, so be sure to add two extra 00 at the end</p>
+                <p className="font-semibold text-xs dark:text-gray-500">⚠️ Price is in <b>cents</b>, so be sure to add two extra 00 at the end</p>
                 <NumberInput label='Base Price* (in cents)' name='basePrice' options={{ valueAsNumber: true, required: true }} />
                 <NumberInput label='Seminar Price* (in cents)' name='seminarPrice' options={{ valueAsNumber: true, required: true }} />
                 <NumberInput label='Dialogue Price* (in cents)' name='dialoguePrice' options={{ valueAsNumber: true, required: true }} />
@@ -145,6 +179,11 @@ export const CourseForm = ({id}: {id?: string}) => {
                     }}  
                 />
                 <TextInput label='Author' name='author' options={{ required: false }} />
+                { /* 
+                    TODO add utility to show when dates are in the past!
+                */ }
+                <DateInput label='Seminar Availability Until*' name='seminarAvailability' options={{ required: true }} />
+                <DateInput label='Dialogue Availability Until*' name='dialogueAvailability' options={{ required: true }} />
                 <Checkbox label='Publish' name='published' />
                 <SubmitInput value={`${course ? 'Update' : 'Create'} course`} isLoading={buttonLoading || submitLoading} />
             </form>
