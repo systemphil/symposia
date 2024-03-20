@@ -1,4 +1,3 @@
-import { type Stripe } from 'stripe';
 import { stripe } from "@/lib/stripe/stripeClient";
 import { serverGetDomain } from "@/utils/serverUtils";
 
@@ -90,12 +89,21 @@ type StripeCreateCheckoutSessionProps = {
     }
     slug: string,
     courseId: string,
+    imageUrl: string | null | undefined,
+    name: string,
+    description: string,
+    customerEmail: string,
 }
 
 export type StripeCheckoutSessionMetadata = {
     userId: string,
     purchase: string,
     courseId: string,
+    imageUrl: string,
+    name: string,
+    description: string,
+    courseLink: string,
+    stripeCustomerId: string,
 }
 
 export async function stripeCreateCheckoutSession({
@@ -104,10 +112,14 @@ export async function stripeCreateCheckoutSession({
     purchase, 
     slug, 
     courseId,
+    imageUrl,
+    name,
+    description,
+    customerEmail,
 }: StripeCreateCheckoutSessionProps) {
     const baseUrl = serverGetDomain();
     const stripeSession = await stripe.checkout.sessions.create({
-        customer: customerId,
+        customer_email: customerEmail,
         client_reference_id: userId,
         payment_method_types: ["card", "paypal"],
         mode: "payment",
@@ -115,9 +127,17 @@ export async function stripeCreateCheckoutSession({
         success_url: `${baseUrl}/purchase-success`,
         cancel_url: `${baseUrl}/courses/${slug}?canceled=true`,
         metadata: {
+            stripeCustomerId: customerId,
             userId: userId,
             purchase: purchase.price,
             courseId: courseId,
+            /**
+             * TODO fix fallback image
+             */
+            imageUrl: imageUrl ?? "https://avatars.githubusercontent.com/u/147748257?s=200&v=4",
+            name: name,
+            description: description,
+            courseLink: `${baseUrl}/courses/${slug}`,
         } satisfies StripeCheckoutSessionMetadata,
     });
 
@@ -144,69 +164,28 @@ export async function stripeCreateCustomer({
     return customer;
 }
 
-
-// interface SessionPrismaStripeProps {
-//     session: Session,
-//     prisma: PrismaClient,
-//     stripe: Stripe,
-// }
-
-// export async function forceStripeSessionExpire ({session, prisma, stripe}: SessionPrismaStripeProps) {
-//     // Get pending session details from db
-//     const pendingStripeSession = await prisma.pendingStripeSession.findFirst({
-//         where: {
-//             userId: session.user.id
-//         },
-//     })
-//     if (!pendingStripeSession) {
-//         throw new Error("Expected pending session entry...");
-//     }
-
-//     // Manually expire Stripe Session
-//     await stripe.checkout.sessions.expire(
-//         pendingStripeSession.stripeSession
-//     );
-// };
-
-// export async function createStripeSessionResume ({session, prisma, stripe}: SessionPrismaStripeProps) {
-//     const pendingStripeSessionRecord = await prisma.pendingStripeSession.findUnique({
-//         where: {
-//             userId: session.user.id,
-//         }
-//     })
-
-//     if (!pendingStripeSessionRecord) {
-//         return { 
-//             url: null,
-//             cancelUrl: null,
-//         };
-//     }
-
-//     const stripeSession = await stripe.checkout.sessions.retrieve(
-//         pendingStripeSessionRecord.stripeSession
-//     );
-
-//     if (!stripeSession) {
-//         throw new Error("Could not create retrieve checkout session");
-//     }
-
-//     return { 
-//         url: stripeSession.url,
-//         cancelUrl: stripeSession.cancel_url,
-//     };
-// }
-
-interface CreateStripeRefundProps {
-    paymentIntentId: string,
-    stripe: Stripe
+export async function stripeGetCustomerEmail({
+    customerId
+}: {
+    customerId: string
+}) {
+    const customer = await stripe.customers.retrieve(customerId);
+    // TODO typescript isn't picking up the type here for some reason
+    // @ts-expect-error
+    return customer.email;
 }
-export async function createStripeRefund ({ paymentIntentId, stripe }: CreateStripeRefundProps) {
-    try {
-        const refund = await stripe.refunds.create({
-            payment_intent: paymentIntentId
-        });
-        return refund;
-    } catch(err) {
-        if (err instanceof Error) return err.message;
-    }
-}
+
+// interface CreateStripeRefundProps {
+//     paymentIntentId: string,
+//     stripe: Stripe
+// }
+// export async function createStripeRefund ({ paymentIntentId, stripe }: CreateStripeRefundProps) {
+//     try {
+//         const refund = await stripe.refunds.create({
+//             payment_intent: paymentIntentId
+//         });
+//         return refund;
+//     } catch(err) {
+//         if (err instanceof Error) return err.message;
+//     }
+// }

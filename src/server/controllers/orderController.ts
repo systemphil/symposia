@@ -27,6 +27,7 @@ import {
     stripeCreateCustomer, 
     stripeCreatePrice, 
     stripeCreateProduct, 
+    stripeGetCustomerEmail, 
     stripeUpdateProduct 
 } from "./stripeController";
 
@@ -204,7 +205,9 @@ export async function orderCreateOrUpdateCourse ({
     dialoguePrice, 
     imageUrl, 
     published, 
-    author 
+    author,
+    seminarAvailability,
+    dialogueAvailability,
 }: OrderCreateOrUpdateCourseProps) {
     // Locally scoped helper functions
     async function updateStripePriceIfNeeded({ 
@@ -226,6 +229,38 @@ export async function orderCreateOrUpdateCourse ({
         return;
     }
 
+    async function updateStripeProductIfNeeded({
+        stripeProductId, 
+        existingName, 
+        incomingName, 
+        existingDescription, 
+        incomingDescription, 
+        existingImageUrl, 
+        incomingImageUrl
+    }: {
+        stripeProductId: string, 
+        existingName: string,
+        incomingName: string,
+        existingDescription: string,
+        incomingDescription: string,
+        existingImageUrl: string | null,
+        incomingImageUrl: string | null,
+    }) {
+        if (existingName !== incomingName 
+            || existingDescription !== incomingDescription 
+            || existingImageUrl !== incomingImageUrl
+        ) {
+            const product = await stripeUpdateProduct({ 
+                stripeProductId, 
+                name: incomingName, 
+                description: incomingDescription, 
+                imageUrl: incomingImageUrl
+            });
+            return product;
+        }
+        return { id: stripeProductId };
+    }
+
     async function createStripeResources() {
         const product = await stripeCreateProduct({ name, description, imageUrl });
         const stripeBasePrice = await stripeCreatePrice({ stripeProductId: product.id, unitPrice: basePrice });
@@ -235,6 +270,9 @@ export async function orderCreateOrUpdateCourse ({
     }
 
     async function updateStripeResources({
+        existingName,
+        existingDescription,
+        existingImageUrl,
         stripeProductId, 
         stripeBasePriceId, 
         stripeSeminarPriceId, 
@@ -243,6 +281,9 @@ export async function orderCreateOrUpdateCourse ({
         existingSeminarPrice,
         existingDialoguePrice
     }: { 
+        existingName: string,
+        existingDescription: string,
+        existingImageUrl: string | null,
         stripeProductId: string, 
         stripeBasePriceId: string, 
         stripeSeminarPriceId: string, 
@@ -251,7 +292,15 @@ export async function orderCreateOrUpdateCourse ({
         existingSeminarPrice: number, 
         existingDialoguePrice: number
     }) {
-        const product = await stripeUpdateProduct({ stripeProductId, name, description, imageUrl });
+        const product = await updateStripeProductIfNeeded({ 
+            stripeProductId, 
+            existingName,
+            incomingName: name,
+            existingDescription,
+            incomingDescription: description, 
+            existingImageUrl,
+            incomingImageUrl: imageUrl,
+        });
         const stripeBasePrice = await updateStripePriceIfNeeded({ 
             stripePriceId: stripeBasePriceId, 
             productId: product.id, 
@@ -295,6 +344,8 @@ export async function orderCreateOrUpdateCourse ({
                 stripeBasePriceId: stripeBasePrice.id,
                 stripeSeminarPriceId: stripeSeminarPrice.id,
                 stripeDialoguePriceId: stripeDialoguePrice.id,
+                seminarAvailability,
+                dialogueAvailability,
             }
             const course = await dbUpsertCourseById(dbPayload);
             return course;
@@ -310,6 +361,9 @@ export async function orderCreateOrUpdateCourse ({
         ) throw new Error("Requisite Stripe resource entries not found at db call. \n" + JSON.stringify(existingCourse, null, 2));
 
         const { product, stripeBasePrice, stripeSeminarPrice, stripeDialoguePrice } = await updateStripeResources({
+            existingName: existingCourse.name,
+            existingDescription: existingCourse.description,
+            existingImageUrl: existingCourse.imageUrl,
             stripeProductId: existingCourse.stripeProductId,
             stripeBasePriceId: existingCourse.stripeBasePriceId,
             existingBasePrice: existingCourse.basePrice,
@@ -338,6 +392,8 @@ export async function orderCreateOrUpdateCourse ({
             stripeBasePriceId: updatedStripeBasePriceId,
             stripeSeminarPriceId: updatedStripeSeminarPriceId,
             stripeDialoguePriceId: updatedStripeDialoguePriceId,
+            seminarAvailability,
+            dialogueAvailability,
         }
         const course = await dbUpsertCourseById(dbPayload);
         
@@ -351,6 +407,8 @@ export async function orderCreateOrUpdateCourse ({
 }
 
 export async function orderCreateCheckout(slug: string, priceTier: string) {
+    const COURSE_DEADLINE_WITH_GRACE_PERIOD = new Date(new Date().getTime() + 5 * 60 * 1000);
+
     const session = await getServerAuthSession();
     if (!session) throw new Error("Session missing");
 
@@ -373,6 +431,20 @@ export async function orderCreateCheckout(slug: string, priceTier: string) {
     const course = await dbGetCourseBySlug(slug);
     if (!course) throw new Error("Course not found");
 
+    // Verify on the backend the course is still available for purchase
+    switch(priceTier) {
+        case "base":
+            break;
+        case "seminar":
+            if (!course.seminarAvailability || course.seminarAvailability < COURSE_DEADLINE_WITH_GRACE_PERIOD) 
+                throw new Error("Course seminar tier not available");
+            break;
+        case "dialogue":
+            if (!course.dialogueAvailability || course.dialogueAvailability < COURSE_DEADLINE_WITH_GRACE_PERIOD) 
+                throw new Error("Course dialogue tier not available");
+            break;
+    }
+
     let priceId = "";
     switch(priceTier) {
         case "base":
@@ -393,6 +465,9 @@ export async function orderCreateCheckout(slug: string, priceTier: string) {
 
     if (!userData.stripeCustomerId) throw new Error("User does not have a stripeCustomerId");
 
+    const customerEmail = await stripeGetCustomerEmail({ customerId: userData.stripeCustomerId });
+    if (!customerEmail) throw new Error("Could not retrieve customer email");
+
     const checkout = await stripeCreateCheckoutSession({
         customerId: userData.stripeCustomerId,
         userId: userData.id,
@@ -405,6 +480,10 @@ export async function orderCreateCheckout(slug: string, priceTier: string) {
         },
         slug: slug,
         courseId: course.id,
+        imageUrl: course.imageUrl,
+        name: course.name,
+        description: course.description,
+        customerEmail: customerEmail,
     })
 
     return { url: checkout.url };

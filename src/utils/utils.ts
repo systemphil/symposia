@@ -48,3 +48,13 @@ export function colorLog(text: string, color?: "teal" | "orange" | null) {
 export async function sleep(ms: number) {
     return await new Promise(r => setTimeout(r, ms));
 }
+
+const CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
+    currency: "USD",
+    style: "currency",
+    minimumFractionDigits: 0,
+})
+  
+export function formatCurrency(amount: number) {
+    return CURRENCY_FORMATTER.format(amount)
+}

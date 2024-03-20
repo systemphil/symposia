@@ -25,14 +25,15 @@ export async function POST (req: NextRequest) {
             break;
         case "payment_intent.requires_action":
             break;
+        case "product.updated":
+            console.log("===Product updated event received")
+            break;
+        case "product.created":
+            break;
         default:
-            console.log(`Unhandled event type: ${event.type}`);
+            console.log(`===Unhandled event type: ${event.type}`);
             // Unexpected event type
     }
-
-    // if (process.env.NODE_ENV === "development") {
-    //     console.log("Development mode in stripe webhook -- bypassing stripe event db record");
-    // }
 
     // Record the event in the database (unless development mode)
     if (process.env.NODE_ENV !== "development") {

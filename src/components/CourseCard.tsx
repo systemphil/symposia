@@ -20,6 +20,7 @@ export default async function CourseCard ({ course }: CourseCardProps) {
                         alt={`Video thumbnail preview for ${course.name}`}
                         width={340}
                         height={240}
+                        priority
                     />
                 )}
 
