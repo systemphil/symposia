@@ -23,6 +23,13 @@ const config: Config = {
       },
     },
   },
+  // variants: {
+  //   extend: {
+  //     transform: ['hover', 'group-hover'],
+  //     translate: ['hover', 'group-hover'],
+  //     textColor: ['responsive', 'hover', 'focus', 'group-hover'],
+  //   }
+  // },
   plugins: [
     require("daisyui"),
     require('@tailwindcss/typography'),

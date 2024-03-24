@@ -30,6 +30,10 @@ If you'd like to be part of the development of this app, kindly follow the instr
 
 3.0. Run `npx prisma generate` to generate the prisma client, this will be important for keeping your local types up to date with the database schema.
 
+### Running stripe local
+
+4.0 `stripe listen --forward-to 127.0.0.1:3000/api/stripe-webhook` To enable local testing with webhook for stripe.
+
 ### Running the Server
 
 9.9. Finally, to start a local development server, run `npm run dev` and open up `http://localhost:3000` on your favorite browser.

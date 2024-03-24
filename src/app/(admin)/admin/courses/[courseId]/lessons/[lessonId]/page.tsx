@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { dbGetLessonAndRelationsById } from '@/server/controllers/coursesController';
+import { dbGetLessonAndRelationsById } from '@/server/controllers/dbController';
 import Heading from '@/components/Heading';
 import LessonForm from '@/components/forms/LessonForm';
 import CourseMaterialCard from '@/components/CourseMaterialCard';
@@ -51,21 +51,6 @@ export default async function AdminLessonEdit ({ params }: { params: { courseId:
                 <div>
                     <Heading as='h4'>Lesson Video</Heading>
                     <VideoForm />
-                    {/* {(
-                        lesson.video
-                    ) ? (
-                        <CourseMaterialCard //TODO need video form with upload, not a coursematerialcard
-                            href={`/admin/courses/${courseId}/lessons/${lessonId}/lesson-video/${lesson.video.id}`} 
-                            heading={lesson.name}
-                        />
-                    ) : (
-                        <div>
-                            <Heading as='h2'>No video.</Heading>
-                            <Link href={`/admin/courses/${courseId}/lessons/${lessonId}/lesson-video/new`}>
-                                <button className="btn btn-primary">Add video</button>
-                            </Link>
-                        </div>
-                    )} */}
                 </div>
 
                 <div>

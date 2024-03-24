@@ -20,14 +20,16 @@ const storage = new Storage({
     credentials: creds,
 });
 
-const BUCKET_NAME = env.GCP_PRIMARY_BUCKET_NAME ?? "invalid";
+const PRIMARY_BUCKET_NAME = env.GCP_PRIMARY_BUCKET_NAME ?? "invalid";
+const SECONDARY_BUCKET_NAME = env.GCP_SECONDARY_BUCKET_NAME ?? "invalid";
 
-if (BUCKET_NAME === "invalid") {
-    throw new Error("GCP_PRIMARY_BUCKET_NAME is not set");
+if (PRIMARY_BUCKET_NAME === "invalid" || SECONDARY_BUCKET_NAME === "invalid") {
+    throw new Error("A GCP bucket name is not set");
 }
 
 /**
  * Storage bucket reference instance. Call methods on this object to interact with the bucket.
  * @see https://cloud.google.com/nodejs/docs/reference/storage/latest
  */
-export const bucket = storage.bucket(BUCKET_NAME);
+export const primaryBucket = storage.bucket(PRIMARY_BUCKET_NAME);
+export const secondaryBucket = storage.bucket(SECONDARY_BUCKET_NAME);
