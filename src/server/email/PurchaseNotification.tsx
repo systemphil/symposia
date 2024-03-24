@@ -8,33 +8,35 @@ import {
     Tailwind,
   } from "@react-email/components"
 import { OrderInformation } from "./OrderInformation"
+import { User } from "@prisma/client"
+import { UserInformation } from "./UserInformation";
   
 type PurchaseReceiptEmailProps = {
     product: {
-        name: string
-        imagePath: string
-        description: string
-    }
-    order: { id: string; createdAt: Date; pricePaidInCents: number }
-    courseLink: string
+        name: string;
+        imagePath: string;
+        description: string;
+    };
+    order: { id: string; createdAt: Date; pricePaidInCents: number };
+    courseLink: string;
+    user: User;
 }
 
-// ! BUG where is this coming from??
-// Warning: Each child in a list should have a unique "key" prop. See https://reactjs.org/link/warning-keys for more information.
-
-export default function PurchaseReceiptEmail({
+export default function PurchaseNotification ({
+    user,
     product,
     order,
     courseLink,
 }: PurchaseReceiptEmailProps) {
     return (
         <Html>
-            <Preview>Access {product.name} and view receipt</Preview>
+            <Preview>New purchase for {product.name}</Preview>
             <Tailwind>
                 <Head />
                 <Body className="font-sans bg-white">
                     <Container className="max-w-xl">
-                        <Heading>Purchase Receipt</Heading>
+                        <Heading>Purchase Notification</Heading>
+                        <UserInformation user={user} />
                         <OrderInformation
                             order={order}
                             product={product}

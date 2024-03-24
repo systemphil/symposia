@@ -3,11 +3,12 @@ import { dbUpdateUserPurchases } from "./dbController";
 import { StripeCheckoutSessionMetadata } from "./stripeController";
 import { resend } from '../email';
 import PurchaseReceiptEmail from '../email/PurchaseReceipt';
+import PurchaseNotification from '../email/PurchaseNotification';
 
 export async function handleSessionCompleted (event: Stripe.CheckoutSessionCompletedEvent) {
     const sessionMetadata = event.data.object.metadata as StripeCheckoutSessionMetadata;
     if (event.data.object.payment_status !== 'paid') {
-        console.log("===Payment status not paid");
+        console.log(`=!=Payment status not paid for session ${event.data.object.id}`);
         return;
     }
 
@@ -19,12 +20,12 @@ export async function handleSessionCompleted (event: Stripe.CheckoutSessionCompl
 
     const customerEmail = event.data.object.customer_email;
     if (!customerEmail) {
-        console.log("===No customer email found in session metadata");
+        console.log(`=!=No customer email found in session metadata. Session id ${event.data.object.id}`);
         return updatedUser;
     }
-    const senderEmail = process.env.SENDER_EMAIL
+    const senderEmail = process.env.EMAIL_SEND
     if (!senderEmail) {
-        console.log("===No sender email found in process.env");
+        console.log("=!=No sender email found in process.env");
         return updatedUser;
     }
 
@@ -46,6 +47,7 @@ export async function handleSessionCompleted (event: Stripe.CheckoutSessionCompl
         subject: 'Order Confirmation',
         react: (
             <PurchaseReceiptEmail
+                key={order.id}
                 order={order}
                 product={product}
                 courseLink={sessionMetadata.courseLink}
@@ -53,10 +55,26 @@ export async function handleSessionCompleted (event: Stripe.CheckoutSessionCompl
         ),
     });
 
-    /**
-     * TODO send additional emails for seminar and dialogue
-     * TODO also record in the db what people have signed up for seminar/dialogue
-     */
+    const receiverEmail = process.env.EMAIL_RECEIVE;
+    if (receiverEmail) {
+        await resend.emails.send({
+            from: `No Reply <${senderEmail}>`,
+            to: receiverEmail,
+            subject: 'New Purchase',
+            react: (
+                <PurchaseNotification
+                    user={updatedUser}
+                    key={order.id}
+                    order={order}
+                    product={product}
+                    courseLink={sessionMetadata.courseLink}
+                />
+            ),
+        });
+    } else {
+        console.log("=!=No receiver email found in process.env");
+    }
+
     return updatedUser;
 }
 

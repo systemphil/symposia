@@ -484,7 +484,7 @@ export async function orderCreateCheckout(slug: string, priceTier: string) {
         name: course.name,
         description: course.description,
         customerEmail: customerEmail,
-    })
+    });
 
     return { url: checkout.url };
 }

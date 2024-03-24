@@ -85,8 +85,8 @@ type StripeCreateCheckoutSessionProps = {
         quantity: number,
         adjustable_quantity: {
             enabled: boolean,
-        }
-    }
+        },
+    },
     slug: string,
     courseId: string,
     imageUrl: string | null | undefined,
