@@ -1,5 +1,5 @@
 import Editor from "@/components/Editor";
-import { dbGetCourseAndDetailsAndLessonsById, dbGetMdxByModelId } from "@/server/controllers/coursesController";
+import { dbGetCourseAndDetailsAndLessonsById, dbGetMdxByModelId } from "@/server/controllers/dbController";
 
 /**
  * Fetches data for CourseDetails and renders the MDX Editor to the UI.

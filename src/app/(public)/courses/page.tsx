@@ -1,26 +1,17 @@
 import CourseGrid from "@/components/CourseGrid";
 import Heading from "@/components/Heading";
 import { stylesConfig } from "@/config/stylesConfig";
-import { dbGetAllPublishedCourses } from "@/server/controllers/coursesController";
+import { Suspense } from "react";
 
-
-export default async function PublicCourses() {
-    const courses = await dbGetAllPublishedCourses();
+export default async function PublishedCourses() {
 
     return (
         <main className={`h-screen flex flex-col justify-front items-center gap-4 ${stylesConfig.coursesPage.bgColor}`}>
             <Heading>Available Courses</Heading>
 
-            {(
-                courses.length > 0
-            ) ? (
-                <CourseGrid courses={courses} isAdmin={false} />
-            ) : (
-                <div>
-                    <Heading as='h3'>There are no courses currently available</Heading>
-                </div>
-            )}
-
+            <Suspense fallback={<p>Loading...</p>}>
+                <CourseGrid/>
+            </Suspense>
         </main>
-    )
-}
+    );
+};

@@ -1,4 +1,15 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'storage.googleapis.com',
+                port: '',
+                pathname: `/${process.env.GCP_SECONDARY_BUCKET_NAME}/**`,
+            },
+        ],
+    },
+}
 
 module.exports = nextConfig

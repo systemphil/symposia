@@ -1,8 +1,7 @@
 import LoadingBars from "@/components/LoadingBars";
 import MDXRenderer from "@/components/MDXRenderer";
-import { DBGetCompiledMdxBySlugsProps, dbGetCompiledMdxBySlugs } from "@/server/controllers/coursesController";
+import { DBGetCompiledMdxBySlugsProps, dbGetCompiledMdxBySlugs } from "@/server/controllers/dbController";
 import { Suspense } from "react";
-
 
 /**
  * * TEST ROUTE
@@ -48,9 +47,8 @@ export default async function TestPage2({ params }: { params: { courseSlug: stri
                         <MDXRenderer data={compiledMdx2} />
                     </Suspense>
                 </div>
+                
             </div>
-            
-            
         </main>
     )
 }

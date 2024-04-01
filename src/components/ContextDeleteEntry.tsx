@@ -5,7 +5,6 @@ import { type ModelName } from '@/server/controllers/orderController';
 import React, { createContext, useContext, useState } from 'react';
 import toast from 'react-hot-toast';
 
-
 // deleteEntry: (id: string) => void;
 const DeleteContext = createContext({deleteEntry: (id: string, modelName: ModelName) => null});
 
@@ -21,9 +20,9 @@ export const useDeleteEntry = () => {
 export const DeleteEntryProvider = ({ children }: { children: React.ReactNode}) => {
     const [ deleteStaging, setDeleteStaging ] = useState<{id: string, modelName: ModelName} | null>(null);
     const utils = apiClientside.useContext();
-    const mutation = apiClientside.courses.deleteModelEntry.useMutation({
+    const mutation = apiClientside.db.deleteModelEntry.useMutation({
         onSuccess: (entry) => {
-            void utils.courses.invalidate();
+            void utils.db.invalidate();
             toast.success(`Success! ${entry.id} deleted.`)
         },
         onError: (error) => {

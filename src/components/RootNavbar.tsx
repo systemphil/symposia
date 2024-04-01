@@ -2,6 +2,7 @@
 
 import { stylesConfig } from "@/config/stylesConfig";
 import { signIn, signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 
 
@@ -17,7 +18,7 @@ const RootNavbar = () => {
                         <div className="dropdown dropdown-bottom dropdown-start">
                             <label tabIndex={1} className="btn btn-ghost btn-circle">
                                 <div className="w-12 rounded-full">
-                                    <img src="/static/svg/menu.svg" alt=""/>
+                                    <Image src="/static/svg/menu.svg" alt="" height={25} width={25}/>
                                 </div>
                             </label>
                             <ul tabIndex={1} className="menu dropdown-content z-[1] p-2 shadow bg-custom-gray w-52 rounded-sm drop-shadow-2xl text-custom-black font-semibold">
@@ -54,7 +55,8 @@ const RootNavbar = () => {
                                 <label tabIndex={0} className="btn btn-ghost btn-circle">
                                     <div className="avatar">
                                         <div className="w-12 rounded-full">
-                                            <img src={sessionData?.user.image ?? "/static/images/avatar_placeholder.png"} />
+                                            {/* eslint-disable-next-line */}
+                                            <img src={sessionData?.user.image ?? "/static/images/avatar_placeholder.png"} alt="avatar_picture" />
                                         </div>
                                     </div>
                                 </label>

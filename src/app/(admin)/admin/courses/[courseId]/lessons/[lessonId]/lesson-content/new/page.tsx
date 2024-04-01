@@ -1,4 +1,4 @@
-import { dbGetLessonAndRelationsById, dbUpsertLessonContentById } from "@/server/controllers/coursesController";
+import { dbGetLessonAndRelationsById, dbUpsertLessonContentById } from "@/server/controllers/dbController";
 import { redirect } from "next/navigation";
 
 /**

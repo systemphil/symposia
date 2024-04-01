@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import VideoFileInput from "./VideoFileInput";
 import { Video } from "@prisma/client";
@@ -9,8 +9,6 @@ import { apiClientside } from "@/lib/trpc/trpcClientside";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import VideoViewer from "../VideoViewer";
-import Heading from "../Heading";
-
 
 type VideoFormValues = Video & {
     fileInput: FileList;
@@ -27,10 +25,13 @@ const VideoForm = () => {
     const [selectedFile, setSelectedFile] = useState<File>();
     const [handlerLoading, setHandlerLoading] = useState<boolean>(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const isCalledRef = useRef(false);
     const params = useParams();
     const utils = apiClientside.useContext();
     const lessonId = typeof params.lessonId === "string" ? params.lessonId : "";
-    const { data: videoEntry } = apiClientside.courses.getVideoByLessonId.useQuery({ id: lessonId});
+
+    // Queries and mutations
+    const { data: videoEntry } = apiClientside.db.getVideoByLessonId.useQuery({ id: lessonId});
     const createSignedPostUrlMutation = apiClientside.gc.createSignedPostUrl.useMutation({
         onError: (error) => {
             console.error(error)
@@ -46,12 +47,15 @@ const VideoForm = () => {
     const createSignedReadUrlMutation = apiClientside.gc.createSignedReadUrl.useMutation({
         onError: (error) => { console.error(error)}
     })
+
+    // Event handlers and other hooks
     const handleSelectedFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target && e.target.files && e.target.files[0];
         if (file) {
             setSelectedFile(file);
         }
     };
+
     const methods = useForm<VideoFormValues>({ 
         defaultValues: {
             id: videoEntry?.id || "",
@@ -60,6 +64,7 @@ const VideoForm = () => {
             fileInput: undefined,
         }
     });
+
     const onSubmit: SubmitHandler<VideoFormValues> = async (data) => {
         try {
             //
@@ -68,9 +73,6 @@ const VideoForm = () => {
             setHandlerLoading(true);
             if (!data.fileInput || data.fileInput.length === 0) {
                 toast.error('No files selected!');
-                setSelectedFile(undefined);
-                methods.reset();
-                setHandlerLoading(false);
                 return;
             }
             //
@@ -120,20 +122,21 @@ const VideoForm = () => {
             //
             // 3. Upload complete. Cleanup of form and resetting queries and states.
             //
-            void utils.courses.getVideoByLessonId.invalidate();
-            setSelectedFile(undefined);
-            methods.reset();
-            setHandlerLoading(false);
+            void utils.db.getVideoByLessonId.invalidate();
         } catch(error) {
-            setSelectedFile(undefined);
-            methods.reset();
-            setHandlerLoading(false);
             toast.error('Oops! Something went wrong');
             throw error;
+        } finally  {
+            setSelectedFile(undefined);
+            methods.reset();
+            setHandlerLoading(false);
         }
     };
+
     useEffect(() => {
         if (videoEntry) {
+            if (isCalledRef.current === true) return;
+            isCalledRef.current = true; // Stop double call in strict mode.
             createSignedReadUrlMutation
                 .mutateAsync({ id: videoEntry.id, fileName: videoEntry.fileName})
                 .then((url) => {
@@ -142,9 +145,13 @@ const VideoForm = () => {
                 .catch((error) => {
                     toast.error("Oops! Unable to get video preview");
                     console.error("Error retrieving preview URL: ", error);
+                })
+                .finally(() => {
+                    isCalledRef.current = false;
                 });
         }
-    }, [videoEntry]);
+    }, [videoEntry, createSignedReadUrlMutation]);
+
     return(
         <FormProvider {...methods}>
             <form 
@@ -157,7 +164,7 @@ const VideoForm = () => {
                     name='fileInput'
                     options={{ 
                         required: true,
-                        onChange: (e) => handleSelectedFileChange(e)
+                        onChange: (e) => handleSelectedFileChange(e),
                     }} 
                 />
                 {selectedFile && (
@@ -168,6 +175,7 @@ const VideoForm = () => {
                 <SubmitInput value={`${(videoEntry && videoEntry.id) ? 'Update' : 'Upload'} video`} isLoading={handlerLoading} />
             </form>
         </FormProvider>
-    )
+    );
 }
+
 export default VideoForm;
