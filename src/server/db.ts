@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 import { env } from "process";
 
-const LOG_ACTIVE = false;
+const LOG_ACTIVE = true;
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;

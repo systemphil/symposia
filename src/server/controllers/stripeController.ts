@@ -124,7 +124,10 @@ export async function stripeCreateCheckoutSession({
         payment_method_types: ["card", "paypal"],
         mode: "payment",
         line_items: [ purchase ],
-        success_url: `${baseUrl}/purchase-success`,
+        /**
+         * * Note: priceId is split for the success URL and then re-attached in the db query.
+         */
+        success_url: `${baseUrl}/purchase-success?p=${purchase.price.split("_")[1]}&s=${slug}`,
         cancel_url: `${baseUrl}/courses/${slug}?canceled=true`,
         metadata: {
             stripeCustomerId: customerId,

@@ -15,7 +15,7 @@ export async function handleSessionCompleted (event: Stripe.CheckoutSessionCompl
     const updatedUser = await dbUpdateUserPurchases({
         userId: sessionMetadata.userId,
         courseId: sessionMetadata.courseId,
-        purchase: sessionMetadata.purchase,
+        purchasePriceId: sessionMetadata.purchase,
     });
 
     const customerEmail = event.data.object.customer_email;

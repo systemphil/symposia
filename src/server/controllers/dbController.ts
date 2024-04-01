@@ -107,15 +107,15 @@ export async function dbUpdateUserStripeCustomerId ({userId, stripeCustomerId}: 
  * @access PUBLIC
  */
 export async function dbUpdateUserPurchases ({
-    userId, courseId, purchase
+    userId, courseId, purchasePriceId
 }: {
-    userId: string, courseId: string, purchase: string
+    userId: string, courseId: string, purchasePriceId: string
 }) {
     const validUserId = z.string().parse(userId);
     const existingUser = await prisma.user.findUnique({ where: { id: validUserId } });
     if (!existingUser) throw new Error("User not found");
 
-    const updatedPurchases = [ ...existingUser.productsPurchased, purchase ];
+    const updatedPurchases = [ ...existingUser.productsPurchased, purchasePriceId ];
     const updatedUser = await prisma.user.update({
         where: {
             id: validUserId,
@@ -922,4 +922,21 @@ export async function dbCreateStripeEventRecord (event: Stripe.Event) {
             },
         },
     });
+}
+
+export async function dbVerifyUserPurchase (userId: string, priceId: string) {
+    const validUserId = z.string().parse(userId);
+    const validPriceId = z.string().parse(priceId);
+    const completePriceId = "price_" + validPriceId;
+    const user = await prisma.user.findUnique({
+        where: {
+            id: validUserId,
+        },
+        select: {
+            productsPurchased: true,
+        }
+    });
+    if (!user) return false;
+    const hasUserPurchased = user.productsPurchased.includes(completePriceId);
+    return hasUserPurchased; 
 }

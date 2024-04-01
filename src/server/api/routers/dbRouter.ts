@@ -6,7 +6,8 @@ import {
     dbGetVideoByLessonId, 
     dbUpdateMdxByModelId, 
     dbUpsertLessonById, 
-    dbUpsertLessonContentById, 
+    dbUpsertLessonContentById,
+    dbVerifyUserPurchase, 
 } from "@/server/controllers/dbController";
 import { createTRPCRouter, publicProcedure, protectedProcedure, protectedAdminProcedure } from "../trpc";
 import * as z from "zod";
@@ -67,6 +68,17 @@ export const dbRouter = createTRPCRouter({
         )
         .query(async (opts) => {
             return await dbGetVideoByLessonId(opts.input.id);
+        }),
+    getVerifiedPurchase: protectedProcedure
+        .input(
+            z
+                .object({
+                    userId: z.string(),
+                    purchasePriceId: z.string(),
+                })
+        )
+        .query(async (opts) => {
+            return await dbVerifyUserPurchase(opts.input.userId, opts.input.purchasePriceId);
         }),
     upsertCourse: protectedAdminProcedure
         .input(

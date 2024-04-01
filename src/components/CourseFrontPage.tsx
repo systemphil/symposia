@@ -4,6 +4,7 @@ import CourseEnrollButton from "@/components/CourseEnrollButton";
 import Heading from "@/components/Heading";
 import Image from "next/image";
 import Link from "next/link";
+import { Toasty } from "./Toasty";
 
 export default async function CourseFrontPage ({ slug }: { slug: string}) {
     const course = await dbGetCourseBySlug(slug);
@@ -30,6 +31,7 @@ export default async function CourseFrontPage ({ slug }: { slug: string}) {
             <Heading>{course.name}</Heading>
             <Heading as='h6'>{course.description}</Heading>
             <CourseEnrollButton slug={slug}/>
+            <Toasty />
         </div>
     );
 }
