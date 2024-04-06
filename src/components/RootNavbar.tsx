@@ -37,15 +37,21 @@ export const RootNavbar = () => {
                         <Link href="/">
                             <p>Home</p>
                         </Link>
-                        <Link href="/test"> {/* // TODO REMOVE WHEN FINISHED */}
-                            <p className="text-red-500">Test</p>
-                        </Link>
-                        <Link href="/admin">
-                            <p>Admin</p>
-                        </Link>
                         <Link href="/courses">
                             <p>Courses</p>
                         </Link>
+                        {
+                            sessionData && sessionData.user.role === "ADMIN" && (
+                                <>
+                                    <Link href="/admin">
+                                        <p className="text-purple-700">Admin</p>
+                                    </Link>
+                                    <Link href="/test"> {/* // TODO REMOVE WHEN FINISHED */}
+                                        <p className="text-red-500">Test</p>
+                                    </Link>
+                                </>
+                            )
+                        }
                     </div>
 
                     <nav className="flex gap-6 items-center">
@@ -86,6 +92,11 @@ const UserMenu = ({sessionData}: {sessionData: Session}) => {
                 <li>
                     <a className="pointer-events-none cursor-default opacity-75">{sessionData && sessionData.user?.email}</a>
                 </li>
+                {sessionData && 
+                sessionData.user.provider &&
+                    <li>
+                        <a className="pointer-events-none cursor-default opacity-75">Logged in with {sessionData.user.provider}</a>
+                    </li>}
                 <li className="border-t my-1" />
                 <li>
                     <Link href="/account/billing">Billing</Link>
