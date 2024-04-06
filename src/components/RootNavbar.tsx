@@ -1,12 +1,13 @@
 "use client";
 
 import { stylesConfig } from "@/config/stylesConfig";
+import { Session } from "next-auth";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 
 
-const RootNavbar = () => {
+export const RootNavbar = () => {
     const { data: sessionData } = useSession();
 
     return (
@@ -36,41 +37,28 @@ const RootNavbar = () => {
                         <Link href="/">
                             <p>Home</p>
                         </Link>
-                        <Link href="/test"> {/* // TODO REMOVE WHEN FINISHED */}
-                            <p className="text-red-500">Test</p>
-                        </Link>
-                        <Link href="/admin">
-                            <p>Admin</p>
-                        </Link>
                         <Link href="/courses">
                             <p>Courses</p>
                         </Link>
+                        {
+                            sessionData && sessionData.user.role === "ADMIN" && (
+                                <>
+                                    <Link href="/admin">
+                                        <p className="text-purple-700">Admin</p>
+                                    </Link>
+                                    <Link href="/test"> {/* // TODO REMOVE WHEN FINISHED */}
+                                        <p className="text-red-500">Test</p>
+                                    </Link>
+                                </>
+                            )
+                        }
                     </div>
 
                     <nav className="flex gap-6 items-center">
                         {(
                             sessionData
                         ) ? (
-                            <div className="dropdown dropdown-bottom dropdown-end">
-                                <label tabIndex={0} className="btn btn-ghost btn-circle">
-                                    <div className="avatar">
-                                        <div className="w-12 rounded-full">
-                                            {/* eslint-disable-next-line */}
-                                            <img src={sessionData?.user.image ?? "/static/images/avatar_placeholder.png"} alt="avatar_picture" />
-                                        </div>
-                                    </div>
-                                </label>
-                                <ul tabIndex={0} className="menu dropdown-content z-[1] p-2 shadow bg-custom-gray rounded-box w-52 drop-shadow-2xl text-custom-black">
-                                    <li><a className="pointer-events-none cursor-default opacity-75 text-lg pb-0">{sessionData && sessionData.user?.name}</a></li>
-                                    <li><a className="pointer-events-none cursor-default opacity-75">{sessionData && sessionData.user?.email}</a></li>
-                                    <li className="border-t my-1"></li>
-                                    <li><Link href="/account">Dashboard</Link></li> 
-                                    <li><Link href="/account/booking">Booking</Link></li> 
-                                    <li><Link href="/account/billing">Billing</Link></li>
-                                    <li className="border-t my-1"></li>
-                                    <li><button onClick={() => void signOut()}>Sign Out</button></li>
-                                </ul>
-                            </div>
+                            <UserMenu sessionData={sessionData} />
                         ) : (
                             <button
                                 className="btn btn-primary"
@@ -86,4 +74,38 @@ const RootNavbar = () => {
     );
 };
 
-export default RootNavbar;
+const UserMenu = ({sessionData}: {sessionData: Session}) => {
+    return(
+        <div className="dropdown dropdown-bottom dropdown-end">
+            <label tabIndex={0} className="btn btn-ghost btn-circle">
+                <div className="avatar">
+                    <div className="w-12 rounded-full">
+                        {/* eslint-disable-next-line */}
+                        <img src={sessionData?.user.image ?? "/static/images/avatar_placeholder.png"} alt="avatar_picture" />
+                    </div>
+                </div>
+            </label>
+            <ul tabIndex={0} className="menu dropdown-content z-[1] p-2 shadow bg-slate-100 rounded-box w-52 drop-shadow-2xl text-custom-black">
+                <li>
+                    <a className="pointer-events-none cursor-default opacity-75 text-lg pb-0">{sessionData && sessionData.user?.name}</a>
+                </li>
+                <li>
+                    <a className="pointer-events-none cursor-default opacity-75">{sessionData && sessionData.user?.email}</a>
+                </li>
+                {sessionData && 
+                sessionData.user.provider &&
+                    <li>
+                        <a className="pointer-events-none cursor-default opacity-75">Logged in with {sessionData.user.provider}</a>
+                    </li>}
+                <li className="border-t my-1" />
+                <li>
+                    <Link href="/account/billing">Billing</Link>
+                </li>
+                <li className="border-t my-1" />
+                <li>
+                    <button onClick={() => void signOut()}>Sign Out</button>
+                </li>
+            </ul>
+        </div>
+    )
+}
