@@ -5,7 +5,7 @@ import { Inter } from 'next/font/google'
 import { Toaster } from 'react-hot-toast';
 import TRPCProvider from '@/lib/trpc/TRPCProvider'
 import NextAuthProvider from '../lib/nextAuth/NextAuthProvider'
-import RootNavbar from '@/components/RootNavbar'
+import { RootNavbar } from '@/components/RootNavbar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,6 +14,8 @@ export const metadata: Metadata = {
     description: 'Where each course is a symposium',
 }
 
+const rootClasses = "antialiased text-gray-900 bg-gray-100 dark:bg-gray-900 dark:text-gray-800"
+
 export default function RootLayout({
     children,
 }: {
@@ -21,7 +23,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            <body className={inter.className}>
+            <body className={`${inter.className} ${rootClasses}`}>
                 <NextAuthProvider>
                     <TRPCProvider>
 
