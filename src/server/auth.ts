@@ -70,7 +70,8 @@ export const authOptions: NextAuthOptions = {
     theme: {
         colorScheme: "light",
         brandColor: "#AA336A",
-        logo: "https://avatars.githubusercontent.com/u/147748257?s=200&v=4"
+        // TODO fix logo source
+        logo: "https://avatars.githubusercontent.com/u/147748257?s=200&v=4",
     }
 };
 

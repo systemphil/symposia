@@ -2,17 +2,10 @@
 
 import React, { createContext, forwardRef, useContext } from "react";
 import dynamic from "next/dynamic";
-import { headingsPlugin } from '@mdxeditor/editor/plugins/headings'
-import { listsPlugin } from '@mdxeditor/editor/plugins/lists'
-import { quotePlugin } from '@mdxeditor/editor/plugins/quote'
-import { thematicBreakPlugin } from '@mdxeditor/editor/plugins/thematic-break'
-import { UndoRedo } from '@mdxeditor/editor/plugins/toolbar/components/UndoRedo'
-import { BoldItalicUnderlineToggles } from '@mdxeditor/editor/plugins/toolbar/components/BoldItalicUnderlineToggles'
-import { toolbarPlugin } from '@mdxeditor/editor/plugins/toolbar'
 import { 
     AdmonitionDirectiveDescriptor,
-    AdmonitionKind,
     BlockTypeSelect,
+    BoldItalicUnderlineToggles,
     Button,
     ChangeAdmonitionType,
     ChangeCodeMirrorLanguage,
@@ -33,16 +26,22 @@ import {
     Separator, 
     ShowSandpackInfo, 
     TooltipWrap, 
+    UndoRedo, 
     codeBlockPlugin, 
     codeMirrorPlugin, 
     diffSourcePlugin, 
     directivesPlugin,
     frontmatterPlugin,
+    headingsPlugin,
     imagePlugin,
     linkDialogPlugin,
     linkPlugin,
+    listsPlugin,
     markdownShortcutPlugin,
+    quotePlugin,
     tablePlugin,
+    thematicBreakPlugin,
+    toolbarPlugin,
 } from "@mdxeditor/editor";
 import { apiClientside } from "@/lib/trpc/trpcClientside";
 import { type dbGetMdxByModelId } from "@/server/controllers/dbController";
@@ -242,6 +241,6 @@ function whenInAdmonition(editorInFocus: EditorInFocus | null) {
     if (!node || node.getType() !== 'directive') {
         return false
     }
-  
-    return ['note', 'tip', 'danger', 'info', 'caution'].includes(node.getMdastNode().name as AdmonitionKind)
+    // @ts-expect-error
+    return ['note', 'tip', 'danger', 'info', 'caution'].includes(node.getMdastNode().name)
 }

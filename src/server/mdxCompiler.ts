@@ -1,9 +1,11 @@
+// @ts-nocheck
+// TODO fix types for node remark-directive below
+
 import {compile} from '@mdx-js/mdx';
 import remarkGfm from "remark-gfm";
 import remarkDirective from 'remark-directive';
 import {visit} from 'unist-util-visit';
 import type {Root} from 'mdast';
-
 
 /**
  * Compiles MDX strings into JavaScript. Configure additional plugins here.
@@ -26,6 +28,7 @@ export const mdxCompiler = async (mdxSource: string) => {
 }
 export type MDXCompilerReturnType = Awaited<ReturnType<typeof mdxCompiler>>;
 const ADMONITION_TYPES = ["note", "tip", "danger", "info", "caution"]
+
 /**
  * Plugin for the MDX compiler that adds admonition/callout nodes and classes to compiled output. Traverses the tree
  * to check for `directives` (Markdown items tagged with `:::`) with special names. E.g. `:::danger <content-here> :::`.
@@ -48,27 +51,27 @@ function adminitionPlugin() {
                     if (node.name === ADMONITION_TYPES[0]) {
                         node.attributes = {
                             ...node.attributes,
-                            className: '_admonitionNote_13nbk_63', 
+                            className: '_admonitionNote_1tncs_153', 
                         };
                     } else if (node.name === ADMONITION_TYPES[1]) {
                         node.attributes = {
                             ...node.attributes,
-                            className: '_admonitionTip_13nbk_63', 
+                            className: '_admonitionTip_1tncs_154', 
                         };
                     } else if (node.name === ADMONITION_TYPES[2]) {
                         node.attributes = {
                             ...node.attributes,
-                            className: '_admonitionDanger_13nbk_63', 
+                            className: '_admonitionDanger_1tncs_151', 
                         };
                     } else if (node.name === ADMONITION_TYPES[3]) {
                         node.attributes = {
                             ...node.attributes,
-                            className: '_admonitionInfo_13nbk_63', 
+                            className: '_admonitionInfo_1tncs_152', 
                         };
                     } else if (node.name === ADMONITION_TYPES[4]) {
                         node.attributes = {
                             ...node.attributes,
-                            className: '_admonitionCaution_13nbk_63', 
+                            className: '_admonitionCaution_1tncs_155', 
                         };
                     }
                     
@@ -85,7 +88,7 @@ function adminitionPlugin() {
                         type: 'paragraph',
                         data: {
                             hName: 'div',
-                            hProperties: { className: ['_nestedEditor_w1wlt_891'] },
+                            hProperties: { className: ['_nestedEditor_19o4e_913'] },
                         },
                         // @ts-ignore
                         children: node.children,
