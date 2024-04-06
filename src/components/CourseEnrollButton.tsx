@@ -1,10 +1,10 @@
 import { getServerAuthSession } from "@/server/auth";
 import { dbGetCourseBySlug, dbGetUserPurchasedCourses } from "@/server/controllers/dbController";
 import { orderCreateCheckout } from "@/server/controllers/orderController";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SubmitButton } from "./forms/SubmitButton";
 import { z } from "zod";
+import { SignInButton } from "./SignInButton";
 
 type CourseEnrollButtonProps = {
     slug: string;
@@ -13,11 +13,7 @@ type CourseEnrollButtonProps = {
 const CourseEnrollButton = async ({ slug }: CourseEnrollButtonProps) => {
     const session = await getServerAuthSession();
     if (!session) {
-        return (
-            <Link href={{ pathname: '/sign-in', query: { enroll: slug } }} className='btn btn-primary'>
-                Sign In to Buy
-            </Link>
-        );
+        return <SignInButton />
     }
 
     const userCourses = await dbGetUserPurchasedCourses(session.user.id);
