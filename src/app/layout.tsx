@@ -14,7 +14,8 @@ export const metadata: Metadata = {
     description: 'Where each course is a symposium',
 }
 
-const rootClasses = "antialiased text-gray-900 bg-gray-100 dark:bg-gray-900 dark:text-gray-800"
+// TODO fix classes when styling properly
+const rootClasses = "antialiased text-gray-900 bg-gray-100 dark:bg-gray-900 dark:text-gray-800 bg-white dark:bg-white"
 
 export default function RootLayout({
     children,

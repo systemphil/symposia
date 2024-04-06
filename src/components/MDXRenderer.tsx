@@ -7,7 +7,6 @@ import { type MDXModule } from 'mdx/types';
 import { type MDXCompilerReturnType } from '@/server/mdxCompiler';
 import LoadingBars from './LoadingBars';
 
-
 /**
  * Renders MDX content to the UI. Requires compiled MDX string. TailwindCSS formatting applied through prose using tailwindcss/typography.
  * To configure MDX plugins, please see the compiler.
@@ -29,15 +28,18 @@ const MDXRenderer = ({ data }: {data: MDXCompilerReturnType}) => {
         })()
     }, [data])
 
+    // _editorRoot_w1wlt_36 _editorWrapper_w1wlt_133 mdxeditor
+    // _rootContentEditableWrapper_w1wlt_1022
+    // _contentEditable_w1wlt_339
     return (
         <>
             {(
                 mdxModule
             ) ? (
-                <article className="_editorRoot_w1wlt_36 _editorWrapper_w1wlt_133 mdxeditor">
+                <article className="mdxeditor _editorRoot_19o4e_38 _editorWrapper_19o4e_139">
                     <div className="block">
-                        <div className="_rootContentEditableWrapper_w1wlt_1022">
-                            <div className="_contentEditable_w1wlt_339 prose max-w-none w-full">
+                        <div className="_rootContentEditableWrapper_19o4e_1047 mdxeditor-root-contenteditable">
+                            <div className="_contentEditable_19o4e_352 prose max-w-none w-full">
                                 <Content />
                             </div>
                         </div>

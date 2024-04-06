@@ -10,12 +10,11 @@ export default async function TestPage() {
         <main className="h-screen flex flex-col justify-front items-center gap-4 bg-slate-200">
             <p>Test page with hardcoded retrieval from db</p>
             <div className="container">
-                
-                    scheduled for deletion
+                    <p>Scheduled for deletion</p>
                     <br></br>
-                <Link href="/test/first-course-updated/"><button className="btn btn-accent">1 dynamic path</button></Link>  
+                <Link href="/test/buddy/"><button className="btn btn-accent">1 dynamic path</button></Link>  
                 <br></br>
-                <Link href="/test/first-course-updated/logic-introduction"><button className="btn btn-accent">2 dynamic path</button></Link>  
+                <Link href="/test/buddy/loving-buddy"><button className="btn btn-accent">2 dynamic path</button></Link>  
                 
             </div>
             
