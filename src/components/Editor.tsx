@@ -122,38 +122,37 @@ export default function Editor({ initialMaterial, title }: EditorProps) {
     return (
         <>
             <Heading as="h1">Editing {material.mdxCategory.toLowerCase()} of &quot;<span className="italic">{title}</span>&nbsp;&quot;</Heading>
-            {/* //TODO BTN below only for testing, CLEANUP when done */}
-            <button className="btn btn-accent" onClick={() => console.log(editorRef.current?.getMarkdown())}>DEBUG:Print markdown to console</button>
-                <EditorContext.Provider value={updateMaterialMutation.isLoading}>
-                    <ForwardedRefMDXEditor 
-                        ref={editorRef}
-                        markdown={material.mdx}
-                        contentEditableClassName="prose max-w-none"
-                        plugins={[
-                            listsPlugin(),
-                            quotePlugin(),
-                            headingsPlugin(),
-                            linkPlugin(),
-                            linkDialogPlugin(),
-                            imagePlugin(),
-                            tablePlugin(),
-                            thematicBreakPlugin(),
-                            frontmatterPlugin(),
-                            codeBlockPlugin({ defaultCodeBlockLanguage: 'txt' }),
-                            // codeBlockPlugin({ codeBlockEditorDescriptors: [PlainTextCodeEditorDescriptor] }),
-                            codeMirrorPlugin({ codeBlockLanguages: { js: 'JavaScript', css: 'CSS', txt: 'text', tsx: 'TypeScript' } }),
-                            directivesPlugin({ directiveDescriptors: [ AdmonitionDirectiveDescriptor] }),
-                            diffSourcePlugin({ viewMode: 'rich-text', diffMarkdown: 'boo' }),
-                            markdownShortcutPlugin(),
-                            toolbarPlugin({
-                                toolbarContents: () => (
-                                    <DefaultToolbar handleSave={handleSave} />
-                                )
-                            })
-                        ]}
-                    />
-                </EditorContext.Provider>
+            <EditorContext.Provider value={updateMaterialMutation.isLoading}>
+                <ForwardedRefMDXEditor 
+                    ref={editorRef}
+                    markdown={material.mdx}
+                    contentEditableClassName="prose max-w-none"
+                    plugins={[
+                        listsPlugin(),
+                        quotePlugin(),
+                        headingsPlugin(),
+                        linkPlugin(),
+                        linkDialogPlugin(),
+                        imagePlugin(),
+                        tablePlugin(),
+                        thematicBreakPlugin(),
+                        frontmatterPlugin(),
+                        codeBlockPlugin({ defaultCodeBlockLanguage: 'txt' }),
+                        // codeBlockPlugin({ codeBlockEditorDescriptors: [PlainTextCodeEditorDescriptor] }),
+                        codeMirrorPlugin({ codeBlockLanguages: { js: 'JavaScript', css: 'CSS', txt: 'text', tsx: 'TypeScript' } }),
+                        directivesPlugin({ directiveDescriptors: [ AdmonitionDirectiveDescriptor] }),
+                        diffSourcePlugin({ viewMode: 'rich-text', diffMarkdown: 'boo' }),
+                        markdownShortcutPlugin(),
+                        toolbarPlugin({
+                            toolbarContents: () => (
+                                <DefaultToolbar handleSave={handleSave} />
+                            )
+                        })
+                    ]}
+                />
+            </EditorContext.Provider>
             <div className="border-neutral-border border-dashed border-t-[1px] mb-16"></div>
+            <button className="btn btn-warning btn-xs m-2 border-dotted border-2 border-black hover:border-solid hover:border-black hover:border-2 duration-200" onClick={() => console.log(editorRef.current?.getMarkdown())}>DEBUG:Print markdown to console</button>
         </>
     )
 }
