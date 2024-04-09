@@ -41,6 +41,14 @@ export const dbGetCourseBySlug = async (slug: string) => {
     return await prisma.course.findUnique({
         where: {
             slug: validSlug,
+        },
+        include: {
+            lessons: {
+                select: {
+                    slug: true,
+                    name: true,
+                }
+            }
         }
     })
 }

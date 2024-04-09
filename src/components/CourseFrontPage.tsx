@@ -5,6 +5,7 @@ import Heading from "@/components/Heading";
 import Image from "next/image";
 import Link from "next/link";
 import { Toasty } from "./Toasty";
+import { CourseLessonContents } from "./CourseLessonContents";
 
 export default async function CourseFrontPage ({ slug }: { slug: string}) {
     const course = await dbGetCourseBySlug(slug);
@@ -12,6 +13,8 @@ export default async function CourseFrontPage ({ slug }: { slug: string}) {
     if (!course) {
         return redirect("/courses");
     }
+
+    console.log(course.lessons.map(lesson => lesson.slug))
 
     return (
         <div className="flex flex-col justify-center items-center">
@@ -31,6 +34,7 @@ export default async function CourseFrontPage ({ slug }: { slug: string}) {
             <Heading>{course.name}</Heading>
             <Heading as='h6'>{course.description}</Heading>
             <CourseEnrollButton slug={slug}/>
+            <CourseLessonContents lessons={course.lessons} courseSlug={slug} />
             <Toasty />
         </div>
     );
