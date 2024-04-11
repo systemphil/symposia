@@ -103,9 +103,6 @@ const VideoForm = () => {
             });
             const upload = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    "Access-Control-Allow-Origin": "no-cors",
-                },
                 body: formData,
             });
             if (upload.ok) {
@@ -131,6 +128,7 @@ const VideoForm = () => {
             throw error;
         } finally  {
             setSelectedFile(undefined);
+            setPreviewUrl(null);
             methods.reset();
             setHandlerLoading(false);
         }
