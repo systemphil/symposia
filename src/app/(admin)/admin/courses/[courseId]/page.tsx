@@ -19,11 +19,14 @@ export default async function AdminCourseEdit ({ params }: { params: { courseId:
     }
 
     return (
-        <div className='grid md:grid-cols-2'>
-            <div>
-                <Heading as='h2'>{course.name}</Heading>
-                <CourseForm id={courseId}/>
-                <div className="mt-6">
+        <div className="my-4">
+            <Heading as='h2'>{course.name}</Heading>
+            <div className='grid md:grid-cols-2'>
+                <div>
+                    <CourseForm id={courseId}/>
+                </div>
+
+                <div>
                     <Heading as='h4'>Course Details</Heading>
                     {(
                         course.details
@@ -42,33 +45,30 @@ export default async function AdminCourseEdit ({ params }: { params: { courseId:
                             </Link>
                         </div>
                     )}
+                    <Heading as='h4'>Lessons</Heading>
+                    {(
+                        course.lessons.length > 0
+                    ) ? (
+                        <>
+                            {course.lessons.map(lesson => (
+                                <CourseMaterialCard 
+                                    key={lesson.id}
+                                    href={`/admin/courses/${course.id}/lessons/${lesson.id}`} 
+                                    heading={lesson.name}
+                                    id={lesson.id}
+                                    modelName='Lesson'
+                                />
+                            ))}
+                        </>
+                    ) : (
+                        <div>
+                            <Heading as='h2'>None yet.</Heading>
+                        </div>
+                    )}
+                    <Link href={`/admin/courses/${course.id}/lessons/new`}>
+                        <button className="btn btn-primary">Add a lesson</button>
+                    </Link>
                 </div>
-            </div>
-
-            <div>
-                <Heading as='h4'>Lessons</Heading>
-                {(
-                    course.lessons.length > 0
-                ) ? (
-                    <>
-                        {course.lessons.map(lesson => (
-                            <CourseMaterialCard 
-                                key={lesson.id}
-                                href={`/admin/courses/${course.id}/lessons/${lesson.id}`} 
-                                heading={lesson.name}
-                                id={lesson.id}
-                                modelName='Lesson'
-                            />
-                        ))}
-                    </>
-                ) : (
-                    <div>
-                        <Heading as='h2'>None yet.</Heading>
-                    </div>
-                )}
-                <Link href={`/admin/courses/${course.id}/lessons/new`}>
-                    <button className="btn btn-primary">Add a lesson</button>
-                </Link>
             </div>
         </div>
     )

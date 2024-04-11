@@ -48,6 +48,7 @@ import { type dbGetMdxByModelId } from "@/server/controllers/dbController";
 import Heading from "./Heading";
 import toast from "react-hot-toast";
 import LoadingBars from "./LoadingBars";
+import { DebugBtn } from "./DebugBtn";
 
 /**
  * NextJS dynamic import so that client-side only is enforced. Must import wrapped editor to satisfy requirements of forwardRef.
@@ -152,7 +153,7 @@ export default function Editor({ initialMaterial, title }: EditorProps) {
                 />
             </EditorContext.Provider>
             <div className="border-neutral-border border-dashed border-t-[1px] mb-16"></div>
-            <button className="btn btn-warning btn-xs m-2 border-dotted border-2 border-black hover:border-solid hover:border-black hover:border-2 duration-200" onClick={() => console.log(editorRef.current?.getMarkdown())}>DEBUG:Print markdown to console</button>
+            <DebugBtn onClick={() => console.log(editorRef.current?.getMarkdown())}>DEBUG:Print markdown to console</DebugBtn>
         </>
     )
 }

@@ -1,7 +1,14 @@
 import Link from "next/link"
 
-// ! fix type
-export function CourseLessonContents ({ lessons, courseSlug }: { lessons: any, courseSlug: string }) {
+type CourseLessonContentsProps = {
+    lessons: {
+        slug: string;
+        name: string;
+    }[];
+    courseSlug: string;
+}
+
+export function CourseLessonContents ({ lessons, courseSlug }: CourseLessonContentsProps) {
 
     if (lessons.length > 0) {
         return (

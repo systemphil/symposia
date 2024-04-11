@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 
-export const Toasty = () => {
+export const ToastSearchParams = () => {
     const searchParams = useSearchParams();
 
     useEffect(() => {

@@ -103,6 +103,9 @@ const VideoForm = () => {
             });
             const upload = await fetch(url, {
                 method: 'POST',
+                headers: {
+                    "Access-Control-Allow-Origin": "no-cors",
+                },
                 body: formData,
             });
             if (upload.ok) {
@@ -134,7 +137,7 @@ const VideoForm = () => {
     };
 
     useEffect(() => {
-        if (videoEntry) {
+        if (videoEntry && !previewUrl) {
             if (isCalledRef.current === true) return;
             isCalledRef.current = true; // Stop double call in strict mode.
             createSignedReadUrlMutation
@@ -150,7 +153,7 @@ const VideoForm = () => {
                     isCalledRef.current = false;
                 });
         }
-    }, [videoEntry, createSignedReadUrlMutation]);
+    }, [videoEntry, createSignedReadUrlMutation, previewUrl]);
 
     return(
         <FormProvider {...methods}>

@@ -2,8 +2,8 @@ import { stylesConfig } from "@/config/stylesConfig";
 import { Suspense } from "react";
 import CourseFrontPage from "@/components/CourseFrontPage";
 
-export default async function CourseFrontPageRoute ({ params }: { params: { slug: string }}) {
-    const slug = params.slug;
+export default async function CourseFrontPageRoute ({ params }: { params: { courseSlug: string }}) {
+    const slug = params.courseSlug;
 
     if (typeof slug !== "string") {
         throw new Error("missing course slug");

@@ -48,7 +48,12 @@ export const dbGetCourseBySlug = async (slug: string) => {
                     slug: true,
                     name: true,
                 }
-            }
+            },
+            details: {
+                select: {
+                    mdxCompiled: true,
+                }
+            },
         }
     })
 }
@@ -200,6 +205,40 @@ export const dbGetLessonAndRelationsById = async (id: string) => {
         }
         throw new Error("An error occurred while fetching the course.");
     }
+}
+/**
+ * Calls the database to retrieve specific lesson and relations by id identifier.
+ * Comes back with Video entry, and LessonContent and LessonTranscript entries with mdx field as string,
+ * as well as the name and slug of the course the lesson is attached to.
+ * @access "PUBLIC""
+ */
+export const dbGetLessonAndRelationsBySlug = async (slug: string) => {
+    const validSlug = z.string().parse(slug);
+    return await prisma.lesson.findFirst({
+        where: {
+            slug: validSlug,
+        },
+        include: {
+            part: true,
+            content: {
+                select: {
+                    mdxCompiled: true,
+                }
+            },
+            transcript: {
+                select: {
+                    mdxCompiled: true,
+                }
+            },
+            video: true,
+            course: {
+                select: {
+                    name: true,
+                    slug: true,
+                }
+            }
+        }
+    });
 }
 /**
  * Calls the database to retrieve mdx field by id of the model as identifier.

@@ -4,8 +4,9 @@ import CourseEnrollButton from "@/components/CourseEnrollButton";
 import Heading from "@/components/Heading";
 import Image from "next/image";
 import Link from "next/link";
-import { Toasty } from "./Toasty";
+import { ToastSearchParams } from "./ToastSearchParams";
 import { CourseLessonContents } from "./CourseLessonContents";
+import { MDXRenderer } from "./MDXRenderer";
 
 export default async function CourseFrontPage ({ slug }: { slug: string}) {
     const course = await dbGetCourseBySlug(slug);
@@ -13,8 +14,6 @@ export default async function CourseFrontPage ({ slug }: { slug: string}) {
     if (!course) {
         return redirect("/courses");
     }
-
-    console.log(course.lessons.map(lesson => lesson.slug))
 
     return (
         <div className="flex flex-col justify-center items-center">
@@ -35,7 +34,12 @@ export default async function CourseFrontPage ({ slug }: { slug: string}) {
             <Heading as='h6'>{course.description}</Heading>
             <CourseEnrollButton slug={slug}/>
             <CourseLessonContents lessons={course.lessons} courseSlug={slug} />
-            <Toasty />
+            {
+                course?.details?.mdxCompiled
+                ? <MDXRenderer data={course.details.mdxCompiled} />
+                : <div>No course details</div>
+            }
+            <ToastSearchParams />
         </div>
     );
 }
