@@ -5,7 +5,7 @@ import Heading from "@/components/Heading";
 import Image from "next/image";
 import Link from "next/link";
 import { ToastSearchParams } from "./ToastSearchParams";
-import { CourseLessonContents } from "./CourseLessonContents";
+import { TableOfLessons } from "./TableOfLessons";
 import { MDXRenderer } from "./MDXRenderer";
 
 export default async function CourseFrontPage ({ slug }: { slug: string}) {
@@ -33,7 +33,7 @@ export default async function CourseFrontPage ({ slug }: { slug: string}) {
             <Heading>{course.name}</Heading>
             <Heading as='h6'>{course.description}</Heading>
             <CourseEnrollButton slug={slug}/>
-            <CourseLessonContents lessons={course.lessons} courseSlug={slug} />
+            <TableOfLessons lessons={course.lessons} courseSlug={slug} />
             {
                 course?.details?.mdxCompiled
                 ? <MDXRenderer data={course.details.mdxCompiled} />

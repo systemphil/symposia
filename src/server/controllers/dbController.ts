@@ -210,6 +210,7 @@ export const dbGetLessonAndRelationsById = async (id: string) => {
  * Calls the database to retrieve specific lesson and relations by id identifier.
  * Comes back with Video entry, and LessonContent and LessonTranscript entries with mdx field as string,
  * as well as the name and slug of the course the lesson is attached to.
+ * @note To be used for LessonFrontPage
  * @access "PUBLIC""
  */
 export const dbGetLessonAndRelationsBySlug = async (slug: string) => {
@@ -235,6 +236,12 @@ export const dbGetLessonAndRelationsBySlug = async (slug: string) => {
                 select: {
                     name: true,
                     slug: true,
+                    lessons: {
+                        select: {
+                            slug: true,
+                            name: true,
+                        }
+                    }
                 }
             }
         }

@@ -5,8 +5,9 @@ import Link from "next/link";
 import { ToastSearchParams } from "./ToastSearchParams";
 import { MDXRenderer } from "./MDXRenderer";
 import { VideoDisplay } from "./VideoDisplay";
+import { TableOfLessons } from "./TableOfLessons";
 
-export default async function LessonFrontPage ({ 
+export async function LessonFrontPage ({ 
     lessonSlug 
 }: { 
     lessonSlug: string 
@@ -20,9 +21,6 @@ export default async function LessonFrontPage ({
                 <span className="relative pr-2 transition group-hover:-translate-x-1">←</span>
                 <span>Back to {lessonData.course.name}</span>
             </Link>
-            {
-                // TODO build a course lesson menu
-            }
             <div className="h-[500px] flex max-w-lg m-4">
             {
                 lessonData.video
@@ -34,6 +32,12 @@ export default async function LessonFrontPage ({
             
             <Heading>{lessonData.name}</Heading>
             <Heading as='h6'>{lessonData.description}</Heading>
+
+            <TableOfLessons 
+                lessons={lessonData.course.lessons} 
+                courseSlug={lessonData.course.slug} 
+            />
+            
             {
                 lessonData?.content?.mdxCompiled
                 ? <MDXRenderer data={lessonData.content.mdxCompiled} />

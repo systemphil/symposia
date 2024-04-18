@@ -8,7 +8,7 @@ type CourseLessonContentsProps = {
     courseSlug: string;
 }
 
-export function CourseLessonContents ({ lessons, courseSlug }: CourseLessonContentsProps) {
+export function TableOfLessons ({ lessons, courseSlug }: CourseLessonContentsProps) {
 
     if (lessons.length > 0) {
         return (
