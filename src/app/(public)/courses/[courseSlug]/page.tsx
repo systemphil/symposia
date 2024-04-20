@@ -1,4 +1,3 @@
-import { stylesConfig } from "@/config/stylesConfig";
 import { Suspense } from "react";
 import CourseFrontPage from "@/components/CourseFrontPage";
 
@@ -10,7 +9,7 @@ export default async function CourseFrontPageRoute ({ params }: { params: { cour
     }
 
     return (
-        <main className={`h-screen flex flex-col justify-front items-center gap-4 ${stylesConfig.coursesPage.bgColor}`}>
+        <main className={`h-screen flex flex-col justify-front items-center gap-4`}>
             <Suspense fallback={<p>Loading...</p>}>
                 <CourseFrontPage slug={slug}/>
             </Suspense>

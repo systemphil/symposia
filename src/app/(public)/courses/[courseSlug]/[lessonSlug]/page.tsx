@@ -1,6 +1,5 @@
 import { LessonFrontPage } from "@/components/LessonFrontPage";
 import { errorMessages } from "@/config/errorMessages";
-import { stylesConfig } from "@/config/stylesConfig";
 import { getServerAuthSession } from "@/server/auth";
 import { dbGetUserPurchasedCourses } from "@/server/controllers/dbController";
 import { redirect } from "next/navigation";
@@ -32,7 +31,7 @@ export default async function LessonFrontPageRoute ({ params }: { params: { less
     }
 
     return (
-        <main className={`h-screen flex flex-col justify-front items-center gap-4 ${stylesConfig.coursesPage.bgColor}`}>
+        <main className={`h-screen flex flex-col justify-front items-center gap-4`}>
             <Suspense fallback={<p>Loading...</p>}>
                 <LessonFrontPage lessonSlug={lessonSlug} />
             </Suspense>
