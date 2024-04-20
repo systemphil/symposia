@@ -6,13 +6,18 @@ import { ToastSearchParams } from "./ToastSearchParams";
 import { MDXRenderer } from "./MDXRenderer";
 import { VideoDisplay } from "./VideoDisplay";
 import { TableOfLessons } from "./TableOfLessons";
+import { cache } from "@/server/cache";
+
+const getLessonAndRelationsBySlug = cache(async (slug) => {
+    return await dbGetLessonAndRelationsBySlug(slug);
+}, ["/lessons"])
 
 export async function LessonFrontPage ({ 
     lessonSlug 
 }: { 
     lessonSlug: string 
 }) {
-    const lessonData = await dbGetLessonAndRelationsBySlug(lessonSlug);
+    const lessonData = await getLessonAndRelationsBySlug(lessonSlug);
     if (!lessonData) return redirect("/courses");
 
     return (

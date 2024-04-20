@@ -7,9 +7,14 @@ import Link from "next/link";
 import { ToastSearchParams } from "./ToastSearchParams";
 import { TableOfLessons } from "./TableOfLessons";
 import { MDXRenderer } from "./MDXRenderer";
+import { cache } from "@/server/cache";
+
+const getCourseBySlug = cache(async (slug) => {
+    return await dbGetCourseBySlug(slug);
+}, ["/courses"])
 
 export default async function CourseFrontPage ({ slug }: { slug: string}) {
-    const course = await dbGetCourseBySlug(slug);
+    const course = await getCourseBySlug(slug);
 
     if (!course) {
         return redirect("/courses");
