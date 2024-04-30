@@ -6,7 +6,6 @@ import Link from "next/link";
 export default async function AdminPage() {
     return (
         <PageWrapper>
-            <Heading>Admin</Heading>
             <Heading as="h2">Your courses</Heading>
             <CourseGridCSR />
             <Link href="/admin/courses/new">
