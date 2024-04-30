@@ -1,12 +1,12 @@
 import Heading from "@/components/Heading";
+import { PageWrapper } from "@/components/PageWrapper";
 import { CourseForm } from "@/components/forms/CourseForm";
 
 export default async function NewCourse() {
-    
     return (
-        <main className={`min-h-screen h-full flex flex-col justify-front items-center gap-4`}>
+        <PageWrapper>
             <Heading as="h1">New Course</Heading>
             <CourseForm />
-        </main>
-    )
+        </PageWrapper>
+    );
 }

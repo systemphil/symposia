@@ -6,12 +6,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { LogoBrandAnimated } from "./LogoBrandAnimated";
 import LogoOwl from "./LogoOwl";
+import cn from "classnames";
+
+const TEXT_COLOR = "text-slate-500 dark:text-slate-100";
 
 export const RootNavbar = () => {
     const { data: sessionData } = useSession();
 
     return (
-        <header className="sticky top-0 z-20 print:hidden bg-transparent">
+        <header className={`sticky top-0 z-30 print:hidden bg-transparent ${TEXT_COLOR}`}>
             <div className="'pointer-events-none absolute z-[-1] h-full w-full backdrop-blur-md bg-white/[.85] dark:!bg-slate-900/80 shadow-[0_2px_4px_rgba(0,0,0,.02),0_1px_0_rgba(0,0,0,.06)] dark:shadow-[0_-1px_0_rgba(255,255,255,.1)_inset] contrast-more:shadow-[0_0_0_1px_#000] contrast-more:dark:shadow-[0_0_0_1px_#fff]"></div>
             <div className="container ">
                 <div className="flex h-[64px] items-center justify-between py-6">
@@ -25,7 +28,7 @@ export const RootNavbar = () => {
                                     <Image src="/static/svg/menu.svg" alt="" height={25} width={25}/>
                                 </div>
                             </label>
-                            <ul tabIndex={1} className="menu dropdown-content z-[1] p-2 shadow bg-white w-52 rounded-md drop-shadow-2xl text-black">
+                            <ul tabIndex={1} className="menu dropdown-content z-[1] p-2 shadow bg-white w-52 rounded-md drop-shadow-2xl">
                                 <li>
                                     <Link href="/">Home</Link>
                                 </li> 
@@ -52,7 +55,7 @@ export const RootNavbar = () => {
                     {/* 
                         DESKTOP MENU
                     */}
-                    <div className={`hidden md:flex gap-6 md:gap-10 text-xl`}>
+                    <div className={`hidden md:flex gap-6 md:gap-10 text-md`}>
                         <Link href="/" className="flex items-center gap-4">
                             <LogoOwl />
                             <LogoBrandAnimated />
@@ -95,10 +98,12 @@ export const RootNavbar = () => {
 
 const NavBarLinkDesktop = ({href, text}: { href: string, text: string}) => {
     const hoverUnderline = "after:bg-slate-700 after:absolute after:h-[2px] after:w-0 after:bottom-0 after:left-0 hover:after:w-full after:transition-all after:duration-300";
+    const classes = "py-1 transition-colors duration-300 cursor-pointer hover:text-black dark:hover:text-white";
+
 
     return (
         <Link href={href} className="relative">
-            <p className={`${hoverUnderline}`}>{text}</p>
+            <p className={`${cn(hoverUnderline, classes)}`}>{text}</p>
         </Link>
     );
 }
@@ -116,7 +121,7 @@ const UserMenu = ({sessionData}: {sessionData: Session}) => {
                     </div>
                 </div>
             </label>
-            <ul tabIndex={0} className="menu dropdown-content z-[1] p-2 shadow bg-white rounded-box w-52 drop-shadow-2xl text-black">
+            <ul tabIndex={0} className="menu dropdown-content z-[1] p-2 shadow bg-white rounded-box w-52 drop-shadow-2xl">
                 <li>
                     <a className="pointer-events-none cursor-default opacity-75 text-lg pb-0">
                         {sessionData && sessionData.user?.name}
