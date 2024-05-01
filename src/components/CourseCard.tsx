@@ -13,7 +13,7 @@ export default async function CourseCard({ course }: CourseCardProps) {
 
     return (
         <GlowBoundary>
-            <div className="w-full rounded-lg border bg-gradient-to-b from-neutral-50/90 to-neutral-100/90 transition duration-300 dark:from-neutral-950/90 dark:to-neutral-800/90 md:hover:border-transparent md:bg-gradient-to-bl">
+            <div className="w-full rounded border bg-gradient-to-b from-neutral-50/90 to-neutral-100/90 transition duration-300 dark:from-neutral-950/90 dark:to-neutral-800/90 md:hover:border-transparent md:bg-gradient-to-bl">
                 <Link href={href}>
                     {course.imageUrl && (
                         <Image
