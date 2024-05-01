@@ -2,6 +2,7 @@ import CourseGrid from "@/components/CourseGrid";
 import Heading from "@/components/Heading";
 import { LoadingBall } from "@/components/LoadingBall";
 import { PageWrapper } from "@/components/PageWrapper";
+import FadeIn from "@/components/animations/FadeIn";
 import { Suspense } from "react";
 
 export default async function PublishedCourses() {
@@ -11,9 +12,11 @@ export default async function PublishedCourses() {
                 <Heading>Available Courses</Heading>
             </div>
 
-            <Suspense fallback={<LoadingBall />}>
-                <CourseGrid />
-            </Suspense>
+            <FadeIn>
+                <Suspense fallback={<LoadingBall />}>
+                    <CourseGrid />
+                </Suspense>
+            </FadeIn>
         </PageWrapper>
     );
 }

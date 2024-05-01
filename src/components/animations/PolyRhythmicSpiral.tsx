@@ -51,7 +51,8 @@ const COLORS = [
 ];
 
 /**
- * Modified based on HyperPlexed's work
+ * Modified based on HyperPlexed's work. Many thanks to
+ * him for sharing and making it publicly available.
  * @link https://codepen.io/Hyperplexed/pen/XWxqgGE
  * @cool https://unsplash.com/photos/tZCrFpSNiIQ
  */

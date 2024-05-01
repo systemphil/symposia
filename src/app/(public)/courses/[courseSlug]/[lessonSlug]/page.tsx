@@ -1,5 +1,6 @@
 import { LessonFrontPage } from "@/components/LessonFrontPage";
 import { PageWrapper } from "@/components/PageWrapper";
+import FadeIn from "@/components/animations/FadeIn";
 import { errorMessages } from "@/config/errorMessages";
 import { getServerAuthSession } from "@/server/auth";
 import { dbGetUserPurchasedCourses } from "@/server/controllers/dbController";
@@ -39,9 +40,11 @@ export default async function LessonFrontPageRoute({
 
     return (
         <PageWrapper>
-            <Suspense fallback={<p>Loading...</p>}>
-                <LessonFrontPage lessonSlug={lessonSlug} />
-            </Suspense>
+            <FadeIn>
+                <Suspense fallback={<p>Loading...</p>}>
+                    <LessonFrontPage lessonSlug={lessonSlug} />
+                </Suspense>
+            </FadeIn>
         </PageWrapper>
     );
 }

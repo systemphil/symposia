@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import CourseFrontPage from "@/components/CourseFrontPage";
 import { PageWrapper } from "@/components/PageWrapper";
+import { LoadingBall } from "@/components/LoadingBall";
+import FadeIn from "@/components/animations/FadeIn";
 
 export default async function CourseFrontPageRoute({
     params,
@@ -15,9 +17,11 @@ export default async function CourseFrontPageRoute({
 
     return (
         <PageWrapper>
-            <Suspense fallback={<p>Loading...</p>}>
-                <CourseFrontPage slug={slug} />
-            </Suspense>
+            <FadeIn>
+                <Suspense fallback={<LoadingBall />}>
+                    <CourseFrontPage slug={slug} />
+                </Suspense>
+            </FadeIn>
         </PageWrapper>
     );
 }
