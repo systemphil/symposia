@@ -8,6 +8,7 @@ import NextAuthProvider from "../lib/nextAuth/NextAuthProvider";
 import { RootNavbar } from "@/components/RootNavbar";
 import "../styles/styles.css";
 import Footer from "@/components/Footer";
+import { ToastSearchParams } from "@/components/ToastSearchParams";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,6 +35,7 @@ export default function RootLayout({
                         <RootNavbar />
                         <div className="relative">{children}</div>
                         <Footer />
+                        <ToastSearchParams />
                         <Toaster position="bottom-right" />
                     </TRPCProvider>
                 </NextAuthProvider>

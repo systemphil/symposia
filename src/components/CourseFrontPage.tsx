@@ -4,10 +4,10 @@ import CourseEnroll from "@/components/CourseEnroll";
 import Heading from "@/components/Heading";
 import Image from "next/image";
 import Link from "next/link";
-import { ToastSearchParams } from "./ToastSearchParams";
 import { TableOfLessons } from "./TableOfLessons";
 import { MDXRenderer } from "./MDXRenderer";
 import { cache } from "@/server/cache";
+import { errorMessages } from "@/config/errorMessages";
 
 const getCourseBySlug = cache(
     async (slug) => {
@@ -20,7 +20,7 @@ export default async function CourseFrontPage({ slug }: { slug: string }) {
     const course = await getCourseBySlug(slug);
 
     if (!course) {
-        return redirect("/courses");
+        return redirect(`/courses?error=${errorMessages.courseNotFound}`);
     }
 
     return (
@@ -64,7 +64,6 @@ export default async function CourseFrontPage({ slug }: { slug: string }) {
                     />
                 </div>
             </div>
-            <ToastSearchParams />
         </div>
     );
 }

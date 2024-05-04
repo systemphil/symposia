@@ -17,25 +17,25 @@ export default async function LessonFrontPageRoute({
     const notPurchasedRedirect = `/courses/${courseSlug}?error=${errorMessages.courseNotPurchased}`;
 
     if (typeof lessonSlug !== "string") {
-        throw new Error("missing slugs");
+        return redirect(`/?error=${errorMessages.missingParams}`);
     }
 
     const session = await getServerAuthSession();
     if (!session) {
-        redirect(
+        return redirect(
             `/courses/${courseSlug}?error=${errorMessages.mustBeLoggedIn}`
         );
     }
 
     const purchasedCourses = await dbGetUserPurchasedCourses(session.user.id);
     if (!purchasedCourses) {
-        redirect(notPurchasedRedirect);
+        return redirect(notPurchasedRedirect);
     }
     const hasPurchased = purchasedCourses.some((purchasedCourse) => {
         return purchasedCourse.slug === courseSlug;
     });
     if (!hasPurchased) {
-        redirect(notPurchasedRedirect);
+        return redirect(notPurchasedRedirect);
     }
 
     return (

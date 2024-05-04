@@ -2,11 +2,11 @@ import { dbGetLessonAndRelationsBySlug } from "@/server/controllers/dbController
 import { redirect } from "next/navigation";
 import Heading from "@/components/Heading";
 import Link from "next/link";
-import { ToastSearchParams } from "./ToastSearchParams";
 import { MDXRenderer } from "./MDXRenderer";
 import { VideoDataLoader } from "./VideoDataLoader";
 import { TableOfLessons } from "./TableOfLessons";
 import { cache } from "@/server/cache";
+import { errorMessages } from "@/config/errorMessages";
 
 const getLessonAndRelationsBySlug = cache(
     async (slug) => {
@@ -17,7 +17,9 @@ const getLessonAndRelationsBySlug = cache(
 
 export async function LessonFrontPage({ lessonSlug }: { lessonSlug: string }) {
     const lessonData = await getLessonAndRelationsBySlug(lessonSlug);
-    if (!lessonData) return redirect("/courses");
+    if (!lessonData) {
+        return redirect(`/courses?error=${errorMessages.lessonNotFound}`);
+    }
 
     const md = "md:grid md:grid-cols-4 md:items-start";
     const lg = "lg:grid-cols-6";
@@ -27,7 +29,7 @@ export async function LessonFrontPage({ lessonSlug }: { lessonSlug: string }) {
         <div
             className={`flex flex-col justify-center items-center gap-2 ${md} ${lg} ${xl} ${xxl}`}
         >
-            <div className="min-h-[500px] max-h-[1200px] flex w-full md:col-span-3 md:order-2">
+            <div className="min-h-[500px] flex w-full md:col-span-3 md:order-2">
                 {lessonData.video ? (
                     <VideoDataLoader videoEntry={lessonData.video} />
                 ) : (
@@ -48,9 +50,11 @@ export async function LessonFrontPage({ lessonSlug }: { lessonSlug: string }) {
                     />
                 </div>
             </div>
-            <div className="md:col-span-4 md:m-4 md:order-3 lg:col-span-2 lg:row-span-2">
-                <Heading>{lessonData.name}</Heading>
-                <Heading as="h6">{lessonData.description}</Heading>
+            <div className="w-full px-2 md:px-0 md:w-auto md:col-span-4 md:m-4 md:order-3 lg:col-span-2 lg:row-span-2">
+                <div className="bg-slate-100/90 py-3">
+                    <Heading>{lessonData.name}</Heading>
+                    <Heading as="h6">{lessonData.description}</Heading>
+                </div>
 
                 {lessonData?.content?.mdxCompiled ? (
                     <MDXRenderer data={lessonData.content.mdxCompiled} />
@@ -65,7 +69,6 @@ export async function LessonFrontPage({ lessonSlug }: { lessonSlug: string }) {
                     <div>No transcript</div>
                 )}
             </div>
-            <ToastSearchParams />
         </div>
     );
 }
