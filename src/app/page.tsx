@@ -15,7 +15,9 @@ export default async function Home() {
                 </div>
                 <div className="translate-y-2 md:translate-y-1 lg:-translate-y-1 flex flex-col items-center justify-center">
                     <div className="font-bold text-center relative z-20 bg-clip-text tracking-widest text-transparent">
-                        <Heading classes="pb-4">Discover & Reflect</Heading>
+                        <Heading classes="pb-4 text-transparent bg-gradient-to-b from-black/80 to-black dark:from-white dark:to-[#AAAAAA]">
+                            Discover & Reflect
+                        </Heading>
                     </div>
                     <h3 className="text-xl my-1.5 md:text-2xl lg:text-3xl text-stone-600 font-light inter-var text-center">
                         In-depth learning courses on philosophy
