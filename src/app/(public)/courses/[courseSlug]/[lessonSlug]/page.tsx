@@ -1,5 +1,5 @@
 import { LessonFrontPage } from "@/components/LessonFrontPage";
-import { PageWrapper } from "@/components/PageWrapper";
+import { LoadingBall } from "@/components/LoadingBall";
 import FadeIn from "@/components/animations/FadeIn";
 import { errorMessages } from "@/config/errorMessages";
 import { getServerAuthSession } from "@/server/auth";
@@ -39,12 +39,18 @@ export default async function LessonFrontPageRoute({
     }
 
     return (
-        <PageWrapper>
-            <FadeIn>
-                <Suspense fallback={<p>Loading...</p>}>
-                    <LessonFrontPage lessonSlug={lessonSlug} />
-                </Suspense>
-            </FadeIn>
-        </PageWrapper>
+        <FadeIn>
+            <Suspense fallback={<Loading />}>
+                <LessonFrontPage lessonSlug={lessonSlug} />
+            </Suspense>
+        </FadeIn>
+    );
+}
+
+function Loading() {
+    return (
+        <div className="flex w-full justify-center mt-10 min-h-screen">
+            <LoadingBall />
+        </div>
     );
 }

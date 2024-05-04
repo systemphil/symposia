@@ -9,7 +9,7 @@ type HeadingProps = {
 const Heading = ({ children, as = "h1", classes }: HeadingProps) => {
     const baseClasses = `${
         cinzel.variable
-    } font-serif z-10 font-extrabold leading-tight text-center pb-4 bg-clip-text ${
+    } font-serif z-10 font-extrabold leading-tight text-center bg-clip-text ${
         !classes &&
         "text-transparent bg-gradient-to-b from-black/80 to-black dark:from-white dark:to-[#AAAAAA]"
     }`;

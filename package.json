@@ -52,7 +52,7 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
-    "daisyui": "^3.6.1",
+    "daisyui": "^4.10.5",
     "prisma": "^5.11.0",
     "ts-node": "^10.9.1"
   }
