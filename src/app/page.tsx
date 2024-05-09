@@ -1,7 +1,8 @@
-import ClientErrorToasts from "@/components/ClientErrorToasts";
 import Heading from "@/components/Heading";
 import { PageWrapper } from "@/components/PageWrapper";
+import { Reviews } from "@/components/Reviews";
 import FadeIn from "@/components/animations/FadeIn";
+import InfoCard from "@/components/InfoCard";
 import { PolyRhythmicSpiral } from "@/components/animations/PolyRhythmicSpiral";
 
 export default async function Home() {
@@ -32,23 +33,49 @@ export default async function Home() {
                 </div>
             </div>
             <PageWrapper>
+                <FadeIn>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full py-10">
+                        <InfoCard
+                            title="Deepen Your Thinking: Explore Philosophy In-Depth"
+                            text="Dive into the world's greatest ideas with our comprehensive online philosophy courses. Go beyond introductory lectures and engage with challenging concepts in a supportive learning environment."
+                            maskType="diamond"
+                            imgUrl="/static/images/sun.webp"
+                        />
+                        <InfoCard
+                            title="Choose Your Learning Style: Digital, with Seminars, or 1-on-1 Dialogue"
+                            text="We offer a variety of learning formats to suit your ambition. Take courses entirely on-demand with digital content at your own pace, participate in live interactive seminars with fellow peers, or get personalized guidance with private sessions from our instructors."
+                            maskType="diamond"
+                            imgUrl="/static/images/discussion.webp"
+                        />
+                        <InfoCard
+                            title="Focus on Text: Meet the Greatest Minds of History"
+                            text="Gain insights from renowned philosophers by meeting them on their own ground, namely, their text! Our courses center around primary texts supplemented by secondary literature. We think it is important that you spend time with the philosopher's own text and become equipped to make up your own mind regarding their ideas."
+                            maskType="diamond"
+                            imgUrl="/static/images/books.webp"
+                        />
+                        <InfoCard
+                            title="Sharpen Your Critical Thinking: Unleash Your Philosophical Potential"
+                            text="They who do not understand the past cannot comprehend the future. Philsophy is not about the past but the discovery of futures. Learn to think critically, analyze arguments, and form your own well-reasoned opinions - skills valuable in all aspects of life."
+                            maskType="diamond"
+                            imgUrl="/static/images/eye.webp"
+                        />
+                    </div>
+                </FadeIn>
                 <div className="flex flex-col justify-front items-center gap-4">
-                    <p>Index page</p>
-                    <Lorem />
-                    <Lorem />
-                    <Lorem />
-                    <Lorem />
-                    <Lorem />
-
-                    <Lorem />
-                    <ClientErrorToasts />
+                    <Reviews />
+                    <LoremExample />
+                    <LoremExample />
+                    <LoremExample />
+                    <LoremExample />
+                    <LoremExample />
+                    <LoremExample />
                 </div>
             </PageWrapper>
         </>
     );
 }
 
-const Lorem = () => {
+const LoremExample = () => {
     return (
         <p>
             On the other hand, we denounce with righteous indignation and

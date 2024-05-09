@@ -41,6 +41,9 @@ export const ToastSearchParams = () => {
                         "You must be logged in to purchase this course."
                     );
                     break;
+                case "unauthorized":
+                    toast.error("Unauthorized access.");
+                    break;
             }
         }
         // First attempted this as a cleanup function, but it didn't work
