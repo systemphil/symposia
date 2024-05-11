@@ -76,7 +76,7 @@ function Review({
     return (
         <CardShell addClasses="w-72">
             <div className="card-body">
-                <a href={url ? undefined : url} target="_blank">
+                <a href={url ? url : undefined} target="_blank">
                     <div className="flex gap-3 items-center">
                         <div className="avatar">
                             <div className="w-12 rounded-full">
