@@ -16,7 +16,7 @@ export default async function Home() {
                 </div>
                 <div className="translate-y-2 md:translate-y-1 lg:-translate-y-1 flex flex-col items-center justify-center">
                     <div className="font-bold text-center relative z-20 bg-clip-text tracking-widest text-transparent">
-                        <Heading classes="pb-4 text-transparent bg-gradient-to-b from-black/80 to-black dark:from-white dark:to-[#AAAAAA]">
+                        <Heading replacementClasses="pb-4 text-transparent bg-gradient-to-b from-black/80 to-black dark:from-white dark:to-[#AAAAAA]">
                             Discover & Reflect
                         </Heading>
                     </div>
@@ -33,6 +33,14 @@ export default async function Home() {
                 </div>
             </div>
             <PageWrapper>
+                <FadeIn>
+                    <Heading as="h3" additionalClasses="max-w-lg">
+                        <span className="text-[#6b0072]">Symposia</span> is an
+                        online courseplatform that offers on-demand digital
+                        courses, live university-grade seminars and personalized
+                        tuition.
+                    </Heading>
+                </FadeIn>
                 <FadeIn>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full py-10">
                         <InfoCard
@@ -61,8 +69,16 @@ export default async function Home() {
                         />
                     </div>
                 </FadeIn>
+                <Heading as="h3" additionalClasses="max-w-lg">
+                    Join the <span className="text-[#6b0072]">community</span>
+                </Heading>
+                <p className="text-lg text-slate-500 py-2">
+                    What do our students say about our courses and instructors?
+                </p>
+                <Reviews />
+
+                {/* // TODO delete */}
                 <div className="flex flex-col justify-front items-center gap-4">
-                    <Reviews />
                     <LoremExample />
                     <LoremExample />
                     <LoremExample />

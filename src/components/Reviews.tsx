@@ -41,6 +41,7 @@ export function Reviews() {
                         name={review.name}
                         text={review.text}
                         imgUrl={review.img_url}
+                        title={review.title}
                         url={review.url}
                     />
                 </div>
@@ -63,17 +64,19 @@ function Review({
     name,
     text,
     url = undefined,
+    title = undefined,
     imgUrl = "/static/images/avatar_placeholder.png",
 }: {
     name: string;
     text: string;
     url?: string | undefined;
+    title?: string | undefined;
     imgUrl?: string;
 }) {
     return (
         <CardShell addClasses="w-72">
             <div className="card-body">
-                <a href={url} target="_blank">
+                <a href={url ? undefined : url} target="_blank">
                     <div className="flex gap-3 items-center">
                         <div className="avatar">
                             <div className="w-12 rounded-full">
@@ -85,8 +88,11 @@ function Review({
                                 />
                             </div>
                         </div>
-                        <div>
+                        <div className="relative">
                             <h3 className="text-xl font-semibold">{name}</h3>
+                            <h3 className="absolute text-sm w-[200px] text-slate-400 -translate-y-2">
+                                {title}
+                            </h3>
                         </div>
                     </div>
                     <div className="text-slate-600/90 text-md mt-2">
