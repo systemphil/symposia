@@ -18,6 +18,8 @@ export default async function Home() {
                 <InfoCards />
                 <Community />
                 <VisitCourses />
+                <Instructors />
+                <Refunds />
                 <div className="h-20" />
             </PageWrapper>
         </>
@@ -143,6 +145,43 @@ function VisitCourses() {
             <Link href="/courses">
                 <button className="btn btn-primary">See our courses</button>
             </Link>
+        </>
+    );
+}
+
+function Instructors() {
+    return (
+        <>
+            <Heading as="h3" additionalClasses="max-w-lg mt-10 md:mt-32">
+                Meet the <span className="text-[#6b0072]">instructors</span>
+            </Heading>
+            <p className="text-lg text-slate-500 py-2">
+                Here you can find brief information about our teacher&apos;s
+                interests and qualifications.
+            </p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+                <InfoCard
+                    title="Filip Niklas, PhD"
+                    text="Filip completed his PhD in philosophy in 2022 under the supervision of Professor Stephen Houlgate at the University of Warwick. The title of his thesis was Hegel's <em>Critique of Determinism: Justifying Unfreedom as a Moment of Freedom</em>. Filip has given papers and organized numerous conferences on philosophy. He has taught extensively both at universiy, at the Halkyon Academy and privately. Filip's main research areas are systematic philosophy, metaphysics, ontology, essence, freedom, determinism, and maintains an otherwise broad interest in all the dimensions of intelligence and reason. Filip is also an incurable fan of the art and poetry of William Blake."
+                    maskType="squircle"
+                    imgUrl="/static/images/people/filip.jpg"
+                />
+            </div>
+        </>
+    );
+}
+
+function Refunds() {
+    return (
+        <>
+            <Heading as="h3" additionalClasses="max-w-xl mt-10 md:mt-32">
+                Tried it, not for you,{" "}
+                <span className="text-[#6b0072]">changed</span> your mind?
+            </Heading>
+            <p className="text-lg text-slate-500 py-4">
+                If you find that a particular course wasn&apos;t for you, we
+                offer full refunds up until 30-days after purchase.
+            </p>
         </>
     );
 }

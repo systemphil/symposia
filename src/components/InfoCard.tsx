@@ -6,7 +6,7 @@ import Link from "next/link";
 type InfoCardProps = {
     title: string;
     text: string;
-    maskType?: "diamond" | "triangle";
+    maskType?: "diamond" | "triangle" | "squircle";
     imgUrl?: string;
     urlDescription?: string;
     url?: string;
@@ -27,7 +27,8 @@ export default async function CourseCard({
                     <Image
                         className={`mask ${
                             (maskType === "diamond" && "mask-diamond") ||
-                            (maskType === "triangle" && "mask-triangle")
+                            (maskType === "triangle" && "mask-triangle") ||
+                            (maskType === "squircle" && "mask-squircle")
                         }`}
                         src={imgUrl}
                         alt="Movie"
@@ -40,7 +41,10 @@ export default async function CourseCard({
                 <div className="card-title justify-center">
                     <Heading as="h3">{title}</Heading>
                 </div>
-                <p className="text-slate-700 pt-4 text-justify">{text}</p>
+                <p
+                    className="text-slate-700 pt-4 text-justify"
+                    dangerouslySetInnerHTML={{ __html: text }}
+                ></p>
                 {url && urlDescription && (
                     <div className="card-actions justify-end">
                         <Link href={url}>
