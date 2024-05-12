@@ -6,8 +6,6 @@ import InfoCard from "@/components/InfoCard";
 import { PolyRhythmicSpiral } from "@/components/animations/PolyRhythmicSpiral";
 import Link from "next/link";
 
-// TODO add about instructors section
-
 export default async function Home() {
     return (
         <>
