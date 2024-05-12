@@ -7,7 +7,6 @@ import { PolyRhythmicSpiral } from "@/components/animations/PolyRhythmicSpiral";
 import Link from "next/link";
 
 // TODO add about instructors section
-// TODO add a companion to sphil section
 
 export default async function Home() {
     return (
@@ -15,6 +14,7 @@ export default async function Home() {
             <Hero />
             <PageWrapper>
                 <OpeningDescription />
+                <MainInfoCard />
                 <InfoCards />
                 <Community />
                 <VisitCourses />
@@ -56,7 +56,7 @@ function Hero() {
 function OpeningDescription() {
     return (
         <FadeIn>
-            <Heading as="h3" additionalClasses="max-w-lg">
+            <Heading as="h3" additionalClasses="max-w-xl">
                 <span className="text-[#6b0072]">Symposia</span> is an online
                 courseplatform that offers on-demand digital courses, live
                 university-grade seminars and personalized tuition.
@@ -65,10 +65,27 @@ function OpeningDescription() {
     );
 }
 
+function MainInfoCard() {
+    return (
+        <FadeIn>
+            <div className="md:px-10 max-w-[900px] mt-10 md:mt-32">
+                <InfoCard
+                    title="Why Symposia"
+                    text="We dream of a way of doing philosophy that is intense, life-long and free. To be able to rigorously engage with concepts and ideas to their utmost depth without sacrificing scholarly quality. To be able to pursue and hone one's philosophical craft and enjoyment in a way that supports and enriches everyday living. And finally to be thinking deeply about contents of philosophy purely for their own sake. Symposia exists as a companion to sPhil, a collaborative encyclopedia inspired by systematic philosophers and modern open source principles, and is meant to be an additional guide into the philosohical resources we otherwise make freely available. Whether you are a novice or a professional, our courses welcome anyone who has a burning desire to think philosophically the wonders being."
+                    imgUrl="/static/images/fire.webp"
+                    maskType="triangle"
+                    url="https://systemphil.com"
+                    urlDescription="Visit sPhil"
+                />
+            </div>
+        </FadeIn>
+    );
+}
+
 function InfoCards() {
     return (
         <FadeIn>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full py-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full mt-10 md:mt-32">
                 <InfoCard
                     title="Deepen Your Thinking: Explore Philosophy In-Depth"
                     text="Dive into the world's greatest ideas with our comprehensive online philosophy courses. Go beyond introductory lectures and engage with challenging concepts in a supportive learning environment."
