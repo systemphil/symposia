@@ -9,6 +9,7 @@ import { RootNavbar } from "@/components/RootNavbar";
 import "../styles/styles.css";
 import Footer from "@/components/Footer";
 import { ToastSearchParams } from "@/components/ToastSearchParams";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,7 +36,9 @@ export default function RootLayout({
                         <RootNavbar />
                         <div className="relative">{children}</div>
                         <Footer />
-                        <ToastSearchParams />
+                        <Suspense>
+                            <ToastSearchParams />
+                        </Suspense>
                         <Toaster position="bottom-right" />
                     </TRPCProvider>
                 </NextAuthProvider>

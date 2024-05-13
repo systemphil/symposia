@@ -173,7 +173,7 @@ function TierDescription({
                 <sup className="text-3xl font-extrabold">US</sup>${price / 100}
                 <sup className="text-3xl font-semibold">00</sup>
             </p>
-            <Heading as="h4" classes="text-primary">
+            <Heading as="h4" replacementClasses="text-primary">
                 {title}
             </Heading>
             <p className="text-xs text-slate-600 px-2">{text}</p>

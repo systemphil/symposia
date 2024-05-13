@@ -2,6 +2,7 @@ import { PageWrapper } from "@/components/PageWrapper";
 import { VerifyPurchase } from "@/components/VerifyPurchase";
 import { getServerAuthSession } from "@/server/auth";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function PublishedCourses({
     searchParams,
@@ -23,7 +24,9 @@ export default async function PublishedCourses({
 
     return (
         <PageWrapper>
-            <VerifyPurchase />
+            <Suspense>
+                <VerifyPurchase />
+            </Suspense>
         </PageWrapper>
     );
 }
