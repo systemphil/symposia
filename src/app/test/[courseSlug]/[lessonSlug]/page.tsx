@@ -1,5 +1,5 @@
 import LoadingBars from "@/components/LoadingBars";
-import MDXRenderer from "@/components/MDXRenderer";
+import { MDXRenderer } from "@/components/MDXRenderer";
 import { DBGetCompiledMdxBySlugsProps, dbGetCompiledMdxBySlugs } from "@/server/controllers/dbController";
 import { Suspense } from "react";
 

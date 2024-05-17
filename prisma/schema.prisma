@@ -93,6 +93,8 @@ model Course {
   seminarAvailability   DateTime       @default(now())
   dialogueAvailability  DateTime       @default(now())
   published             Boolean        @default(false)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
 }
 
 enum MdxCategory {
@@ -134,6 +136,8 @@ model Lesson {
   transcript     LessonTranscript?
   video          Video?
   usersCompleted UserLessonProgress[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
 }
 
 model LessonContent {

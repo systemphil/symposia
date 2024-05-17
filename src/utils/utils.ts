@@ -8,13 +8,13 @@ export const getBaseUrlClientside = (): string => {
     // Check if the code is running in a browser environment
     if (typeof window !== "undefined") return "";
 
-    const baseUrl = 
-        env.NODE_ENV === "development"  // Check if environment is development
-            ? `http://localhost:3000`   // If development, use localhost:3000
-            : `${env.NEXTAUTH_URL}`;    // If not development, use URL provided in environment variable
+    const baseUrl =
+        env.NODE_ENV === "development" // Check if environment is development
+            ? `http://localhost:3000` // If development, use localhost:3000
+            : `${env.NEXTAUTH_URL}`; // If not development, use URL provided in environment variable
 
     return baseUrl;
-}
+};
 
 /**
  * Utility function to remove properties from an object by field
@@ -37,24 +37,69 @@ export function exclude<Obj, Key extends keyof Obj>(
  * New colors need to be manually added to the function.
  */
 export function colorLog(text: string, color?: "teal" | "orange" | null) {
-    if (!color) console.log(`\x1b[36m${new Date().toLocaleString()} - ${text}\x1b[0m`);
-    if (color === "teal") console.log(`\x1b[36m${new Date().toLocaleString()} - ${text}\x1b[0m`);
-    if (color === "orange") console.log(`\x1b[33m${new Date().toLocaleString()} - ${text}\x1b[0m`);
+    if (!color)
+        console.log(`\x1b[36m${new Date().toLocaleString()} - ${text}\x1b[0m`);
+    if (color === "teal")
+        console.log(`\x1b[36m${new Date().toLocaleString()} - ${text}\x1b[0m`);
+    if (color === "orange")
+        console.log(`\x1b[33m${new Date().toLocaleString()} - ${text}\x1b[0m`);
 }
 
 /**
  * Don't forget to use `await` when calling this function.
  */
 export async function sleep(ms: number) {
-    return await new Promise(r => setTimeout(r, ms));
+    return await new Promise((r) => setTimeout(r, ms));
 }
 
 const CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
     currency: "USD",
     style: "currency",
     minimumFractionDigits: 0,
-})
-  
+});
+
 export function formatCurrency(amount: number) {
-    return CURRENCY_FORMATTER.format(amount)
+    return CURRENCY_FORMATTER.format(amount);
+}
+
+export function romanize(num: number) {
+    if (isNaN(num)) return NaN;
+    var digits = String(+num).split(""),
+        key = [
+            "",
+            "C",
+            "CC",
+            "CCC",
+            "CD",
+            "D",
+            "DC",
+            "DCC",
+            "DCCC",
+            "CM",
+            "",
+            "X",
+            "XX",
+            "XXX",
+            "XL",
+            "L",
+            "LX",
+            "LXX",
+            "LXXX",
+            "XC",
+            "",
+            "I",
+            "II",
+            "III",
+            "IV",
+            "V",
+            "VI",
+            "VII",
+            "VIII",
+            "IX",
+        ],
+        roman = "",
+        i = 3;
+    // @ts-ignore
+    while (i--) roman = (key[+digits.pop() + i * 10] || "") + roman;
+    return Array(+digits.join("") + 1).join("M") + roman;
 }

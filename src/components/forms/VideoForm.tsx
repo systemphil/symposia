@@ -128,13 +128,14 @@ const VideoForm = () => {
             throw error;
         } finally  {
             setSelectedFile(undefined);
+            setPreviewUrl(null);
             methods.reset();
             setHandlerLoading(false);
         }
     };
 
     useEffect(() => {
-        if (videoEntry) {
+        if (videoEntry && !previewUrl) {
             if (isCalledRef.current === true) return;
             isCalledRef.current = true; // Stop double call in strict mode.
             createSignedReadUrlMutation
@@ -150,7 +151,7 @@ const VideoForm = () => {
                     isCalledRef.current = false;
                 });
         }
-    }, [videoEntry, createSignedReadUrlMutation]);
+    }, [videoEntry, createSignedReadUrlMutation, previewUrl]);
 
     return(
         <FormProvider {...methods}>

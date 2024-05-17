@@ -1,13 +1,16 @@
 import Heading from "@/components/Heading";
+import { PageWrapper } from "@/components/PageWrapper";
 import LessonForm from "@/components/forms/LessonForm";
-import { stylesConfig } from "@/config/stylesConfig";
 
-export default async function NewLesson({params}: {params: {courseId: string}}) {
-
+export default async function NewLesson({
+    params,
+}: {
+    params: { courseId: string };
+}) {
     return (
-        <main className={`h-screen flex flex-col justify-front items-center gap-4 ${stylesConfig.page.bgColor}`}>
+        <PageWrapper>
             <Heading as="h1">New Lesson</Heading>
-            <LessonForm courseId={params.courseId}/>
-        </main>
-    )
+            <LessonForm courseId={params.courseId} />
+        </PageWrapper>
+    );
 }

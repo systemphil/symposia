@@ -1,17 +1,22 @@
 import CourseGrid from "@/components/CourseGrid";
 import Heading from "@/components/Heading";
-import { stylesConfig } from "@/config/stylesConfig";
+import { LoadingBall } from "@/components/LoadingBall";
+import { PageWrapper } from "@/components/PageWrapper";
+import FadeIn from "@/components/animations/FadeIn";
 import { Suspense } from "react";
 
 export default async function PublishedCourses() {
-
     return (
-        <main className={`h-screen flex flex-col justify-front items-center gap-4 ${stylesConfig.coursesPage.bgColor}`}>
-            <Heading>Available Courses</Heading>
+        <PageWrapper>
+            <div className="my-16">
+                <Heading>Available Courses</Heading>
+            </div>
 
-            <Suspense fallback={<p>Loading...</p>}>
-                <CourseGrid/>
-            </Suspense>
-        </main>
+            <FadeIn>
+                <Suspense fallback={<LoadingBall />}>
+                    <CourseGrid />
+                </Suspense>
+            </FadeIn>
+        </PageWrapper>
     );
-};
+}

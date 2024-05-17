@@ -12,9 +12,9 @@ import LoadingBars from './LoadingBars';
  * To configure MDX plugins, please see the compiler.
  * @docs {@link https://mdxjs.com/guides/mdx-on-demand/ | MDX on-demand}
  */
-const MDXRenderer = ({ data }: {data: MDXCompilerReturnType}) => {
+export const MDXRenderer = ({ data }: {data: MDXCompilerReturnType}) => {
     const [mdxModule, setMdxModule] = useState<MDXModule | undefined>(undefined);
-    const Content = mdxModule ? mdxModule.default : Fragment
+    const Content = mdxModule ? mdxModule.default : Fragment;
 
     /**
      * The `;` at the start of the code in the useEffect below is used to ensure correct interpretation by the JS parser.
@@ -26,11 +26,8 @@ const MDXRenderer = ({ data }: {data: MDXCompilerReturnType}) => {
         ;(async () => {
             setMdxModule(await run(data, runtime))
         })()
-    }, [data])
+    }, [data]);
 
-    // _editorRoot_w1wlt_36 _editorWrapper_w1wlt_133 mdxeditor
-    // _rootContentEditableWrapper_w1wlt_1022
-    // _contentEditable_w1wlt_339
     return (
         <>
             {(
@@ -49,7 +46,5 @@ const MDXRenderer = ({ data }: {data: MDXCompilerReturnType}) => {
                 <LoadingBars />
             )}
         </>
-    )
+    );
 }
-
-export default MDXRenderer;

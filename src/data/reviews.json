@@ -1,0 +1,30 @@
+[
+    {
+        "name": "Baris",
+        "title": "IT Engineer",
+        "text": "NEEDS NEW ONE.",
+        "url": false,
+        "img_url": "/static/images/people/baris.webp"
+    },
+    {
+        "name": "Lennart Oberlies",
+        "title": "Architect",
+        "text": "Filip lays the strongest evidence himself for a philosophical life. On entering dialogues and discussions with us students, he attends with everything he impersonates to the real challenge of teaching: letting you find ways to bring something up and forward, to raise a subject or a problem yourself, to broach a topic which may live latent in you. This makes his teaching so really unique in my opinion: he addresses and opens the group for conversing, with careful attention to the specificity of every singular voice.",
+        "url": false,
+        "img_url": "/static/images/people/lennart.webp"
+    },
+    {
+        "name": "Drew Lockwood",
+        "title": "Jiu Jitsu Instructor",
+        "text": "Amazing course! I did private lessons with Filip, worth every penny! The 'What is Philosophy' course         helped kick off my latest creative project. Highly recommend it to anyone interested in philosophy.",
+        "url": "https://riliongraciewesthouston.com/",
+        "img_url": "/static/images/people/drew.webp"
+    },
+    {
+        "name": "Stee",
+        "title": "Musician",
+        "text": "My philosophical studies received a jet fuel injection with Filip's teaching. The 'What is Philosophy?' course was beautifully engineered using Collingwood as an anchor text to visit upon several blockbuster philosophical works. Along with weekly videos and materials that brought the themes into sharp focus.  Filip allowed us to unpack our thoughts in the seminars and learn at our own pace, guiding us wisely through the seminar discussions and nudging us on our blind spots. I thoroughly enjoyed it and I look forward to seeing my course-mates on another one soon.",
+        "url": false,
+        "img_url": "/static/images/people/stee.webp"
+    }
+]

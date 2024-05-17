@@ -16,6 +16,7 @@ import Image from 'next/image'
 import { UploadProfileImageResponse } from "@/app/api/image-upload/route";
 import { sleep } from "@/utils/utils";
 import DateInput from "./DateInput";
+import { DebugBtn } from "../DebugBtn";
 
 type AmendedDbUpsertCourseByIdProps = Omit<DbUpsertCourseByIdProps, "seminarAvailability" | "dialogueAvailability"> & {
     seminarAvailability: string;
@@ -187,7 +188,9 @@ export const CourseForm = ({id}: {id?: string}) => {
                 <Checkbox label='Publish' name='published' />
                 <SubmitInput value={`${course ? 'Update' : 'Create'} course`} isLoading={buttonLoading || submitLoading} />
             </form>
-            <button className="btn btn-accent" onClick={() => {console.log(methods.getValues())}}>DEBUG: Get form values</button>
+            <div className="my-12">
+                <DebugBtn onClick={() => {console.log(methods.getValues())}}>DEBUG: Get form values</DebugBtn>
+            </div>
         </FormProvider>
     )
 }
