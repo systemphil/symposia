@@ -178,7 +178,7 @@ const UserMenu = ({ sessionData }: { sessionData: Session }) => {
                 )}
                 <li className="border-t my-1" />
                 <li>
-                    <Link href="/account/billing">Billing</Link>
+                    <Link href="/billing">Billing</Link>
                 </li>
                 <li className="border-t my-1" />
                 <li>

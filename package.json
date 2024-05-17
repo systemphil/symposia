@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "stripe:listen": "stripe listen --forward-to 127.0.0.1:3000/api/stripe-webhook"
+    "stripe:listen": "stripe listen --forward-to 127.0.0.1:3000/api/stripe-webhook",
+    "db:push": "npx prisma db push"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.6.0",

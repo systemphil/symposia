@@ -57,9 +57,9 @@ function OpeningDescription() {
     return (
         <FadeIn>
             <Heading as="h3" additionalClasses="max-w-xl">
-                <span className="text-[#6b0072]">Symposia</span> is an online
-                courseplatform that offers on-demand digital courses, live
-                university-grade seminars and personalized tuition.
+                <span className="text-[#6b0072]">Symposia</span> is an
+                philosophy courseplatform that offers on-demand digital courses,
+                live university-grade seminars and personalized tuition.
             </Heading>
         </FadeIn>
     );
