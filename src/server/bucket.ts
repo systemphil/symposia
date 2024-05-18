@@ -1,9 +1,11 @@
 import { Storage } from "@google-cloud/storage";
 import { env } from "process";
 
-const rawKey = env.GCP_BUCKET_HANDLER_KEY ?? "invalid";
+const rawKey = env.GCP_BUCKET_HANDLER_KEY;
 
-const creds = JSON.parse(Buffer.from(rawKey, "base64").toString());
+const creds = rawKey
+    ? JSON.parse(Buffer.from(rawKey, "base64").toString())
+    : {};
 
 const storage = new Storage({
     projectId: env.GCP_PROJECT_ID,
