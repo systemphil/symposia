@@ -1,23 +1,25 @@
-import { useCallback, useEffect, useState } from "react"
-import CookieConsent, { getCookieConsentValue } from "react-cookie-consent"
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import CookieConsent, { getCookieConsentValue } from "react-cookie-consent";
 
 const G_TAG_MNGR_ID = "g-tag-mngr";
 const G_TAG_ID = "g-tag";
 
-function removeGoogleAnalytics() {
-    const scriptTagMngr = document.getElementById(G_TAG_MNGR_ID);
-    if (scriptTagMngr) {
-        document.head.removeChild(scriptTagMngr);
-    }
-    const scriptTag = document.getElementById(G_TAG_ID);
-    if (scriptTag) {
-        document.head.removeChild(scriptTag);
-    }
-}
-
-const Analytics = () => {
+export const Analytics = () => {
     const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
     const [hasConsentValue, setHasConsentValue] = useState<boolean>(false);
+
+    const removeGoogleAnalytics = () => {
+        const scriptTagMngr = document.getElementById(G_TAG_MNGR_ID);
+        if (scriptTagMngr) {
+            document.head.removeChild(scriptTagMngr);
+        }
+        const scriptTag = document.getElementById(G_TAG_ID);
+        if (scriptTag) {
+            document.head.removeChild(scriptTag);
+        }
+    };
 
     const loadGoogleAnalytics = useCallback(() => {
         if (!GA_ID) return;
@@ -37,7 +39,7 @@ const Analytics = () => {
             gtag('config', '${GA_ID}')
         `;
         document.head.appendChild(scriptTag);
-    }, [GA_ID])
+    }, [GA_ID]);
 
     useEffect(() => {
         setHasConsentValue(!!getCookieConsentValue());
@@ -46,11 +48,10 @@ const Analytics = () => {
         }
         return () => {
             removeGoogleAnalytics();
-        }
+        };
     }, [loadGoogleAnalytics]);
 
-    // TODO fix banner UI
-    return(
+    return (
         <>
             {!hasConsentValue && (
                 <CookieConsent
@@ -59,8 +60,7 @@ const Analytics = () => {
                     onDecline={() => {
                         setHasConsentValue(true);
                     }}
-                    style={{ background: "#111111", color: "white"}}
-                    
+                    style={{ background: "#111111", color: "white" }}
                     buttonStyle={{
                         backgroundColor: "hsl(155, 100%, 66%, 0.17)",
                         color: "#FFFFFF",
@@ -78,11 +78,18 @@ const Analytics = () => {
                         transition: "background-color 0.3s, box-shadow 0.3s",
                     }}
                 >
-                    This site uses cookies to analyze traffic for marketing purposes and to improve your experience. To learn more, visit our <a href="/privacy" className="text-blue-400 underline hover:text-blue-300">Privary Policy</a>.{" "}
+                    This site uses cookies to analyze traffic for marketing
+                    purposes and to improve your experience. To learn more,
+                    visit our{" "}
+                    <a
+                        href="https://systemphil.com/privacy"
+                        className="text-blue-400 underline hover:text-blue-300"
+                    >
+                        Privary Policy
+                    </a>
+                    .{" "}
                 </CookieConsent>
             )}
         </>
-    )
-}
-
-export default Analytics;
+    );
+};
