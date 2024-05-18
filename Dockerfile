@@ -2,6 +2,7 @@ FROM node:20-bullseye as installer
 WORKDIR /app
 COPY prisma ./
 COPY package*.json ./
+RUN npm install
 
 FROM node:20-bullseye as builder
 WORKDIR /app
