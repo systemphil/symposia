@@ -52,7 +52,7 @@ export function VideoDataLoader({ videoEntry }: { videoEntry: Video }) {
                 <div className="text-center mt-4">
                     <h1 className="text-2xl font-semibold">Error ⛓️‍💥</h1>
                     <p className="text-sm text-gray-500">
-                        Unable to load video preview
+                        Unable to load video
                     </p>
                 </div>
             </div>
