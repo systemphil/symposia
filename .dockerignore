@@ -1,0 +1,12 @@
+.env
+.env.dev
+.env.example
+.env.master
+.env.production
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+README.md
+.next
+.git
