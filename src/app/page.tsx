@@ -164,6 +164,12 @@ function Instructors() {
                     maskType="squircle"
                     imgUrl="/static/images/people/filip.jpg"
                 />
+                <InfoCard
+                    title="Ahilleas Rokni, PhD"
+                    text="Ahilleas Rokni completed his PhD thesis in philosophy in 2022 under the supervision of Professor Stephen Houlgate at the University of Warwick. His thesis aimed to give an account of the much-debated move from the Science of Logic to the Philosophy of Nature in Hegel's system. Ahilleas's main research concerns are Hegel's logic, philosophy of nature, philosophy of science, and aesthetics."
+                    maskType="squircle"
+                    imgUrl="/static/images/people/ahilleas.jpg"
+                />
             </div>
         </>
     );
