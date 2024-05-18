@@ -68,7 +68,8 @@ jobs:
             - name: Build and Push Container
               run: |
                   docker build --no-cache \
-                    --build-arg NEXT_PUBLIC_GA_ID=${{secrets.NEXT_PUBLIC_GA_ID}} \
+                    --build-arg NEXT_PUBLIC_GA_ID="${{secrets.NEXT_PUBLIC_GA_ID}}" \
+                    --build-arg DATABASE_URL="${{secrets.DATABASE_URL}}" \
                     -f Dockerfile \
                     -t "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ env.TAG }}" ./
                   docker push "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ env.TAG }}"
