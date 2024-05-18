@@ -82,4 +82,4 @@ jobs:
                     --image="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ env.TAG }}" \
                     --min-instances=default \
                     --max-instances=1
-                    --update-env-vars=[${{ env.A }},${{ env.B }},${{ env.C }},${{ env.D }},${{ env.E }},${{ env.F }},${{ env.G }},${{ env.H }},${{ env.I }},${{ env.J }},${{ env.K }},${{ env.L }},${{ env.M }},${{ env.N }},${{ env.O }},${{ env.P }},${{ env.Q }},${{ env.R }},${{ env.S }},${{ env.T }},${{ env.U }},${{ env.V }},${{ env.W }},${{ env.X }},${{ env.Y }},${{ env.Z }}]
+                    --update-secrets=[${{ env.A }},${{ env.B }},${{ env.C }},${{ env.D }},${{ env.E }},${{ env.F }},${{ env.G }},${{ env.H }},${{ env.I }},${{ env.J }},${{ env.K }},${{ env.L }},${{ env.M }},${{ env.N }},${{ env.O }},${{ env.P }},${{ env.Q }},${{ env.R }},${{ env.S }},${{ env.T }},${{ env.U }},${{ env.V }},${{ env.W }},${{ env.X }},${{ env.Y }},${{ env.Z }}]
