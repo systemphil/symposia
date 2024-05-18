@@ -5,6 +5,8 @@ import { PageWrapper } from "@/components/PageWrapper";
 import FadeIn from "@/components/animations/FadeIn";
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+
 export default async function PublishedCourses() {
     return (
         <PageWrapper>

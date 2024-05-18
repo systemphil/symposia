@@ -7,6 +7,8 @@ import { dbGetUserPurchasedCourses } from "@/server/controllers/dbController";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+
 export default async function LessonFrontPageRoute({
     params,
 }: {

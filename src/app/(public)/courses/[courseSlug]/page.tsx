@@ -6,6 +6,8 @@ import FadeIn from "@/components/animations/FadeIn";
 import { errorMessages } from "@/config/errorMessages";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function CourseFrontPageRoute({
     params,
 }: {

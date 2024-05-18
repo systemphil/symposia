@@ -1,13 +1,21 @@
 import LoadingBars from "@/components/LoadingBars";
 import { MDXRenderer } from "@/components/MDXRenderer";
-import { DBGetCompiledMdxBySlugsProps, dbGetCompiledMdxBySlugs } from "@/server/controllers/dbController";
+import {
+    DBGetCompiledMdxBySlugsProps,
+    dbGetCompiledMdxBySlugs,
+} from "@/server/controllers/dbController";
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
 /**
  * * TEST ROUTE
  * * /test/first-course-updated
  */
-export default async function TestPage1({ params }: { params: { courseSlug: string }}) {
+export default async function TestPage1({
+    params,
+}: {
+    params: { courseSlug: string };
+}) {
     const courseSlug = params.courseSlug;
     /**
      * TODO Why must I add the Props here for TS not to yell at me!?
@@ -15,7 +23,7 @@ export default async function TestPage1({ params }: { params: { courseSlug: stri
     const mdxGetArgs: DBGetCompiledMdxBySlugsProps = {
         courseSlug: courseSlug,
         access: "PUBLIC",
-    }
+    };
 
     // const compiledMdx = await mdxGetCompiledSource(mdxGetArgs)
     const mdxCompiled = await dbGetCompiledMdxBySlugs(mdxGetArgs);
@@ -32,5 +40,5 @@ export default async function TestPage1({ params }: { params: { courseSlug: stri
                 </div>
             </div>
         </main>
-    )
+    );
 }

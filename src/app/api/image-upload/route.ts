@@ -1,7 +1,9 @@
-import sharp from 'sharp'
-import { NextRequest, NextResponse } from 'next/server'
-import { requireAdminAuth } from '@/server/auth'
-import { gcPipeImageUpload } from '@/server/controllers/gcController';
+import sharp from "sharp";
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdminAuth } from "@/server/auth";
+import { gcPipeImageUpload } from "@/server/controllers/gcController";
+
+export const dynamic = "force-dynamic";
 
 /**
  * Thanks to these resources for helping me understand how to do this!
@@ -12,7 +14,7 @@ export async function POST(request: NextRequest) {
     requireAdminAuth();
 
     const formData = await request.formData();
-    const imageFile = formData.get('image') as unknown as File | null;
+    const imageFile = formData.get("image") as unknown as File | null;
 
     if (!imageFile) return NextResponse.json(null, { status: 400 });
 
@@ -28,13 +30,13 @@ export async function POST(request: NextRequest) {
         fileName: `${imageFileName}`,
     });
 
-    return NextResponse.json({ imageUrl })
+    return NextResponse.json({ imageUrl });
 }
 
 // Export types for API Routes
 export type UploadProfileImageResponse = ExtractGenericFromNextResponse<
-  Awaited<ReturnType<typeof POST>>
->
+    Awaited<ReturnType<typeof POST>>
+>;
 type ExtractGenericFromNextResponse<Type> = Type extends NextResponse<infer X>
-  ? X
-  : never
+    ? X
+    : never;

@@ -3,14 +3,16 @@ import { stripe } from "@/lib/stripe/stripeClient";
 import { handleSessionCompleted } from "@/server/controllers/stripeWebhookController";
 import { dbCreateStripeEventRecord } from "@/server/controllers/dbController";
 
+export const dynamic = "force-dynamic";
+
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 
-export async function POST (req: NextRequest) {
+export async function POST(req: NextRequest) {
     const event = await stripe.webhooks.constructEvent(
         await req.text(),
         req.headers.get("stripe-signature") as string,
         webhookSecret as string
-    )
+    );
 
     // Handle the event
     switch (event.type) {
@@ -26,13 +28,15 @@ export async function POST (req: NextRequest) {
         case "payment_intent.requires_action":
             break;
         case "product.updated":
-            console.log("===Product updated event received")
+            console.log("===Product updated event received");
             break;
         case "product.created":
             break;
         default:
-            console.log(`===Unhandled event type: ${event.type}`);
-            // Unexpected event type
+            if (process.env.NODE_ENV === "development") {
+                console.log(`===Unhandled event type: ${event.type}`);
+            }
+        // Unexpected event type
     }
 
     // Record the event in the database (unless development mode)
