@@ -10,6 +10,7 @@ import "../styles/styles.css";
 import Footer from "@/components/Footer";
 import { ToastSearchParams } from "@/components/ToastSearchParams";
 import { Suspense } from "react";
+import { Analytics } from "@/components/Analytics";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,7 +20,6 @@ export const metadata: Metadata = {
         "Where each course is a symposium. Learn about philosophy and the history of ideas in a community of learners.",
 };
 
-// TODO fix classes when styling properly
 const rootClasses =
     "antialiased text-gray-900 bg-gray-100 dark:bg-gray-900 dark:text-gray-800 bg-white dark:bg-white";
 
@@ -40,6 +40,7 @@ export default function RootLayout({
                             <ToastSearchParams />
                         </Suspense>
                         <Toaster position="bottom-right" />
+                        <Analytics />
                     </TRPCProvider>
                 </NextAuthProvider>
             </body>

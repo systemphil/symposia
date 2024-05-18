@@ -5,7 +5,8 @@ import { ReactNode, ReactElement } from "react";
 import cn from "classnames";
 import LogoOwl from "./LogoOwl";
 import { LogoBrandAnimated } from "./LogoBrandAnimated";
-// import { clearCookies } from "@/util/clearCookies";
+import { clearCookies } from "@/utils/clearCookies";
+import { TextButton } from "./TextButton";
 
 const footerLinkClasses =
     "text-sm text-gray-600 dark:text-gray-400 no-underline hover:text-gray-800 hover:dark:text-gray-200 transition";
@@ -60,20 +61,24 @@ const navigation = {
 };
 
 function FooterContent() {
-    // const handleClearCookies = () => {
-    //     clearCookies();
-    //     const dialog = document.getElementById("cookie-dialog") as HTMLDialogElement;
-    //     if (dialog) {
-    //         dialog.show();
-    //     }
-    // }
+    const handleClearCookies = () => {
+        clearCookies();
+        const dialog = document.getElementById(
+            "cookie-dialog"
+        ) as HTMLDialogElement;
+        if (dialog) {
+            dialog.show();
+        }
+    };
 
-    // const handleCloseDialog = () => {
-    //     const dialog = document.getElementById("cookie-dialog") as HTMLDialogElement;
-    //     if (dialog) {
-    //         dialog.close();
-    //     }
-    // }
+    const handleCloseDialog = () => {
+        const dialog = document.getElementById(
+            "cookie-dialog"
+        ) as HTMLDialogElement;
+        if (dialog) {
+            dialog.close();
+        }
+    };
 
     return (
         <div className="w-full" aria-labelledby="footer-heading">
@@ -127,19 +132,32 @@ function FooterContent() {
                                             </FooterLink>
                                         </li>
                                     ))}
-                                    {/* <li 
+                                    <li
                                         key="cookie-removal"
                                         onClick={() => handleClearCookies()}
                                     >
-                                        <button className={footerLinkClasses}>Delete Cookies</button>
+                                        <button className={footerLinkClasses}>
+                                            Delete Cookies
+                                        </button>
                                     </li>
-                                    
+
                                     <dialog id="cookie-dialog">
                                         <div className="flex flex-col items-center justify-center max-w-md shadow p-4 rounded-md">
-                                            <span className="p-2">All cookies should now be deleted and you will be asked upon next visit to accept or decline cookies.</span>
-                                            <Button onClick={() => handleCloseDialog()}>Close</Button>
+                                            <span className="p-2">
+                                                All cookies should now be
+                                                deleted and you will be asked
+                                                upon next visit to accept or
+                                                decline cookies.
+                                            </span>
+                                            <TextButton
+                                                onClick={() =>
+                                                    handleCloseDialog()
+                                                }
+                                            >
+                                                Close
+                                            </TextButton>
                                         </div>
-                                    </dialog> */}
+                                    </dialog>
                                 </ul>
                             </div>
                             <div className="mt-12 md:!mt-0">
