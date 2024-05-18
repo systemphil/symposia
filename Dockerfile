@@ -12,6 +12,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 
 ARG NEXT_PUBLIC_GA_ID
 ARG DATABASE_URL
+ARG GCP_SECONDARY_BUCKET_NAME
 ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
 
 RUN npm run build
@@ -28,7 +29,6 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder /app/next.config.js ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
