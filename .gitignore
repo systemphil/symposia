@@ -34,6 +34,7 @@ _.env
 .env.development
 .env.master
 key.json
+sec-push.sh
 
 # vercel
 .vercel
