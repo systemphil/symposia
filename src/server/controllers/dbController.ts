@@ -540,7 +540,10 @@ export const dbGetVideoFileNameByVideoId = async (id: string) => {
     };
     return await checkIfAdmin(getVideoFileName);
 };
-export type DbUpsertCourseByIdProps = Omit<Course, "id"> & { id?: string };
+export type DbUpsertCourseByIdProps = Omit<
+    Course,
+    "id" | "createdAt" | "updatedAt"
+> & { id?: string };
 /**
  * Updates an existing course details by id as identifier or creates a new one if id is not provided.
  * @access "ADMIN""
