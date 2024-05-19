@@ -8,7 +8,7 @@ const creds = rawKey
     : {};
 
 const storage = new Storage({
-    projectId: env.GCP_PROJECT_ID,
+    projectId: creds.project_id,
     credentials: creds,
 });
 
