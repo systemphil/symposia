@@ -12,7 +12,7 @@
     "db:push": "npx prisma db push"
   },
   "dependencies": {
-    "@google-cloud/storage": "^7.6.0",
+    "@google-cloud/storage": "^7.11.0",
     "@mdx-js/mdx": "^2.3.0",
     "@mdxeditor/editor": "^2.19.0",
     "@next-auth/prisma-adapter": "^1.0.7",
