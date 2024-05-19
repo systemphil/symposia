@@ -1,7 +1,7 @@
 import { Storage } from "@google-cloud/storage";
 import { env } from "process";
 
-const rawKey = env.GCP_BUCKET_HANDLER_KEY;
+const rawKey = env.GCP_BUCKET_HANDLER_KEY ?? "";
 
 const creds = rawKey
     ? JSON.parse(Buffer.from(rawKey, "base64").toString())
