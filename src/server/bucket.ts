@@ -7,13 +7,10 @@ const creds = rawKey
     ? JSON.parse(Buffer.from(rawKey, "base64").toString())
     : {};
 
-const storage =
-    env.NODE_ENV === "development"
-        ? new Storage({
-              projectId: creds.project_id,
-              credentials: creds,
-          })
-        : new Storage();
+const storage = new Storage({
+    projectId: creds.project_id,
+    credentials: creds,
+});
 
 const PRIMARY_BUCKET_NAME = env.GCP_PRIMARY_BUCKET_NAME ?? "invalid";
 const SECONDARY_BUCKET_NAME = env.GCP_SECONDARY_BUCKET_NAME ?? "invalid";
