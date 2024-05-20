@@ -3,8 +3,6 @@ import { env } from "process";
 
 const rawKey = env.GCP_BUCKET_HANDLER_KEY ?? "";
 
-console.log("rawKey", rawKey);
-
 const creds = rawKey
     ? JSON.parse(Buffer.from(rawKey, "base64").toString())
     : {};
@@ -16,9 +14,6 @@ const storage = new Storage({
 
 // const storage = new Storage();
 
-const sa = await storage.getProjectId();
-console.log(sa);
-
 const PRIMARY_BUCKET_NAME = env.GCP_PRIMARY_BUCKET_NAME ?? "invalid";
 const SECONDARY_BUCKET_NAME = env.GCP_SECONDARY_BUCKET_NAME ?? "invalid";
 
@@ -28,3 +23,9 @@ const SECONDARY_BUCKET_NAME = env.GCP_SECONDARY_BUCKET_NAME ?? "invalid";
  */
 export const primaryBucket = storage.bucket(PRIMARY_BUCKET_NAME);
 export const secondaryBucket = storage.bucket(SECONDARY_BUCKET_NAME);
+
+export async function TestBucket() {
+    console.log("rawKey", rawKey);
+    const sa = await storage.getProjectId();
+    console.log(sa);
+}

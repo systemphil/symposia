@@ -2,7 +2,7 @@ import {
     type GetSignedUrlConfig,
     type GenerateSignedPostPolicyV4Options,
 } from "@google-cloud/storage";
-import { primaryBucket, secondaryBucket } from "../bucket";
+import { TestBucket, primaryBucket, secondaryBucket } from "../bucket";
 import { dbUpsertVideoById } from "./dbController";
 import { AuthenticationError, requireAdminAuth } from "@/server/auth";
 import { colorLog } from "@/utils/utils";
@@ -99,6 +99,7 @@ export async function gcGenerateReadSignedUrl({
     fileName,
     id,
 }: GcVideoFilePathProps) {
+    await TestBucket();
     const filePath = `video/${id}/${fileName}`;
     const options: GetSignedUrlConfig = {
         version: "v4",
