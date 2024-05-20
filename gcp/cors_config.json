@@ -1,6 +1,8 @@
 [
-    {
-      "origin": ["<domain>"],
-      "method": ["GET"]
-    }
+  {
+    "origin": ["<>"],
+    "method": ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+    "responseHeader": ["Content-Type"],
+    "maxAgeSeconds": 3600
+  }
 ]

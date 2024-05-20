@@ -46,7 +46,7 @@ export const RootNavbar = () => {
                                     <Link href="/">Home</Link>
                                 </li>
                                 <li>
-                                    <Link href="/">Courses</Link>
+                                    <Link href="/courses">Courses</Link>
                                 </li>
                                 {sessionData &&
                                     sessionData.user.role === "ADMIN" && (
