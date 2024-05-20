@@ -30,9 +30,4 @@ export async function TestBucket() {
     console.log(sa);
     const a = await storage.getServiceAccount();
     console.log(a);
-    const [buckets] = await storage.getBuckets();
-    console.log("Buckets:");
-    buckets.forEach((bucket) => {
-        console.log(bucket.name);
-    });
 }

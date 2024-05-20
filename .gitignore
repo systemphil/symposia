@@ -46,3 +46,7 @@ next-env.d.ts
 
 # other branches
 /dev-branch
+
+# other
+output.txt
+test.js
