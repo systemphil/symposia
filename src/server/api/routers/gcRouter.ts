@@ -1,6 +1,13 @@
-
-import { gcDeleteVideoFile, gcGenerateReadSignedUrl, gcGenerateSignedPostUploadUrl } from "@/server/controllers/gcController";
-import { createTRPCRouter, protectedAdminProcedure, publicProcedure } from "../trpc";
+import {
+    gcDeleteVideoFile,
+    gcGenerateReadSignedUrl,
+    gcGenerateSignedPostUploadUrl,
+} from "@/server/controllers/gcController";
+import {
+    createTRPCRouter,
+    protectedAdminProcedure,
+    publicProcedure,
+} from "../trpc";
 import * as z from "zod";
 
 /**
@@ -13,12 +20,11 @@ export const gcRouter = createTRPCRouter({
      */
     createSignedPostUrl: protectedAdminProcedure
         .input(
-            z
-                .object({
-                    id: z.string().optional(),
-                    lessonId: z.string(),
-                    fileName: z.string(),
-                })
+            z.object({
+                id: z.string().optional(),
+                lessonId: z.string(),
+                fileName: z.string(),
+            })
         )
         .mutation(async (opts) => {
             return await gcGenerateSignedPostUploadUrl(opts.input);
@@ -28,11 +34,10 @@ export const gcRouter = createTRPCRouter({
      */
     createSignedReadUrl: publicProcedure
         .input(
-            z
-                .object({
-                    id: z.string(),
-                    fileName: z.string(),
-                })
+            z.object({
+                id: z.string(),
+                fileName: z.string(),
+            })
         )
         .mutation(async (opts) => {
             return await gcGenerateReadSignedUrl(opts.input);
@@ -42,13 +47,12 @@ export const gcRouter = createTRPCRouter({
      */
     deleteVideoFile: protectedAdminProcedure
         .input(
-            z
-                .object({
-                    id: z.string(),
-                    fileName: z.string(),
-                })
+            z.object({
+                id: z.string(),
+                fileName: z.string(),
+            })
         )
         .mutation(async (opts) => {
             return await gcDeleteVideoFile(opts.input);
-        })
-})
+        }),
+});
