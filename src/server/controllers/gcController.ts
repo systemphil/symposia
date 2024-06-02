@@ -1,4 +1,5 @@
-import { secondaryBucket } from "../bucket";
+import { GetSignedUrlConfig } from "@google-cloud/storage";
+import { primaryBucket, secondaryBucket } from "../bucket";
 import { dbUpsertVideoById } from "./dbController";
 import { AuthenticationError, requireAdminAuth } from "@/server/auth";
 import { colorLog } from "@/utils/utils";
@@ -34,24 +35,36 @@ export async function gcGenerateSignedUploadUrl({
             videoEntry.id = newVideoEntry.id;
         }
         const filePath = `video/${videoEntry.id}/${videoEntry.fileName}`;
-        if (!BUCKET_SERVER_ORIGIN)
-            throw new Error("Bucket server URL not set.");
-        const outgoingUrl = `${BUCKET_SERVER_ORIGIN}/write-object`;
-        const res = await fetch(outgoingUrl, {
-            method: "POST",
-            body: JSON.stringify({ object: filePath }),
-        });
-        if (!res.ok) {
-            throw new Error("Failed to get signed upload URL");
-        }
-        const data = await res.json();
-        if (data.url) {
+        // * Alternative method using bucket server
+        // if (!BUCKET_SERVER_ORIGIN)
+        //     throw new Error("Bucket server URL not set.");
+        // const outgoingUrl = `${BUCKET_SERVER_ORIGIN}/write-object`;
+        // const res = await fetch(outgoingUrl, {
+        //     method: "POST",
+        //     body: JSON.stringify({ object: filePath }),
+        // });
+        // if (!res.ok) {
+        //     throw new Error("Failed to get signed upload URL");
+        // }
+        // const data = await res.json();
+        const options = {
+            version: "v4",
+            action: "write",
+            expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+        } satisfies GetSignedUrlConfig;
+        const [url] = await primaryBucket.file(filePath).getSignedUrl(options);
+
+        if (url) {
             await dbUpsertVideoById({
                 lessonId: videoEntry.lessonId,
                 id: videoEntry.id,
                 fileName: videoEntry.fileName,
             });
         }
+
+        const data = {
+            url: url,
+        };
         return data;
     } catch (error) {
         if (error instanceof AuthenticationError) {
@@ -75,18 +88,29 @@ export async function gcDeleteVideoFile({
 }: GcVideoFilePathProps) {
     await requireAdminAuth();
     const filePath = `video/${id}/${fileName}`;
-    if (!BUCKET_SERVER_ORIGIN) throw new Error("Bucket server URL not set.");
-    const outgoingUrl = `${BUCKET_SERVER_ORIGIN}/delete-object`;
-    const res = await fetch(outgoingUrl, {
-        method: "POST",
-        body: JSON.stringify({ object: filePath }),
-    });
-    if (!res.ok) {
-        console.error(`Failed to delete object ${filePath}`);
-        console.log(res);
-        throw new Error("Deleting object request failed.");
-    }
-    colorLog(`===OBJECT DELETED->${filePath}`);
+    // * Alternative method using bucket server
+    // if (!BUCKET_SERVER_ORIGIN) throw new Error("Bucket server URL not set.");
+    // const outgoingUrl = `${BUCKET_SERVER_ORIGIN}/delete-object`;
+    // const res = await fetch(outgoingUrl, {
+    //     method: "POST",
+    //     body: JSON.stringify({ object: filePath }),
+    // });
+    // if (!res.ok) {
+    //     console.error(`Failed to delete object ${filePath}`);
+    //     console.log(res);
+    //     throw new Error("Deleting object request failed.");
+    // }
+    await primaryBucket
+        .file(filePath)
+        .delete()
+        .then(() => {
+            colorLog(`===OBJECT DELETED->${filePath}`);
+        })
+        .catch((err) => {
+            console.error(`Failed to delete object ${filePath}`);
+            console.error(err);
+            throw new Error("Deleting object request failed.");
+        });
     return;
 }
 /**
@@ -98,17 +122,25 @@ export async function gcGenerateReadSignedUrl({
     id,
 }: GcVideoFilePathProps) {
     const filePath = `video/${id}/${fileName}`;
-    if (!BUCKET_SERVER_ORIGIN) throw new Error("Bucket server URL not set.");
-    const outgoingUrl = `${BUCKET_SERVER_ORIGIN}/read-object`;
-    const res = await fetch(outgoingUrl, {
-        method: "POST",
-        body: JSON.stringify({ object: filePath }),
-    });
-    if (!res.ok) {
-        throw new Error("Failed to get signed URL");
-    }
-    const data = await res.json();
-    return data.url;
+    // * Alternative method using bucket server
+    // if (!BUCKET_SERVER_ORIGIN) throw new Error("Bucket server URL not set.");
+    // const outgoingUrl = `${BUCKET_SERVER_ORIGIN}/read-object`;
+    // const res = await fetch(outgoingUrl, {
+    //     method: "POST",
+    //     body: JSON.stringify({ object: filePath }),
+    // });
+    // if (!res.ok) {
+    //     throw new Error("Failed to get signed URL");
+    // }
+    // const data = await res.json();
+    // return data.url;
+    const options = {
+        version: "v4",
+        action: "read",
+        expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    } satisfies GetSignedUrlConfig;
+    const [url] = await primaryBucket.file(filePath).getSignedUrl(options);
+    return url;
 }
 /**
  * Uploads image to secondary bucket and returns the public URL.
