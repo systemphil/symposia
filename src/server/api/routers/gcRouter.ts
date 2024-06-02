@@ -1,7 +1,7 @@
 import {
     gcDeleteVideoFile,
     gcGenerateReadSignedUrl,
-    gcGenerateSignedPostUploadUrl,
+    gcGenerateSignedUploadUrl,
 } from "@/server/controllers/gcController";
 import {
     createTRPCRouter,
@@ -27,7 +27,7 @@ export const gcRouter = createTRPCRouter({
             })
         )
         .mutation(async (opts) => {
-            return await gcGenerateSignedPostUploadUrl(opts.input);
+            return await gcGenerateSignedUploadUrl(opts.input);
         }),
     /**
      * Generates signed READ URL for Video from bucket. Requires Video id and fileName.

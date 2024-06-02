@@ -10,7 +10,6 @@ const VideoViewer = ({ videoUrl }: { videoUrl: string }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     const handleLoad = () => {
-        console.log("Video loaded");
         setIsLoading(false);
     };
 

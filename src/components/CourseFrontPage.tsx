@@ -8,15 +8,16 @@ import { TableOfLessons } from "./TableOfLessons";
 import { MDXRenderer } from "./MDXRenderer";
 import { cache } from "@/server/cache";
 import { errorMessages } from "@/config/errorMessages";
-
-const getCourseBySlug = cache(
-    async (slug) => {
-        return await dbGetCourseBySlug(slug);
-    },
-    ["/courses"]
-);
+import { CACHE_REVALIDATION_INTERVAL } from "@/config/cacheRevalidationInterval";
 
 export default async function CourseFrontPage({ slug }: { slug: string }) {
+    const getCourseBySlug = cache(
+        async (slug) => {
+            return await dbGetCourseBySlug(slug);
+        },
+        ["/courses", slug],
+        { revalidate: CACHE_REVALIDATION_INTERVAL }
+    );
     const course = await getCourseBySlug(slug);
 
     if (!course) {

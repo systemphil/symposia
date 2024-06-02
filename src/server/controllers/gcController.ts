@@ -1,11 +1,9 @@
-import {
-    type GetSignedUrlConfig,
-    type GenerateSignedPostPolicyV4Options,
-} from "@google-cloud/storage";
-import { TestBucket, primaryBucket, secondaryBucket } from "../bucket";
+import { secondaryBucket } from "../bucket";
 import { dbUpsertVideoById } from "./dbController";
 import { AuthenticationError, requireAdminAuth } from "@/server/auth";
 import { colorLog } from "@/utils/utils";
+
+const BUCKET_SERVER_ORIGIN = process.env.BUCKET_SERVER_URL;
 
 type GcGenerateSignedPostUploadURLProps = {
     fileName: string;
@@ -19,7 +17,7 @@ type GcGenerateSignedPostUploadURLProps = {
  * @description All lesson videos will be stored the directory named after their ID in the Video entry: /video/[VideoId]/[fileName].ext
  * @access "ADMIN"
  */
-export async function gcGenerateSignedPostUploadUrl({
+export async function gcGenerateSignedUploadUrl({
     fileName,
     id,
     lessonId,
@@ -36,24 +34,25 @@ export async function gcGenerateSignedPostUploadUrl({
             videoEntry.id = newVideoEntry.id;
         }
         const filePath = `video/${videoEntry.id}/${videoEntry.fileName}`;
-        const file = primaryBucket.file(filePath);
-        const options: GenerateSignedPostPolicyV4Options = {
-            expires: Date.now() + 1 * 60 * 1000, //  1 minute,
-            fields: { "x-goog-meta-test": "data" },
-        };
-        const [response] = await file.generateSignedPostPolicyV4(options);
-        if (response.url) {
+        if (!BUCKET_SERVER_ORIGIN)
+            throw new Error("Bucket server URL not set.");
+        const outgoingUrl = `${BUCKET_SERVER_ORIGIN}/write-object`;
+        const res = await fetch(outgoingUrl, {
+            method: "POST",
+            body: JSON.stringify({ object: filePath }),
+        });
+        if (!res.ok) {
+            throw new Error("Failed to get signed upload URL");
+        }
+        const data = await res.json();
+        if (data.url) {
             await dbUpsertVideoById({
                 lessonId: videoEntry.lessonId,
                 id: videoEntry.id,
                 fileName: videoEntry.fileName,
             });
-        } else {
-            throw new Error(
-                "Response from generateSignedPostPolicy should contain URL"
-            );
         }
-        return response;
+        return data;
     } catch (error) {
         if (error instanceof AuthenticationError) {
             throw new Error("Unauthorized.");
@@ -76,20 +75,19 @@ export async function gcDeleteVideoFile({
 }: GcVideoFilePathProps) {
     await requireAdminAuth();
     const filePath = `video/${id}/${fileName}`;
-    const res = await primaryBucket
-        .file(filePath)
-        .delete()
-        .then((data) => {
-            return data[0];
-        });
-    if (res && res.statusCode === 204) {
-        colorLog(`===OBJECT DELETED->${filePath}`);
-        return;
-    } else {
+    if (!BUCKET_SERVER_ORIGIN) throw new Error("Bucket server URL not set.");
+    const outgoingUrl = `${BUCKET_SERVER_ORIGIN}/delete-object`;
+    const res = await fetch(outgoingUrl, {
+        method: "POST",
+        body: JSON.stringify({ object: filePath }),
+    });
+    if (!res.ok) {
         console.error(`Failed to delete object ${filePath}`);
         console.log(res);
-        throw new Error("Failed to delete object.");
+        throw new Error("Deleting object request failed.");
     }
+    colorLog(`===OBJECT DELETED->${filePath}`);
+    return;
 }
 /**
  * Generates a signed Read Url for specific video from bucket. Requires the ID of the Video entry from db and the filename.
@@ -99,15 +97,18 @@ export async function gcGenerateReadSignedUrl({
     fileName,
     id,
 }: GcVideoFilePathProps) {
-    await TestBucket();
     const filePath = `video/${id}/${fileName}`;
-    const options: GetSignedUrlConfig = {
-        version: "v4",
-        action: "read",
-        expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-    };
-    const [url] = await primaryBucket.file(filePath).getSignedUrl(options);
-    return url;
+    if (!BUCKET_SERVER_ORIGIN) throw new Error("Bucket server URL not set.");
+    const outgoingUrl = `${BUCKET_SERVER_ORIGIN}/read-object`;
+    const res = await fetch(outgoingUrl, {
+        method: "POST",
+        body: JSON.stringify({ object: filePath }),
+    });
+    if (!res.ok) {
+        throw new Error("Failed to get signed URL");
+    }
+    const data = await res.json();
+    return data.url;
 }
 /**
  * Uploads image to secondary bucket and returns the public URL.

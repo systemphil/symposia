@@ -7,15 +7,16 @@ import { VideoDataLoader } from "./VideoDataLoader";
 import { TableOfLessons } from "./TableOfLessons";
 import { cache } from "@/server/cache";
 import { errorMessages } from "@/config/errorMessages";
-
-const getLessonAndRelationsBySlug = cache(
-    async (slug) => {
-        return await dbGetLessonAndRelationsBySlug(slug);
-    },
-    ["/lessons"]
-);
+import { CACHE_REVALIDATION_INTERVAL } from "@/config/cacheRevalidationInterval";
 
 export async function LessonFrontPage({ lessonSlug }: { lessonSlug: string }) {
+    const getLessonAndRelationsBySlug = cache(
+        async (slug) => {
+            return await dbGetLessonAndRelationsBySlug(slug);
+        },
+        ["/lessons", lessonSlug],
+        { revalidate: CACHE_REVALIDATION_INTERVAL }
+    );
     const lessonData = await getLessonAndRelationsBySlug(lessonSlug);
     if (!lessonData) {
         return redirect(`/courses?error=${errorMessages.lessonNotFound}`);
@@ -25,6 +26,7 @@ export async function LessonFrontPage({ lessonSlug }: { lessonSlug: string }) {
     const lg = "lg:grid-cols-6";
     const xl = "gap-0";
     const xxl = "2xl:gap-8 2xl:px-20";
+
     return (
         <div
             className={`flex flex-col justify-center items-center gap-2 ${md} ${lg} ${xl} ${xxl}`}
