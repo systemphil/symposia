@@ -1,13 +1,16 @@
 import { stripe } from "@/lib/stripe/stripeClient";
-import { serverGetDomain } from "@/utils/serverUtils";
 
 type StripeCreateProductProps = {
-    name: string,
-    description?: string,
-    imageUrl?: string | null, // images cannot be nullified, only replaced
-}
+    name: string;
+    description?: string;
+    imageUrl?: string | null; // images cannot be nullified, only replaced
+};
 
-export async function stripeCreateProduct ({name, description, imageUrl}: StripeCreateProductProps) {
+export async function stripeCreateProduct({
+    name,
+    description,
+    imageUrl,
+}: StripeCreateProductProps) {
     const product = await stripe.products.create({
         name: name,
         description: description ?? undefined,
@@ -17,14 +20,17 @@ export async function stripeCreateProduct ({name, description, imageUrl}: Stripe
 }
 
 type StripeUpdateProductProps = {
-    stripeProductId: string,
-    name?: string,
-    description?: string,
-    imageUrl?: string | null, // images cannot be nullified, only replaced
-}
+    stripeProductId: string;
+    name?: string;
+    description?: string;
+    imageUrl?: string | null; // images cannot be nullified, only replaced
+};
 
-export async function stripeUpdateProduct ({
-    stripeProductId, name, description, imageUrl
+export async function stripeUpdateProduct({
+    stripeProductId,
+    name,
+    description,
+    imageUrl,
 }: StripeUpdateProductProps) {
     const product = await stripe.products.update(stripeProductId, {
         name: name ?? undefined,
@@ -34,7 +40,11 @@ export async function stripeUpdateProduct ({
     return product;
 }
 
-export async function stripeArchiveProduct ({stripeProductId}: {stripeProductId: string}) {
+export async function stripeArchiveProduct({
+    stripeProductId,
+}: {
+    stripeProductId: string;
+}) {
     const product = await stripe.products.update(stripeProductId, {
         active: false,
     });
@@ -42,12 +52,16 @@ export async function stripeArchiveProduct ({stripeProductId}: {stripeProductId:
 }
 
 interface StripeCreatePriceProps {
-    stripeProductId: string,
-    unitPrice: number,
-    currency?: string,
+    stripeProductId: string;
+    unitPrice: number;
+    currency?: string;
 }
 
-export async function stripeCreatePrice ({stripeProductId, unitPrice, currency = "usd"}: StripeCreatePriceProps) {
+export async function stripeCreatePrice({
+    stripeProductId,
+    unitPrice,
+    currency = "usd",
+}: StripeCreatePriceProps) {
     const price = await stripe.prices.create({
         unit_amount: unitPrice,
         currency: currency,
@@ -56,15 +70,21 @@ export async function stripeCreatePrice ({stripeProductId, unitPrice, currency =
     return price;
 }
 
-export async function stripeRetrievePrice ({stripePriceId}: {stripePriceId: string}) {
+export async function stripeRetrievePrice({
+    stripePriceId,
+}: {
+    stripePriceId: string;
+}) {
     const price = await stripe.prices.retrieve(stripePriceId);
     return price;
 }
 
-export async function stripeArchivePrice ({
+export async function stripeArchivePrice({
     stripePriceId,
 }: {
-    stripePriceId: string, unitPrice?: number, currency?: string
+    stripePriceId: string;
+    unitPrice?: number;
+    currency?: string;
 }) {
     const price = await stripe.prices.update(stripePriceId, {
         active: false,
@@ -72,62 +92,70 @@ export async function stripeArchivePrice ({
     return price;
 }
 
-export async function stripeDeleteProduct ({stripeProductId}: {stripeProductId: string}) {
+export async function stripeDeleteProduct({
+    stripeProductId,
+}: {
+    stripeProductId: string;
+}) {
     const product = await stripe.products.del(stripeProductId);
     return product;
 }
 
 type StripeCreateCheckoutSessionProps = {
-    customerId: string,
-    userId: string,
+    customerId: string;
+    userId: string;
     purchase: {
-        price: string,
-        quantity: number,
+        price: string;
+        quantity: number;
         adjustable_quantity: {
-            enabled: boolean,
-        },
-    },
-    slug: string,
-    courseId: string,
-    imageUrl: string | null | undefined,
-    name: string,
-    description: string,
-    customerEmail: string,
-}
+            enabled: boolean;
+        };
+    };
+    slug: string;
+    courseId: string;
+    imageUrl: string | null | undefined;
+    name: string;
+    description: string;
+    customerEmail: string;
+};
 
 export type StripeCheckoutSessionMetadata = {
-    userId: string,
-    purchase: string,
-    courseId: string,
-    imageUrl: string,
-    name: string,
-    description: string,
-    courseLink: string,
-    stripeCustomerId: string,
-}
+    userId: string;
+    purchase: string;
+    courseId: string;
+    imageUrl: string;
+    name: string;
+    description: string;
+    courseLink: string;
+    stripeCustomerId: string;
+};
 
 export async function stripeCreateCheckoutSession({
-    customerId, 
-    userId, 
-    purchase, 
-    slug, 
+    customerId,
+    userId,
+    purchase,
+    slug,
     courseId,
     imageUrl,
     name,
     description,
     customerEmail,
 }: StripeCreateCheckoutSessionProps) {
-    const baseUrl = serverGetDomain();
+    const baseUrl = process.env.NEXTAUTH_URL;
+    if (!baseUrl) throw new Error("NEXTAUTH_URL is not defined");
+
     const stripeSession = await stripe.checkout.sessions.create({
         customer_email: customerEmail,
         client_reference_id: userId,
         payment_method_types: ["card", "paypal"],
         mode: "payment",
-        line_items: [ purchase ],
+        line_items: [purchase],
         /**
          * * Note: priceId is split for the success URL and then re-attached in the db query.
          */
-        success_url: `${baseUrl}/purchase-success?p=${purchase.price.split("_")[1]}&s=${slug}`,
+        success_url: `${baseUrl}/purchase-success?p=${
+            purchase.price.split("_")[1]
+        }&s=${slug}`,
         cancel_url: `${baseUrl}/courses/${slug}?canceled=true`,
         metadata: {
             stripeCustomerId: customerId,
@@ -137,7 +165,9 @@ export async function stripeCreateCheckoutSession({
             /**
              * TODO fix fallback image
              */
-            imageUrl: imageUrl ?? "https://avatars.githubusercontent.com/u/147748257?s=200&v=4",
+            imageUrl:
+                imageUrl ??
+                "https://avatars.githubusercontent.com/u/147748257?s=200&v=4",
             name: name,
             description: description,
             courseLink: `${baseUrl}/courses/${slug}`,
@@ -149,13 +179,16 @@ export async function stripeCreateCheckoutSession({
     }
 
     return { url: stripeSession.url };
-
 }
 
 export async function stripeCreateCustomer({
-    email, userId, name = undefined
+    email,
+    userId,
+    name = undefined,
 }: {
-    email: string, userId: string, name?: string
+    email: string;
+    userId: string;
+    name?: string;
 }) {
     const customer = await stripe.customers.create({
         name: name,
@@ -168,9 +201,9 @@ export async function stripeCreateCustomer({
 }
 
 export async function stripeGetCustomerEmail({
-    customerId
+    customerId,
 }: {
-    customerId: string
+    customerId: string;
 }) {
     const customer = await stripe.customers.retrieve(customerId);
     // TODO typescript isn't picking up the type here for some reason
