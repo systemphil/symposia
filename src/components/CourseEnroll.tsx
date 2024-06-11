@@ -29,8 +29,11 @@ export default async function CourseEnroll({ slug }: CourseEnrollButtonProps) {
     if (!course) {
         return <div className="badge badge-error">n/a</div>;
     }
+    // TODO remove casting
+    const baseAvailable = course.baseAvailability! > new Date();
     const seminarAvailable = course.seminarAvailability > new Date();
     const dialogueAvailable = course.dialogueAvailability > new Date();
+    const anyAvailable = baseAvailable || seminarAvailable || dialogueAvailable;
 
     const session = await getServerAuthSession();
 
@@ -68,15 +71,31 @@ export default async function CourseEnroll({ slug }: CourseEnrollButtonProps) {
                 </p>
 
                 <div className="form-control has-[:checked]:bg-indigo-50 rounded-md">
-                    <label className="label cursor-pointer gap-16 flex">
+                    <label
+                        className={`label ${
+                            baseAvailable && "cursor-pointer"
+                        } relative`}
+                    >
                         <input
                             type="radio"
                             name="price-tier"
                             className="radio checked:bg-red-500"
-                            defaultChecked
+                            defaultChecked={baseAvailable}
                             value="base"
+                            disabled={!baseAvailable}
                         />
-                        <span className="label-text">Base Tier</span>
+                        {!baseAvailable && (
+                            <span className="absolute text-xs text-slate-500 top-0 right-0">
+                                &nbsp;Currently unavailable
+                            </span>
+                        )}
+                        <span
+                            className={`label-text ${
+                                !baseAvailable && "line-through"
+                            }`}
+                        >
+                            Base Tier
+                        </span>
                     </label>
                     <TierDescription
                         title={BASE_TIER_TITLE}
@@ -148,9 +167,11 @@ export default async function CourseEnroll({ slug }: CourseEnrollButtonProps) {
                         price={course.dialoguePrice}
                     />
                 </div>
-                {session && <SubmitButton>Enroll!</SubmitButton>}
+                {session && anyAvailable && (
+                    <SubmitButton>Enroll!</SubmitButton>
+                )}
             </form>
-            {!session && <SignInButton />}
+            {!session && anyAvailable && <SignInButton />}
             <p className="text-center text-sm text-slate-500">
                 30-Day Money-Back Guarantee
             </p>

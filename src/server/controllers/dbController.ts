@@ -563,6 +563,7 @@ export const dbUpsertCourseById = async ({
     basePrice,
     seminarPrice,
     dialoguePrice,
+    baseAvailability,
     seminarAvailability,
     dialogueAvailability,
 }: DbUpsertCourseByIdProps) => {
@@ -595,6 +596,7 @@ export const dbUpsertCourseById = async ({
         const validPublished = published
             ? z.boolean().parse(published)
             : undefined;
+        const validBaseAvailability = z.date().parse(baseAvailability);
         const validSeminarAvailability = z.date().parse(seminarAvailability);
         const validDialogueAvailability = z.date().parse(dialogueAvailability);
 
@@ -616,6 +618,7 @@ export const dbUpsertCourseById = async ({
                 imageUrl: validImageUrl,
                 author: validAuthor,
                 published: validPublished,
+                baseAvailability: validBaseAvailability,
                 seminarAvailability: validSeminarAvailability,
                 dialogueAvailability: validDialogueAvailability,
             },
@@ -633,6 +636,7 @@ export const dbUpsertCourseById = async ({
                 imageUrl: validImageUrl,
                 author: validAuthor,
                 published: validPublished,
+                baseAvailability: validBaseAvailability,
                 seminarAvailability: validSeminarAvailability,
                 dialogueAvailability: validDialogueAvailability,
             },

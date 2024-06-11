@@ -98,6 +98,7 @@ export const dbRouter = createTRPCRouter({
                 imageUrl: z.string().url().nullable(),
                 author: z.string().nullable(),
                 published: z.boolean(),
+                baseAvailability: z.date(),
                 seminarAvailability: z.date(),
                 dialogueAvailability: z.date(),
             })

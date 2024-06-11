@@ -20,8 +20,9 @@ import { DebugBtn } from "../DebugBtn";
 
 type AmendedDbUpsertCourseByIdProps = Omit<
     DbUpsertCourseByIdProps,
-    "seminarAvailability" | "dialogueAvailability"
+    "seminarAvailability" | "dialogueAvailability" | "baseAvailability"
 > & {
+    baseAvailability: string;
     seminarAvailability: string;
     dialogueAvailability: string;
 };
@@ -71,6 +72,7 @@ export const CourseForm = ({ id }: { id?: string }) => {
         setSubmitLoading(true);
         const dataWithConvertedDates = {
             ...data,
+            baseAvailability: new Date(data.baseAvailability),
             seminarAvailability: new Date(data.seminarAvailability),
             dialogueAvailability: new Date(data.dialogueAvailability),
         } satisfies DbUpsertCourseByIdProps;
@@ -92,6 +94,9 @@ export const CourseForm = ({ id }: { id?: string }) => {
             dialoguePrice: course?.dialoguePrice ?? 0,
             imageUrl: course?.imageUrl ?? "",
             author: course?.author ?? "",
+            baseAvailability: course?.baseAvailability
+                ? course.baseAvailability.toISOString().slice(0, 16)
+                : new Date().toISOString().slice(0, 16),
             seminarAvailability: course?.seminarAvailability
                 ? course.seminarAvailability.toISOString().slice(0, 16)
                 : new Date().toISOString().slice(0, 16),
@@ -236,6 +241,11 @@ export const CourseForm = ({ id }: { id?: string }) => {
                 {/* 
                     TODO add utility to show when dates are in the past!
                 */}
+                <DateInput
+                    label="Base Availability Until*"
+                    name="baseAvailability"
+                    options={{ required: true }}
+                />
                 <DateInput
                     label="Seminar Availability Until*"
                     name="seminarAvailability"

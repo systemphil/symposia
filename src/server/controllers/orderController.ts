@@ -249,6 +249,7 @@ export async function orderCreateOrUpdateCourse({
     imageUrl,
     published,
     author,
+    baseAvailability,
     seminarAvailability,
     dialogueAvailability,
 }: OrderCreateOrUpdateCourseProps) {
@@ -425,6 +426,7 @@ export async function orderCreateOrUpdateCourse({
                 stripeBasePriceId: stripeBasePrice.id,
                 stripeSeminarPriceId: stripeSeminarPrice.id,
                 stripeDialoguePriceId: stripeDialoguePrice.id,
+                baseAvailability,
                 seminarAvailability,
                 dialogueAvailability,
             };
@@ -486,6 +488,7 @@ export async function orderCreateOrUpdateCourse({
             stripeBasePriceId: updatedStripeBasePriceId,
             stripeSeminarPriceId: updatedStripeSeminarPriceId,
             stripeDialoguePriceId: updatedStripeDialoguePriceId,
+            baseAvailability,
             seminarAvailability,
             dialogueAvailability,
         };
