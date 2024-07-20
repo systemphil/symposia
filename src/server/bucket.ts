@@ -23,10 +23,3 @@ const SECONDARY_BUCKET_NAME = env.GCP_SECONDARY_BUCKET_NAME ?? "invalid";
  */
 export const primaryBucket = storage.bucket(PRIMARY_BUCKET_NAME);
 export const secondaryBucket = storage.bucket(SECONDARY_BUCKET_NAME);
-
-export async function TestBucket() {
-    const sa = await storage.getProjectId();
-    console.log(sa);
-    const a = await storage.getServiceAccount();
-    console.log(a);
-}
