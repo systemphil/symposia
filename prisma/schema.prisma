@@ -224,3 +224,11 @@ model MaintenanceMessage {
   createdAt DateTime            @default(now())
   updatedAt DateTime            @updatedAt
 }
+
+model NewsletterEmail {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  subscribed Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

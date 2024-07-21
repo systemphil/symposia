@@ -1,4 +1,5 @@
 import {
+    dbCreateNewsletterEmail,
     dbGetAllCourses,
     dbGetCourseAndDetailsAndLessonsById,
     dbGetLessonAndRelationsById,
@@ -157,5 +158,14 @@ export const dbRouter = createTRPCRouter({
         )
         .mutation(async (opts) => {
             return await orderDeleteModelEntry(opts.input);
+        }),
+    createNewsletterEmailEntry: publicProcedure
+        .input(
+            z.object({
+                email: z.string().email(),
+            })
+        )
+        .mutation(async (opts) => {
+            return await dbCreateNewsletterEmail(opts.input);
         }),
 });

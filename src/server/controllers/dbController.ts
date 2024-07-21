@@ -1108,3 +1108,11 @@ export async function dbGetMaintenanceMessageUser() {
         },
     });
 }
+
+export async function dbCreateNewsletterEmail({ email }: { email: string }) {
+    return await prisma.newsletterEmail.create({
+        data: {
+            email,
+        },
+    });
+}

@@ -14,6 +14,7 @@ import {
     WarningAmberOutlined,
 } from "@mui/icons-material";
 import FadeIn from "./animations/FadeIn";
+import { NewsletterEmail } from "./NewsletterEmail";
 
 export async function Maintenance({ area }: { area: "global" | "user" }) {
     const getMaintenanceMsgGlobal = cache(
@@ -114,6 +115,11 @@ export async function Maintenance({ area }: { area: "global" | "user" }) {
                             <p className="text-slate-900 dark:text-slate-400 pt-4 text-justify">
                                 {maintenance.message}
                             </p>
+                            {maintenance.severity === "beta" && (
+                                <div className="flex justify-center">
+                                    <NewsletterEmail />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

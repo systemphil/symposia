@@ -7,6 +7,7 @@ import { PolyRhythmicSpiral } from "@/components/animations/PolyRhythmicSpiral";
 import Link from "next/link";
 import { Maintenance } from "@/components/Maintenance";
 import { Suspense } from "react";
+import { NewsletterEmail } from "@/components/NewsletterEmail";
 
 export default async function Home() {
     return (
@@ -20,6 +21,7 @@ export default async function Home() {
                 <MainInfoCard />
                 <InfoCards />
                 <Community />
+                <NewsletterSignUp />
                 <VisitCourses />
                 <Instructors />
                 <Refunds />
@@ -130,6 +132,22 @@ function Community() {
                 What do our students say about our courses and instructors?
             </p>
             <Reviews />
+        </>
+    );
+}
+
+function NewsletterSignUp() {
+    return (
+        <>
+            <Heading as="h3" additionalClasses="max-w-lg mt-10 md:mt-32">
+                Stay up-to-date with our{" "}
+                <span className="text-[#6b0072]">newsletter</span>
+            </Heading>
+            <p className="text-lg text-slate-500 py-2">
+                Sign up to receive updates on new courses, seminars, and other
+                events.
+            </p>
+            <NewsletterEmail />
         </>
     );
 }
