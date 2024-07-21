@@ -197,3 +197,30 @@ model StripeEvent {
   livemode         Boolean
   pending_webhooks Int
 }
+
+// === SECTION 4 ==============================================
+// * Miscellaneous internal data
+// ============================================================
+
+enum MaintenanceArea {
+  global
+  user
+}
+
+enum MaintenanceSeverity {
+  success
+  info
+  warning
+  critical
+  beta
+}
+
+model MaintenanceMessage {
+  id        String              @id @default(cuid())
+  area      MaintenanceArea     @unique
+  severity  MaintenanceSeverity
+  published Boolean             @default(false)
+  message   String
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}

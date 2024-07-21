@@ -1090,3 +1090,21 @@ export async function dbVerifyUserPurchase(userId: string, priceId: string) {
     const hasUserPurchased = user.productsPurchased.includes(completePriceId);
     return hasUserPurchased;
 }
+
+export async function dbGetMaintenanceMessageGlobal() {
+    return await prisma.maintenanceMessage.findFirst({
+        where: {
+            area: "global",
+            published: true,
+        },
+    });
+}
+
+export async function dbGetMaintenanceMessageUser() {
+    return await prisma.maintenanceMessage.findFirst({
+        where: {
+            area: "user",
+            published: true,
+        },
+    });
+}

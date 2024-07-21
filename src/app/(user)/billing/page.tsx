@@ -1,4 +1,5 @@
 import { CardShell } from "@/components/CardShell";
+import { Maintenance } from "@/components/Maintenance";
 import { PageWrapper } from "@/components/PageWrapper";
 import { getServerAuthSession } from "@/server/auth";
 import { dbGetUserPurchasedCourses } from "@/server/controllers/dbController";
@@ -19,6 +20,7 @@ export default async function Billing() {
 
     return (
         <PageWrapper>
+            <Maintenance area="user" />
             <div className="py-10">
                 <h1 className="text-xl font-bold py-6 text-center">Billing</h1>
                 {purchasedCourses && purchasedCourses.length > 0 ? (

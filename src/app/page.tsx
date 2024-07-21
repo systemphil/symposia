@@ -5,6 +5,7 @@ import FadeIn from "@/components/animations/FadeIn";
 import InfoCard from "@/components/InfoCard";
 import { PolyRhythmicSpiral } from "@/components/animations/PolyRhythmicSpiral";
 import Link from "next/link";
+import { Maintenance } from "@/components/Maintenance";
 
 export default async function Home() {
     return (
@@ -12,6 +13,7 @@ export default async function Home() {
             <Hero />
             <PageWrapper>
                 <OpeningDescription />
+                <Maintenance area="global" />
                 <MainInfoCard />
                 <InfoCards />
                 <Community />
