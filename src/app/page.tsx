@@ -6,6 +6,7 @@ import InfoCard from "@/components/InfoCard";
 import { PolyRhythmicSpiral } from "@/components/animations/PolyRhythmicSpiral";
 import Link from "next/link";
 import { Maintenance } from "@/components/Maintenance";
+import { Suspense } from "react";
 
 export default async function Home() {
     return (
@@ -13,7 +14,9 @@ export default async function Home() {
             <Hero />
             <PageWrapper>
                 <OpeningDescription />
-                <Maintenance area="global" />
+                <Suspense>
+                    <Maintenance area="global" />
+                </Suspense>
                 <MainInfoCard />
                 <InfoCards />
                 <Community />

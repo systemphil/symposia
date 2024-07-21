@@ -6,6 +6,7 @@ import { dbGetUserPurchasedCourses } from "@/server/controllers/dbController";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,9 @@ export default async function Billing() {
 
     return (
         <PageWrapper>
-            <Maintenance area="user" />
+            <Suspense>
+                <Maintenance area="user" />
+            </Suspense>
             <div className="py-10">
                 <h1 className="text-xl font-bold py-6 text-center">Billing</h1>
                 {purchasedCourses && purchasedCourses.length > 0 ? (
