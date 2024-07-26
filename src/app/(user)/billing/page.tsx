@@ -81,7 +81,7 @@ export default async function Billing() {
                         <div className="mt-96 bg-slate-100 p-4 rounded-md text-stone-500">
                             If you wish to refund a course, please contact us at{" "}
                             <a
-                                href="mailto:logos@systemphil.com"
+                                href="mailto:support@systemphil.com"
                                 className="text-blue-400 underline hover:text-blue-700"
                             >
                                 this email

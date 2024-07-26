@@ -57,7 +57,7 @@ export const VerifyPurchase = () => {
                         There was an error in confirming your purchase. Please
                         contact support{" "}
                         <a
-                            href="mailto:logos@systemphil.com"
+                            href="mailto:support@systemphil.com"
                             className="text-blue-400 underline hover:text-blue-700"
                         >
                             at this email
