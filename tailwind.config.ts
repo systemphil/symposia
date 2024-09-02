@@ -31,6 +31,8 @@ const config: Config = {
     //   }
     // },
     plugins: [require("daisyui"), require("@tailwindcss/typography")],
+    // @ts-ignore
+    darkMode: "false",
     daisyui: {
         logs: false,
         themes: ["light", "emerald", "pastel", "fantasy"],
