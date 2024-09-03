@@ -81,7 +81,7 @@ function MainInfoCard() {
                     text="We dream of a way of doing philosophy that is intense, life-long and free. To be able to rigorously engage with concepts and ideas to their utmost depth without sacrificing either scholarly quality or creativity.. To be able to pursue and hone one's philosophical craft and enjoyment in a way that supports and enriches everyday living. And finally to be thinking deeply about contents of philosophy purely for their own sake. Symposia exists as a companion to sPhil, a collaborative encyclopedia inspired by systematic philosophers and modern open source principles. Symposia is intended to be an additional guide into the philosophical resources we otherwise make freely available at sPhil. Whether you are a novice or a professional, our courses welcome anyone who has a burning desire to examine, philosophically, the wonders of being."
                     imgUrl="/static/images/fire.webp"
                     maskType="triangle"
-                    url="https://systemphil.com"
+                    url="https://sphil.xyz"
                     urlDescription="Visit sPhil"
                 />
             </div>

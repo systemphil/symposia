@@ -82,7 +82,7 @@ export const Analytics = () => {
                     purposes and to improve your experience. To learn more,
                     visit our{" "}
                     <a
-                        href="https://systemphil.com/privacy"
+                        href="https://sphil.xyz/privacy"
                         className="text-blue-400 underline hover:text-blue-300"
                     >
                         Privary Policy

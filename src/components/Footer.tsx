@@ -32,27 +32,27 @@ function FooterHeader({ children }: { children: ReactNode }) {
 
 const navigation = {
     general: [
-        { name: "sPhil", href: "https://systemphil.com" },
+        { name: "sPhil", href: "https://sphil.xyz" },
         {
             name: "Acknowledgements",
-            href: "https://systemphil.com/acknowledgements",
+            href: "https://sphil.xyz/acknowledgements",
         },
     ],
     company: [
-        { name: "Team", href: "https://systemphil.com/team" },
-        { name: "Contributing", href: "https://systemphil.com/contributing" },
+        { name: "Team", href: "https://sphil.xyz/team" },
+        { name: "Contributing", href: "https://sphil.xyz/contributing" },
         {
             name: "Methodology",
-            href: "https://systemphil.com/contributing/methodology",
+            href: "https://sphil.xyz/contributing/methodology",
         },
         {
             name: "Code of Conduct",
-            href: `https://systemphil.com/contributing/code-of-conduct`,
+            href: `https://sphil.xyz/contributing/code-of-conduct`,
         },
     ],
     legal: [
-        { name: "Privacy Policy", href: "https://systemphil.com/privacy" },
-        { name: "Terms of Use", href: "https://systemphil.com/terms" },
+        { name: "Privacy Policy", href: "https://sphil.xyz/privacy" },
+        { name: "Terms of Use", href: "https://sphil.xyz/terms" },
     ],
     support: [
         { name: "GitHub ↗", href: "https://github.com/systemphil/" },
