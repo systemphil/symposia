@@ -108,7 +108,7 @@ export const RootNavbar = () => {
                         )}
                     </div>
 
-                    <nav className="flex gap-6 items-center">
+                    <nav className="flex gap-6 items-center invisible">
                         {sessionData ? (
                             <UserMenu sessionData={sessionData} />
                         ) : (
