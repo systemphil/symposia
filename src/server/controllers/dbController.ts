@@ -1121,3 +1121,13 @@ export async function dbCreateNewsletterEmail({ email }: { email: string }) {
         },
     });
 }
+
+export async function dbGetAllUsersWithPurchase() {
+    return await prisma.user.findMany({
+        where: {
+            productsPurchased: {
+                isEmpty: false,
+            },
+        },
+    });
+}

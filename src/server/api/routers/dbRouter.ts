@@ -1,6 +1,7 @@
 import {
     dbCreateNewsletterEmail,
     dbGetAllCourses,
+    dbGetAllUsersWithPurchase,
     dbGetCourseAndDetailsAndLessonsById,
     dbGetLessonAndRelationsById,
     dbGetMdxByModelId,
@@ -86,6 +87,9 @@ export const dbRouter = createTRPCRouter({
                 opts.input.purchasePriceId
             );
         }),
+    getAllUsersWithPurchasedCourses: protectedAdminProcedure.query(async () => {
+        return await dbGetAllUsersWithPurchase();
+    }),
     upsertCourse: protectedAdminProcedure
         .input(
             z.object({
