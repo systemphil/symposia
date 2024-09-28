@@ -36,9 +36,9 @@ export default function RootLayout({
                         <RootNavbar />
                         <div className="relative">{children}</div>
                         <Footer />
-                        <Suspense>
+                        {/* <Suspense>
                             <ToastSearchParams />
-                        </Suspense>
+                        </Suspense> */}
                         <Toaster position="bottom-right" />
                         <Analytics />
                     </TRPCProvider>

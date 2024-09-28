@@ -28,21 +28,22 @@ export async function POST(req: NextRequest) {
         case "payment_intent.requires_action":
             break;
         case "product.updated":
-            console.log("===Product updated event received");
+            console.info("ℹ️  Product updated event received");
             break;
         case "product.created":
             break;
         default:
             if (process.env.NODE_ENV === "development") {
-                console.log(`===Unhandled event type: ${event.type}`);
+                console.info(`ℹ️ Unhandled event type: ${event.type}`);
             }
         // Unexpected event type
     }
 
     // Record the event in the database (unless development mode)
-    if (process.env.NODE_ENV !== "development") {
-        await dbCreateStripeEventRecord(event);
-    }
+    // All details are recorded on Stripe so this is superflous for our purposes.
+    // if (process.env.NODE_ENV !== "development") {
+    //     await dbCreateStripeEventRecord(event);
+    // }
 
     return new NextResponse();
 }

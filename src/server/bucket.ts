@@ -1,18 +1,19 @@
 import { Storage } from "@google-cloud/storage";
 import { env } from "process";
 
-// const rawKey = env.GCP_BUCKET_HANDLER_KEY ?? "";
+const rawKey = env.GCP_BUCKET_HANDLER_KEY ?? "";
 
-// const creds = rawKey
-//     ? JSON.parse(Buffer.from(rawKey, "base64").toString())
-//     : {};
+const creds = rawKey
+    ? JSON.parse(Buffer.from(rawKey, "base64").toString())
+    : {};
 
-// const storage = new Storage({
-//     projectId: creds.project_id,
-//     credentials: creds,
-// });
-
-const storage = new Storage();
+const storage =
+    process.env.NODE_ENV === "development"
+        ? new Storage({
+              projectId: creds.project_id,
+              credentials: creds,
+          })
+        : new Storage();
 
 const PRIMARY_BUCKET_NAME = env.GCP_PRIMARY_BUCKET_NAME ?? "invalid";
 const SECONDARY_BUCKET_NAME = env.GCP_SECONDARY_BUCKET_NAME ?? "invalid";
