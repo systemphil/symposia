@@ -152,9 +152,11 @@ export async function dbUpdateUserPurchases({
     });
     if (!existingUser) throw new Error("User not found");
 
+    const purchasePriceIdWithTimeStamp = `${purchasePriceId}:${Date.now()}`;
+
     const updatedPurchases = [
         ...existingUser.productsPurchased,
-        purchasePriceId,
+        purchasePriceIdWithTimeStamp,
     ];
     const updatedUser = await prisma.user.update({
         where: {
@@ -1087,7 +1089,10 @@ export async function dbVerifyUserPurchase(userId: string, priceId: string) {
         },
     });
     if (!user) return false;
-    const hasUserPurchased = user.productsPurchased.includes(completePriceId);
+    const userPurchedPriceIds = user.productsPurchased.map((id) => {
+        return id.split(":")[0];
+    });
+    const hasUserPurchased = userPurchedPriceIds.includes(completePriceId);
     return hasUserPurchased;
 }
 
@@ -1113,6 +1118,16 @@ export async function dbCreateNewsletterEmail({ email }: { email: string }) {
     return await prisma.newsletterEmail.create({
         data: {
             email,
+        },
+    });
+}
+
+export async function dbGetAllUsersWithPurchase() {
+    return await prisma.user.findMany({
+        where: {
+            productsPurchased: {
+                isEmpty: false,
+            },
         },
     });
 }

@@ -5,6 +5,9 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 
+/**
+ * ! BUG currently bugged, not working as expected. it's commented out in the root layout
+ */
 export const ToastSearchParams = () => {
     const searchParams = useSearchParams();
     const path = usePathname();

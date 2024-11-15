@@ -15,7 +15,7 @@ const Heading = ({
 }: HeadingProps) => {
     const baseClasses = `${
         cinzel.variable
-    } font-serif z-10 font-extrabold leading-tight text-center bg-clip-text ${
+    } font-serif z-10 font-extrabold py-1 leading-tight text-center bg-clip-text ${
         !replacementClasses &&
         "text-transparent bg-gradient-to-b from-black/80 to-black dark:from-white dark:to-[#AAAAAA]"
     } ${additionalClasses}`;
