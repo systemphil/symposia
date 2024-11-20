@@ -2,10 +2,10 @@ name: CI/CD Development
 
 on:
     workflow_dispatch:
-    push:
-        branches: ["main"]
+        # push:
+        #     branches: ["main"]
 
-    # RUNNER_SERVICE_ACCOUNT:
+        # RUNNER_SERVICE_ACCOUNT:
 
 jobs:
     build-and-deploy:
